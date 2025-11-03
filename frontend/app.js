@@ -325,3 +325,95 @@ let app;
 document.addEventListener('DOMContentLoaded', () => {
     app = new PiForgeApp();
 });
+const API_BASE_URL = "https://your-backend-url.onrailway.app"; // Replace with your actual Railway backend URL
+
+const authService = {
+  token: localStorage.getItem('authToken'),
+  user: JSON.parse(localStorage.getItem('userData') || 'null'),
+
+  isAuthenticated() {
+    return !!this.token;
+  },
+
+  getAuthHeaders() {
+    return {
+      'Authorization': `Bearer ${this.token}`,
+      'Content-Type': 'application/json'
+    };
+  },
+
+  async authenticatedFetch(endpoint, options = {}) {
+    if (!this.isAuthenticated()) {
+      throw new Error('Not authenticated');
+    }
+
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      ...options,
+      headers: {
+        ...options.headers,
+        ...this.getAuthHeaders()
+      }
+    });
+
+    if (response.status === 401) {
+      this.clearAuth();
+      window.location.href = '/login.html';
+      return;
+    }
+
+    return response;
+  },
+
+  clearAuth() {
+    this.token = null;
+    this.user = null;
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userData');
+  }
+};
+
+document.addEventListener('DOMContentLoaded', function () {
+  const publicContent = document.getElementById('publicContent');
+  const authenticatedContent = document.getElementById('authenticatedContent');
+  const userGreeting = document.getElementById('userGreeting');
+  const userInfo = document.getElementById('userInfo');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const loginLink = document.getElementById('loginLink');
+
+  if (authService.isAuthenticated()) {
+    publicContent.style.display = 'none';
+    authenticatedContent.style.display = 'block';
+    userGreeting.textContent = authService.user.username;
+    userInfo.textContent = `🌀 ${authService.user.username}`;
+    logoutBtn.style.display = 'block';
+    loginLink.style.display = 'none';
+  } else {
+    publicContent.style.display = 'block';
+    authenticatedContent.style.display = 'none';
+    logoutBtn.style.display = 'none';
+    loginLink.style.display = 'block';
+  }
+});
+
+function logout() {
+  if (confirm('Leave the quantum field?')) {
+    authService.clearAuth();
+    window.location.href = 'login.html';
+  }
+}
+
+async function testLogin() {
+  const response = await fetch(`${API_BASE_URL}/api/test-login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: 'QuantumSeeker' })
+  });
+
+  const data = await response.json();
+  if (data.token) {
+    localStorage.setItem('authToken', data.token);
+    localStorage.setItem('userData', JSON.stringify(data.user));
+    alert('Welcome to the Quantum Sanctum 🌌');
+    window.location.reload();
+  }
+}
