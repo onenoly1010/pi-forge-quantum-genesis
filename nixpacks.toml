@@ -1,0 +1,19 @@
+[phases.setup]
+cmds = [
+    "cd backend",
+    "python --version"
+]
+
+[phases.install]
+cmds = [
+    "cd backend",
+    "pip install -r requirements.txt"
+]
+
+[phases.build]
+cmds = [
+    "echo '🚀 Pi Forge Quantum Genesis - Build Complete'"
+]
+
+[start]
+cmd = "cd backend && python -m gunicorn -w 2 -k gevent -b 0.0.0.0:$PORT app:app"
