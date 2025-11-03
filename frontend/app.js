@@ -3,13 +3,13 @@
 
 class PiForgeApp {
     constructor() {
-        this.backendUrl = ''; // Will be set after deployment
+        this.backendUrl = ''; // Force mock mode for now
         this.socket = null;
         this.init();
     }
 
     init() {
-        this.checkBackendStatus();
+        this.updateStatus('backend-status', 'disconnected', 'Backend: Mock Mode (Development)');
         this.setupWebSocket();
         this.loadLeaderboard();
         
@@ -18,81 +18,28 @@ class PiForgeApp {
     }
 
     async checkBackendStatus() {
-        try {
-            // Try multiple possible backend URLs
-            const possibleUrls = [
-                window.location.origin.replace('netlify.app', 'up.railway.app') + '/health',
-                'https://pi-forge-quantum-genesis.up.railway.app/health',
-                'https://your-app-name.railway.app/health'
-            ];
-
-            for (const url of possibleUrls) {
-                try {
-                    const response = await fetch(url);
-                    if (response.ok) {
-                        const data = await response.json();
-                        this.backendUrl = url.replace('/health', '');
-                        this.updateStatus('backend-status', 'connected', `Backend: ${data.status}`);
-                        console.log('✅ Backend connected:', this.backendUrl);
-                        return;
-                    }
-                } catch (e) {
-                    continue;
-                }
-            }
-            
-            // If no backend found, use mock mode
-            this.updateStatus('backend-status', 'disconnected', 'Backend: Mock Mode');
-            console.warn('🚨 Backend not found - Running in mock mode');
-        } catch (error) {
-            this.updateStatus('backend-status', 'error', 'Backend: Connection Failed');
-            console.error('Backend check failed:', error);
-        }
+        // Skip backend checking for now - use mock mode
+        this.updateStatus('backend-status', 'disconnected', 'Backend: Mock Mode');
+        console.log('🚨 Running in mock mode - Backend connection disabled');
+        return;
     }
 
     setupWebSocket() {
-        try {
-            // Try to connect to WebSocket
-            const wsUrl = this.backendUrl ? this.backendUrl.replace('https', 'wss') : 'wss://pi-forge-quantum-genesis.up.railway.app';
-            this.socket = io(wsUrl, {
-                transports: ['websocket'],
-                timeout: 5000
-            });
-
-            this.socket.on('connect', () => {
-                this.updateStatus('websocket-status', 'connected', 'WebSocket: Connected');
-                console.log('✅ WebSocket connected');
-            });
-
-            this.socket.on('disconnect', () => {
-                this.updateStatus('websocket-status', 'disconnected', 'WebSocket: Disconnected');
-            });
-
-            this.socket.on('mining_update', (data) => {
-                this.addEvent(`🕶️ VR Mine: ${data.user_id} mined ${data.digits} digits`);
-            });
-
-            this.socket.on('quest_complete', (data) => {
-                this.addEvent(`⚔️ VR Quest: ${data.user_id} completed ${data.quest}`);
-            });
-
-            this.socket.on('connected', (data) => {
-                this.addEvent(`🔌 ${data.message}`);
-            });
-
-        } catch (error) {
-            console.warn('WebSocket setup failed:', error);
-            this.updateStatus('websocket-status', 'disconnected', 'WebSocket: Mock Mode');
-        }
+        // Skip WebSocket for mock mode
+        this.updateStatus('websocket-status', 'disconnected', 'WebSocket: Mock Mode');
+        console.log('🔌 WebSocket disabled - Running in mock mode');
     }
 
     updateStatus(elementId, status, text) {
         const element = document.getElementById(elementId);
-        const dot = element.querySelector('.status-dot');
-        
-        element.textContent = text;
-        dot.className = 'status-dot ' + status;
-        element.appendChild(dot);
+        if (element) {
+            const dot = element.querySelector('.status-dot');
+            element.textContent = text;
+            if (dot) {
+                dot.className = 'status-dot ' + status;
+                element.appendChild(dot);
+            }
+        }
     }
 
     async startMining() {
@@ -111,38 +58,25 @@ class PiForgeApp {
         resultDiv.innerHTML = '<div class="pulse">🚀 Starting quantum computation...</div>';
 
         try {
-            let response;
-            if (this.backendUrl) {
-                response = await fetch(`${this.backendUrl}/compute/${digits}`);
-            } else {
-                // Mock response
-                response = {
-                    ok: true,
-                    json: async () => ({
-                        digits: digits,
-                        result: this.calculateMockPi(digits),
-                        status: "computed",
-                        developer: "Kris Olofson"
-                    })
-                };
-            }
+            // Mock response only
+            const data = {
+                digits: digits,
+                result: this.calculateMockPi(digits),
+                status: "computed",
+                developer: "Kris Olofson"
+            };
 
-            const data = await response.json();
-            
-            if (response.ok) {
-                resultDiv.innerHTML = `
-                    <div style="color: #00ff88;">
-                        <strong>✅ Success!</strong><br>
-                        Digits: ${data.digits}<br>
-                        Result: ${data.result}<br>
-                        Status: ${data.status}
-                    </div>
-                `;
-                this.addEvent(`⚡ Mined ${digits} Pi digits`);
-                this.loadLeaderboard(); // Refresh leaderboard
-            } else {
-                throw new Error(data.error || 'Mining failed');
-            }
+            resultDiv.innerHTML = `
+                <div style="color: #00ff88;">
+                    <strong>✅ Success!</strong><br>
+                    Digits: ${data.digits}<br>
+                    Result: ${data.result}<br>
+                    Status: ${data.status}
+                </div>
+            `;
+            this.addEvent(`⚡ Mined ${digits} Pi digits`);
+            this.loadLeaderboard(); // Refresh leaderboard
+
         } catch (error) {
             console.error('Mining error:', error);
             resultDiv.innerHTML = `<span style="color: #ff6b6b;">❌ Error: ${error.message}</span>`;
@@ -166,37 +100,17 @@ class PiForgeApp {
         button.textContent = '🔒 Staking...';
 
         try {
-            let response;
-            if (this.backendUrl) {
-                response = await fetch(`${this.backendUrl}/stake`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        user_id: 'kris_olofson',
-                        amount: amount
-                    })
-                });
-            } else {
-                // Mock response
-                response = {
-                    ok: true,
-                    json: async () => ({
-                        status: "staked",
-                        amount: amount,
-                        user_id: "kris_olofson",
-                        message: "Tokens staked successfully"
-                    })
-                };
-            }
+            // Mock response only
+            const data = {
+                status: "staked",
+                amount: amount,
+                user_id: "quantum_miner",
+                message: "Tokens staked successfully"
+            };
 
-            const data = await response.json();
-            
-            if (response.ok) {
-                alert(`✅ ${data.message}\nAmount: ${data.amount} tokens`);
-                this.addEvent(`💰 Staked ${amount} tokens`);
-            } else {
-                throw new Error(data.error || 'Staking failed');
-            }
+            alert(`✅ ${data.message}\nAmount: ${data.amount} tokens`);
+            this.addEvent(`💰 Staked ${amount} tokens`);
+
         } catch (error) {
             console.error('Staking error:', error);
             alert(`❌ Staking failed: ${error.message}`);
@@ -210,22 +124,16 @@ class PiForgeApp {
         const leaderboardDiv = document.getElementById('leaderboard');
         
         try {
-            let data;
-            if (this.backendUrl) {
-                const response = await fetch(`${this.backendUrl}/leaderboard`);
-                data = await response.json();
-            } else {
-                // Mock data
-                data = {
-                    leaderboard: [
-                        { user_id: 'kris_olofson', digits_mined: 1000000 },
-                        { user_id: 'quantum_miner', digits_mined: 850000 },
-                        { user_id: 'pi_explorer', digits_mined: 720000 },
-                        { user_id: 'math_genius', digits_mined: 650000 },
-                        { user_id: 'crypto_pioneer', digits_mined: 580000 }
-                    ]
-                };
-            }
+            // Mock data only
+            const data = {
+                leaderboard: [
+                    { user_id: 'quantum_miner', digits_mined: 1000000 },
+                    { user_id: 'pi_explorer', digits_mined: 850000 },
+                    { user_id: 'math_genius', digits_mined: 720000 },
+                    { user_id: 'crypto_pioneer', digits_mined: 650000 },
+                    { user_id: 'vr_miner', digits_mined: 580000 }
+                ]
+            };
 
             if (data.leaderboard && data.leaderboard.length > 0) {
                 leaderboardDiv.innerHTML = data.leaderboard.map((user, index) => `
@@ -246,46 +154,34 @@ class PiForgeApp {
     startVRMine() {
         this.addEvent('🕶️ Starting VR mining session...');
         
-        if (this.socket && this.socket.connected) {
-            this.socket.emit('vr_mine', {
-                user_id: 'kris_olofson',
-                digits: Math.floor(Math.random() * 10000) + 1000
-            });
-        } else {
-            // Mock VR mine
-            setTimeout(() => {
-                this.addEvent('🕶️ VR Mine: kris_olofson mined 1,247 digits');
-            }, 1000);
-        }
+        // Mock VR mine
+        setTimeout(() => {
+            this.addEvent('🕶️ VR Mine: quantum_miner mined 1,247 digits');
+        }, 1000);
     }
 
     startVRQuest() {
         this.addEvent('⚔️ Starting VR quest...');
         
-        if (this.socket && this.socket.connected) {
-            this.socket.emit('vr_quest', {
-                user_id: 'kris_olofson',
-                quest: 'quantum_computation'
-            });
-        } else {
-            // Mock VR quest
-            setTimeout(() => {
-                this.addEvent('⚔️ VR Quest: kris_olofson completed quantum_computation');
-            }, 1500);
-        }
+        // Mock VR quest
+        setTimeout(() => {
+            this.addEvent('⚔️ VR Quest: quantum_miner completed quantum_computation');
+        }, 1500);
     }
 
     addEvent(message) {
         const eventsFeed = document.getElementById('eventsFeed');
-        const eventItem = document.createElement('div');
-        eventItem.className = 'event-item';
-        eventItem.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-        
-        eventsFeed.prepend(eventItem);
-        
-        // Keep only last 10 events
-        while (eventsFeed.children.length > 10) {
-            eventsFeed.removeChild(eventsFeed.lastChild);
+        if (eventsFeed) {
+            const eventItem = document.createElement('div');
+            eventItem.className = 'event-item';
+            eventItem.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            
+            eventsFeed.prepend(eventItem);
+            
+            // Keep only last 10 events
+            while (eventsFeed.children.length > 10) {
+                eventsFeed.removeChild(eventsFeed.lastChild);
+            }
         }
     }
 
@@ -301,117 +197,34 @@ class PiForgeApp {
 
 // Global functions for button clicks
 function startMining() {
-    app.startMining();
+    if (window.app) {
+        window.app.startMining();
+    }
 }
 
 function stakeTokens() {
-    app.stakeTokens();
-}
-
-function loadLeaderboard() {
-    app.loadLeaderboard();
+    if (window.app) {
+        window.app.stakeTokens();
+    }
 }
 
 function startVRMine() {
-    app.startVRMine();
+    if (window.app) {
+        window.app.startVRMine();
+    }
 }
 
 function startVRQuest() {
-    app.startVRQuest();
+    if (window.app) {
+        window.app.startVRQuest();
+    }
 }
 
 // Initialize app when page loads
-let app;
 document.addEventListener('DOMContentLoaded', () => {
-    app = new PiForgeApp();
+    window.app = new PiForgeApp();
+    console.log('🚀 Pi Forge Quantum Genesis - Mock Mode Active');
 });
-const API_BASE_URL = "https://your-backend-url.onrailway.app"; // Replace with your actual Railway backend URL
-
-const authService = {
-  token: localStorage.getItem('authToken'),
-  user: JSON.parse(localStorage.getItem('userData') || 'null'),
-
-  isAuthenticated() {
-    return !!this.token;
-  },
-
-  getAuthHeaders() {
-    return {
-      'Authorization': `Bearer ${this.token}`,
-      'Content-Type': 'application/json'
-    };
-  },
-
-  async authenticatedFetch(endpoint, options = {}) {
-    if (!this.isAuthenticated()) {
-      throw new Error('Not authenticated');
-    }
-
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      ...options,
-      headers: {
-        ...options.headers,
-        ...this.getAuthHeaders()
-      }
-    });
-
-    if (response.status === 401) {
-      this.clearAuth();
-      window.location.href = '/login.html';
-      return;
-    }
-
-    return response;
-  },
-
-  clearAuth() {
-    this.token = null;
-    this.user = null;
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userData');
-  }
-};
-
-document.addEventListener('DOMContentLoaded', function () {
-  const publicContent = document.getElementById('publicContent');
-  const authenticatedContent = document.getElementById('authenticatedContent');
-  const userGreeting = document.getElementById('userGreeting');
-  const userInfo = document.getElementById('userInfo');
-  const logoutBtn = document.getElementById('logoutBtn');
-  const loginLink = document.getElementById('loginLink');
-
-  if (authService.isAuthenticated()) {
-    publicContent.style.display = 'none';
-    authenticatedContent.style.display = 'block';
-    userGreeting.textContent = authService.user.username;
-    userInfo.textContent = `🌀 ${authService.user.username}`;
-    logoutBtn.style.display = 'block';
-    loginLink.style.display = 'none';
-  } else {
-    publicContent.style.display = 'block';
-    authenticatedContent.style.display = 'none';
-    logoutBtn.style.display = 'none';
-    loginLink.style.display = 'block';
-  }
-});
-
-function logout() {
-  if (confirm('Leave the quantum field?')) {
-    authService.clearAuth();
-    window.location.href = 'login.html';
-  }
-}
-
-async function testLogin() {
-  const response = await fetch(`${API_BASE_URL}/api/test-login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username: 'QuantumSeeker' })
-  });
-
-  const data = await response.json();
-  if (data.token) {
-    localStorage.setItem('authToken', data.token);
     localStorage.setItem('userData', JSON.stringify(data.user));
     alert('Welcome to the Quantum Sanctum 🌌');
     window.location.reload();
