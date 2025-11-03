@@ -6,6 +6,7 @@ from web3 import Web3
 import redis
 from dotenv import load_dotenv
 from flask_cors import CORS
+from auth import generate_token, token_required
 
 load_dotenv()
 
@@ -20,12 +21,22 @@ supabase = None
 if os.getenv('SUPABASE_URL'):
     supabase = create_client(os.getenv('SUPABASE_URL'), os.getenv('SUPABASE_KEY'))
 
+def authenticate_user(email, password):
+    # Simple demo authentication - replace with your actual logic
+    if email == "admin@pi-forge.com" and password == "quantum2024":
+        return {
+            'id': 1,
+            'username': 'quantum_miner', 
+            'email': email
+        }
+    return None
+
 @app.route('/')
 def home():
     return jsonify({
         "status": "Pi Forge Quantum Genesis - LIVE",
         "version": "1.0.0", 
-        "developer": "Kris Olofson (onenoly11)",
+        "developer": "Kris Olofson",
         "services": ["compute", "staking", "nft", "dao", "vr"]
     })
 
@@ -48,7 +59,7 @@ def compute_pi(digits):
         
         if supabase:
             supabase.table('leaderboard').upsert({
-                'user_id': 'kris_olofson',
+                'user_id': 'quantum_miner',
                 'digits_mined': digits,
                 'last_active': 'now()'
             }).execute()
@@ -66,7 +77,7 @@ def compute_pi(digits):
 def stake():
     try:
         data = request.json
-        user_id = data.get('user_id', 'kris_olofson')
+        user_id = data.get('user_id', 'quantum_miner')
         amount = data.get('amount', 0)
         
         if supabase:
@@ -99,9 +110,36 @@ def get_leaderboard():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/auth/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    
+    user = authenticate_user(data.get('email'), data.get('password'))
+    
+    if user:
+        token = generate_token(user['id'])
+        return jsonify({
+            'token': token,
+            'user': {
+                'id': user['id'],
+                'username': user['username'],
+                'email': user['email']
+            }
+        })
+    else:
+        return jsonify({'error': 'Invalid credentials'}), 401
+
+@app.route('/api/protected-route', methods=['GET'])
+@token_required
+def protected_route(current_user):
+    return jsonify({
+        'message': f'Hello {current_user["username"]}!',
+        'user_id': current_user['sub']
+    })
+
 @socketio.on('vr_mine')
 def handle_vr_mine(data):
-    user_id = data.get('user_id', 'kris_olofson')
+    user_id = data.get('user_id', 'quantum_miner')
     digits = data.get('digits', 0)
     emit('mining_update', {
         'user_id': user_id, 
@@ -112,7 +150,7 @@ def handle_vr_mine(data):
 
 @socketio.on('vr_quest')
 def handle_vr_quest(data):
-    user_id = data.get('user_id', 'kris_olofson')
+    user_id = data.get('user_id', 'quantum_miner')
     quest = data.get('quest', 'default')
     emit('quest_complete', {
         'user_id': user_id,
@@ -134,34 +172,3 @@ if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     print(f"🚀 Pi Forge by Kris Olofson starting on port {port}")
     socketio.run(app, host='0.0.0.0', port=port, debug=False)
-from auth import generate_token, token_required
-
-# Add login endpoint
-@app.route('/api/auth/login', methods=['POST'])
-def login():
-    data = request.get_json()
-    
-    # Validate user credentials (replace with your auth logic)
-    user = authenticate_user(data.get('email'), data.get('password'))
-    
-    if user:
-        token = generate_token(user['id'], user['username'])
-        return jsonify({
-            'token': token,
-            'user': {
-                'id': user['id'],
-                'username': user['username'],
-                'email': user['email']
-            }
-        })
-    else:
-        return jsonify({'error': 'Invalid credentials'}), 401
-
-# Protect your API routes
-@app.route('/api/protected-route', methods=['GET'])
-@token_required
-def protected_route(current_user):
-    return jsonify({
-        'message': f'Hello {current_user["username"]}!',
-        'user_id': current_user['sub']
-    })
