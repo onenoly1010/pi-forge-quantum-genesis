@@ -1,0 +1,15 @@
+[build]
+  publish = "frontend"
+  command = "echo 'No build needed - pure HTML/CSS/JS'"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[build.environment]
+  NODE_VERSION = "18"
+
+[dev]
+  port = 3000
+  publish = "frontend"
