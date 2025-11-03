@@ -134,3 +134,34 @@ if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     print(f"🚀 Pi Forge by Kris Olofson starting on port {port}")
     socketio.run(app, host='0.0.0.0', port=port, debug=False)
+from auth import generate_token, token_required
+
+# Add login endpoint
+@app.route('/api/auth/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    
+    # Validate user credentials (replace with your auth logic)
+    user = authenticate_user(data.get('email'), data.get('password'))
+    
+    if user:
+        token = generate_token(user['id'], user['username'])
+        return jsonify({
+            'token': token,
+            'user': {
+                'id': user['id'],
+                'username': user['username'],
+                'email': user['email']
+            }
+        })
+    else:
+        return jsonify({'error': 'Invalid credentials'}), 401
+
+# Protect your API routes
+@app.route('/api/protected-route', methods=['GET'])
+@token_required
+def protected_route(current_user):
+    return jsonify({
+        'message': f'Hello {current_user["username"]}!',
+        'user_id': current_user['sub']
+    })
