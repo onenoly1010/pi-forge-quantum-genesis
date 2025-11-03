@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pi Forge Quantum Genesis | Kris Olofson</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- VR Header -->
+        <header class="vr-header">
+            <div class="quantum-glow"></div>
+            <h1>🧠 Pi Forge Quantum Genesis</h1>
+            <p class="subtitle">By Kris Olofson (onenoly11)</p>
+            <div class="status-panel">
+                <div class="status-item" id="backend-status">
+                    <span class="status-dot"></span>
+                    Backend: Checking...
+                </div>
+                <div class="status-item" id="websocket-status">
+                    <span class="status-dot"></span>
+                    WebSocket: Disconnected
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Dashboard -->
+        <main class="dashboard">
+            <!-- Mining Section -->
+            <section class="card mining-card">
+                <h2>⚡ Quantum Pi Mining</h2>
+                <div class="input-group">
+                    <input type="number" id="digitsInput" placeholder="Enter digits to compute" min="1" max="1000000">
+                    <button onclick="startMining()" id="mineBtn">🚀 Start Mining</button>
+                </div>
+                <div class="result" id="miningResult"></div>
+            </section>
+
+            <!-- Staking Section -->
+            <section class="card staking-card">
+                <h2>💰 Token Staking</h2>
+                <div class="input-group">
+                    <input type="number" id="stakeAmount" placeholder="Amount to stake" min="1">
+                    <button onclick="stakeTokens()" id="stakeBtn">🔒 Stake Tokens</button>
+                </div>
+                <div class="apy-display">APY: 5.5%</div>
+            </section>
+
+            <!-- VR Experience -->
+            <section class="card vr-card">
+                <h2>🎮 VR Mining Experience</h2>
+                <div class="vr-controls">
+                    <button onclick="startVRMine()" class="vr-btn">🕶️ Start VR Mine</button>
+                    <button onclick="startVRQuest()" class="vr-btn">⚔️ VR Quest</button>
+                </div>
+                <div class="vr-feed" id="vrFeed"></div>
+            </section>
+
+            <!-- Leaderboard -->
+            <section class="card leaderboard-card">
+                <h2>🏆 Mining Leaderboard</h2>
+                <button onclick="loadLeaderboard()" class="refresh-btn">🔄 Refresh</button>
+                <div id="leaderboard" class="leaderboard">
+                    Loading...
+                </div>
+            </section>
+
+            <!-- Real-time Events -->
+            <section class="card events-card">
+                <h2>🔔 Real-time Events</h2>
+                <div id="eventsFeed" class="events-feed"></div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="quantum-footer">
+            <p>🔬 Built with Quantum Spirit by Kris Olofson | Pi Forge Genesis 2024</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
