@@ -225,8 +225,3 @@ document.addEventListener('DOMContentLoaded', () => {
     window.app = new PiForgeApp();
     console.log('🚀 Pi Forge Quantum Genesis - Mock Mode Active');
 });
-    localStorage.setItem('userData', JSON.stringify(data.user));
-    alert('Welcome to the Quantum Sanctum 🌌');
-    window.location.reload();
-  }
-}
