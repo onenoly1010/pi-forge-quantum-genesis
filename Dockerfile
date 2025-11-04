@@ -7,4 +7,4 @@ RUN pip install -r requirements.txt
 
 COPY backend/ .
 
-CMD python -m gunicorn -w 2 -k gevent -b 0.0.0.0:$PORT app:app
+CMD sh -c "python -m gunicorn -w 2 -k gevent -b 0.0.0.0:$PORT app:app"
