@@ -1,23 +1,22 @@
-gevent>=21.0.0
+# Web Framework
 flask==2.3.3
 flask-socketio==5.3.6
-web3==6.11.0
-supabase==2.3.0
-redis==4.6.0
-python-dotenv==1.0.0
-gunicorn==21.2.0
-eth-account==0.9.0
-requests==2.31.0
 flask-cors==4.0.0
-gevent>=21.0.0
-PyJWT==2.8.0
-python-decouple==3.8
+
+# Production Server
 gunicorn==21.2.0
 gevent==23.9.1
-flask==2.3.3
-flask-socketio==5.3.6
-flask-cors==4.0.0
+
+# Blockchain & Web3
 web3==6.11.0
-python-dotenv==1.0.0
-supabase==1.1.1
+eth-account==0.9.0
+
+# Database & Cache
+supabase==2.3.0
 redis==5.0.1
+
+# Utilities
+python-dotenv==1.0.0
+requests==2.31.0
+PyJWT==2.8.0
+python-decouple==3.8
