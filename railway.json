@@ -9,7 +9,6 @@
     "sleepApplication": false,
     "restartPolicyType": "ON_FAILURE",
     "healthCheckPath": "/health",
-    "healthCheckTimeout": 300,
-    "startCommand": "cd backend && python -m gunicorn -w 2 -k gevent -b 0.0.0.0:$PORT app:app"
+    "healthCheckTimeout": 300
   }
 }
