@@ -5,10 +5,10 @@ WORKDIR = "/app/backend"
 cmds = ["python --version"]
 
 [phases.install]
-cmds = ["pip install -r requirements.txt"]
+cmds = ["cd backend && pip install -r requirements.txt"]
 
 [phases.build]
 cmds = ["echo '🚀 Pi Forge Quantum Genesis - Build Complete'"]
 
 [start]
-cmd = "python -m gunicorn -w 2 -k gevent -b 0.0.0.0:$PORT app:app"
+cmd = "cd backend && python -m gunicorn -w 2 -k gevent -b 0.0.0.0:$PORT app:app"
