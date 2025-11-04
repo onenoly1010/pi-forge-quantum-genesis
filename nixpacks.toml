@@ -1,9 +1,6 @@
 [build.environment]
 WORKDIR = "/app/backend"
 
-[phases.setup]
-cmds = ["python --version"]
-
 [phases.install]
 cmds = ["pip install -r requirements.txt"]
 
