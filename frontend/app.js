@@ -3,18 +3,23 @@
 
 class PiForgeApp {
     constructor() {
-        this.backendUrl = ''; // Force mock mode for now
+        this.backendUrl = process?.env?.BACKEND_URL || ''; // Force mock mode for now
         this.socket = null;
+        this.mockMode = true; // Enable mock mode by default
         this.init();
     }
 
     init() {
+        console.log('🚀 Initializing Pi Forge Quantum Genesis...');
         this.updateStatus('backend-status', 'disconnected', 'Backend: Mock Mode (Development)');
         this.setupWebSocket();
         this.loadLeaderboard();
         
         // Auto-refresh leaderboard every 30 seconds
         setInterval(() => this.loadLeaderboard(), 30000);
+        
+        // Add event listeners for better UX
+        this.attachEventListeners();
     }
 
     async checkBackendStatus() {
@@ -48,8 +53,15 @@ class PiForgeApp {
         const button = document.getElementById('mineBtn');
         
         const digits = parseInt(digitsInput.value);
-        if (!digits || digits < 1) {
-            resultDiv.innerHTML = '<span style="color: #ff6b6b;">⚠️ Please enter valid number of digits</span>';
+        
+        // Enhanced validation
+        if (!digits || isNaN(digits) || digits < 1) {
+            this.showError(resultDiv, '⚠️ Please enter a valid number (minimum 1 digit)');
+            return;
+        }
+        
+        if (digits > 1000000) {
+            this.showError(resultDiv, '⚠️ Maximum 1,000,000 digits allowed');
             return;
         }
 
@@ -69,17 +81,17 @@ class PiForgeApp {
             resultDiv.innerHTML = `
                 <div style="color: #00ff88;">
                     <strong>✅ Success!</strong><br>
-                    Digits: ${data.digits}<br>
+                    Digits: ${data.digits.toLocaleString()}<br>
                     Result: ${data.result}<br>
                     Status: ${data.status}
                 </div>
             `;
-            this.addEvent(`⚡ Mined ${digits} Pi digits`);
+            this.addEvent(`⚡ Mined ${digits.toLocaleString()} Pi digits`);
             this.loadLeaderboard(); // Refresh leaderboard
 
         } catch (error) {
             console.error('Mining error:', error);
-            resultDiv.innerHTML = `<span style="color: #ff6b6b;">❌ Error: ${error.message}</span>`;
+            this.showError(resultDiv, `❌ Error: ${error.message}`);
         } finally {
             button.disabled = false;
             button.textContent = '🚀 Start Mining';
@@ -90,9 +102,16 @@ class PiForgeApp {
         const amountInput = document.getElementById('stakeAmount');
         const button = document.getElementById('stakeBtn');
         
-        const amount = parseInt(amountInput.value);
-        if (!amount || amount < 1) {
-            alert('Please enter a valid stake amount');
+        const amount = parseFloat(amountInput.value);
+        
+        // Enhanced validation
+        if (!amount || isNaN(amount) || amount <= 0) {
+            alert('⚠️ Please enter a valid stake amount (positive number)');
+            return;
+        }
+        
+        if (amount > 1000000) {
+            alert('⚠️ Maximum stake amount is 1,000,000 tokens');
             return;
         }
 
@@ -108,8 +127,9 @@ class PiForgeApp {
                 message: "Tokens staked successfully"
             };
 
-            alert(`✅ ${data.message}\nAmount: ${data.amount} tokens`);
-            this.addEvent(`💰 Staked ${amount} tokens`);
+            alert(`✅ ${data.message}\nAmount: ${data.amount.toLocaleString()} tokens\nAPY: 5.5%`);
+            this.addEvent(`💰 Staked ${amount.toLocaleString()} tokens`);
+            amountInput.value = ''; // Clear input after successful stake
 
         } catch (error) {
             console.error('Staking error:', error);
@@ -191,6 +211,34 @@ class PiForgeApp {
             return pi.substring(0, digits + 2);
         } else {
             return `3.14... [computed ${digits.toLocaleString()} digits in quantum state]`;
+        }
+    }
+    
+    showError(element, message) {
+        if (element) {
+            element.innerHTML = `<span style="color: #ff6b6b;">${message}</span>`;
+        }
+    }
+    
+    attachEventListeners() {
+        // Allow Enter key to trigger mining
+        const digitsInput = document.getElementById('digitsInput');
+        if (digitsInput) {
+            digitsInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    this.startMining();
+                }
+            });
+        }
+        
+        // Allow Enter key to trigger staking
+        const stakeInput = document.getElementById('stakeAmount');
+        if (stakeInput) {
+            stakeInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    this.stakeTokens();
+                }
+            });
         }
     }
 }

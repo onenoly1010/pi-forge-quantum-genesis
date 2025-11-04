@@ -14,12 +14,32 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'pi-forge-kris-olofson-2024')
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-redis_url = os.getenv('REDIS_URL', 'redis://localhost:6379')
-socketio = SocketIO(app, cors_allowed_origins="*", message_queue=redis_url)
+# Initialize SocketIO with optional Redis
+redis_url = os.getenv('REDIS_URL')
+if redis_url:
+    try:
+        # Test Redis connection
+        test_redis = redis.from_url(redis_url, socket_connect_timeout=5)
+        test_redis.ping()
+        socketio = SocketIO(app, cors_allowed_origins="*", message_queue=redis_url)
+        print(f"✅ Connected to Redis: {redis_url}")
+    except Exception as e:
+        print(f"⚠️  Redis connection failed: {e}. Running without Redis.")
+        socketio = SocketIO(app, cors_allowed_origins="*")
+else:
+    socketio = SocketIO(app, cors_allowed_origins="*")
+    print("ℹ️  Running without Redis (in-memory mode)")
 
+# Initialize Supabase client if credentials are provided
 supabase = None
-if os.getenv('SUPABASE_URL'):
-    supabase = create_client(os.getenv('SUPABASE_URL'), os.getenv('SUPABASE_KEY'))
+if os.getenv('SUPABASE_URL') and os.getenv('SUPABASE_KEY'):
+    try:
+        supabase = create_client(os.getenv('SUPABASE_URL'), os.getenv('SUPABASE_KEY'))
+        print("✅ Connected to Supabase")
+    except Exception as e:
+        print(f"⚠️  Supabase initialization failed: {e}")
+else:
+    print("ℹ️  Running without Supabase database")
 
 def authenticate_user(email, password):
     # Simple demo authentication - replace with your actual logic
@@ -50,6 +70,12 @@ def health():
 
 @app.route('/compute/<int:digits>')
 def compute_pi(digits):
+    # Validate input
+    if digits < 1:
+        return jsonify({"error": "Digits must be at least 1"}), 400
+    if digits > 1000000:
+        return jsonify({"error": "Maximum 1,000,000 digits allowed"}), 400
+    
     try:
         pi_approx = "3.14159265358979323846"
         if digits <= 20:
@@ -58,11 +84,15 @@ def compute_pi(digits):
             result = f"3.14... computed {digits} digits"
         
         if supabase:
-            supabase.table('leaderboard').upsert({
-                'user_id': 'quantum_miner',
-                'digits_mined': digits,
-                'last_active': 'now()'
-            }).execute()
+            try:
+                supabase.table('leaderboard').upsert({
+                    'user_id': 'quantum_miner',
+                    'digits_mined': digits,
+                    'last_active': 'now()'
+                }).execute()
+            except Exception as db_error:
+                # Log but don't fail the request if database update fails
+                print(f"Database update failed: {db_error}")
         
         return jsonify({
             "digits": digits, 
@@ -77,16 +107,29 @@ def compute_pi(digits):
 def stake():
     try:
         data = request.json
+        if not data:
+            return jsonify({"error": "Request body required"}), 400
+            
         user_id = data.get('user_id', 'quantum_miner')
         amount = data.get('amount', 0)
         
+        # Validate amount
+        if not isinstance(amount, (int, float)) or amount <= 0:
+            return jsonify({"error": "Amount must be a positive number"}), 400
+        
+        if amount > 1000000:
+            return jsonify({"error": "Maximum stake amount is 1,000,000"}), 400
+        
         if supabase:
-            supabase.table('stakes').insert({
-                "user_id": user_id,
-                "amount": amount,
-                "start_time": "now()",
-                "apy": 0.055
-            }).execute()
+            try:
+                supabase.table('stakes').insert({
+                    "user_id": user_id,
+                    "amount": amount,
+                    "start_time": "now()",
+                    "apy": 0.055
+                }).execute()
+            except Exception as db_error:
+                print(f"Database insert failed: {db_error}")
         
         return jsonify({
             "status": "staked", 
@@ -112,22 +155,34 @@ def get_leaderboard():
 
 @app.route('/api/auth/login', methods=['POST'])
 def login():
-    data = request.get_json()
-    
-    user = authenticate_user(data.get('email'), data.get('password'))
-    
-    if user:
-        token = generate_token(user['id'])
-        return jsonify({
-            'token': token,
-            'user': {
-                'id': user['id'],
-                'username': user['username'],
-                'email': user['email']
-            }
-        })
-    else:
-        return jsonify({'error': 'Invalid credentials'}), 401
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({'error': 'Request body required'}), 400
+        
+        email = data.get('email')
+        password = data.get('password')
+        
+        if not email or not password:
+            return jsonify({'error': 'Email and password required'}), 400
+        
+        user = authenticate_user(email, password)
+        
+        if user:
+            token = generate_token(user['id'])
+            return jsonify({
+                'token': token,
+                'user': {
+                    'id': user['id'],
+                    'username': user['username'],
+                    'email': user['email']
+                }
+            })
+        else:
+            return jsonify({'error': 'Invalid credentials'}), 401
+    except Exception as e:
+        return jsonify({'error': 'Login failed'}), 500
 
 @app.route('/api/protected-route', methods=['GET'])
 @token_required
