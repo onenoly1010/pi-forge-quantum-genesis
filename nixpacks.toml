@@ -1,13 +1,11 @@
 [phases.setup]
 cmds = [
-    "cd backend",
-    "python --version"
+    "cd backend && python --version"
 ]
 
 [phases.install]
 cmds = [
-    "cd backend",
-    "pip install -r requirements.txt"
+    "cd backend && pip install -r requirements.txt"
 ]
 
 [phases.build]
