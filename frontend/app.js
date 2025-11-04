@@ -3,9 +3,10 @@
 
 class PiForgeApp {
     constructor() {
-        this.backendUrl = process?.env?.BACKEND_URL || ''; // Force mock mode for now
+        // Configuration: set BACKEND_URL in index.html or use empty string for mock mode
+        this.backendUrl = window.BACKEND_URL || ''; 
         this.socket = null;
-        this.mockMode = true; // Enable mock mode by default
+        this.mockMode = !this.backendUrl; // Enable mock mode if no backend URL
         this.init();
     }
 
@@ -52,11 +53,12 @@ class PiForgeApp {
         const resultDiv = document.getElementById('miningResult');
         const button = document.getElementById('mineBtn');
         
+        // Use parseInt for whole numbers (digits should be integers)
         const digits = parseInt(digitsInput.value);
         
         // Enhanced validation
         if (!digits || isNaN(digits) || digits < 1) {
-            this.showError(resultDiv, '⚠️ Please enter a valid number (minimum 1 digit)');
+            this.showError(resultDiv, '⚠️ Please enter a valid whole number (minimum 1 digit)');
             return;
         }
         
@@ -102,6 +104,7 @@ class PiForgeApp {
         const amountInput = document.getElementById('stakeAmount');
         const button = document.getElementById('stakeBtn');
         
+        // Use parseFloat to allow decimal token amounts (e.g., 10.5 tokens)
         const amount = parseFloat(amountInput.value);
         
         // Enhanced validation

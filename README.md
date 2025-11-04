@@ -43,6 +43,7 @@ pi-forge-quantum-genesis/
 - **Redis**: Caching and message queue
 - **Web3**: Blockchain integration
 - **Gunicorn**: Production WSGI server
+- **Python**: 3.12+ (specified in runtime.txt)
 
 ### Frontend
 - **Vanilla JavaScript**: No framework dependencies
@@ -52,7 +53,7 @@ pi-forge-quantum-genesis/
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Python 3.11+
+- Python 3.12+
 - Redis (optional, for caching)
 - Supabase account (optional, for database)
 
