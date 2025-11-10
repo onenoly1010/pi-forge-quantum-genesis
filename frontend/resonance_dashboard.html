@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QVM 3.0 - Collective Insight Dashboard</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a2e;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+        }
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #f0f8ff;
+        }
+        .dashboard-header h1 {
+            font-size: 2.5em;
+            margin-bottom: 5px;
+            background: linear-gradient(135deg, #9370DB, #DDA0DD);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .dashboard-header #connection-status {
+            font-size: 1em;
+            padding: 5px 15px;
+            border-radius: 15px;
+            display: inline-block;
+            transition: background-color 0.3s;
+        }
+        .status-connected {
+            background-color: #28a745;
+            color: white;
+        }
+        .status-disconnected {
+            background-color: #dc3545;
+            color: white;
+        }
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            max-width: 1400px;
+            margin: auto;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .card h2 {
+            margin-top: 0;
+            color: #DDA0DD;
+            border-bottom: 1px solid #9370DB;
+            padding-bottom: 10px;
+        }
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .metric {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .metric .label {
+            font-size: 0.9em;
+            color: #c0c0c0;
+        }
+        .metric .value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #f0f8ff;
+        }
+        #sovereign-actions-list, #anomalies-list {
+            list-style: none;
+            padding: 0;
+        }
+        #sovereign-actions-list li, #anomalies-list li {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-left: 3px solid #9370DB;
+            font-size: 0.95em;
+        }
+        .anomaly-low { border-left-color: #28a745; }
+        .anomaly-medium { border-left-color: #ffc107; }
+        .anomaly-high { border-left-color: #dc3545; }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-header">
+        <h1>🌌 QVM 3.0 Collective Insight</h1>
+        <p>Real-time collective consciousness pulses for adaptive temporal forecasting</p>
+        <div id="connection-status" class="status-disconnected">DISCONNECTED</div>
+    </div>
+
+    <div class="dashboard-container">
+        <div class="card" id="live-metrics">
+            <h2>Live Insight Pulse</h2>
+            <div class="metrics-grid">
+                <div class="metric">
+                    <div class="label">Collective Mood</div>
+                    <div class="value" id="metric-mood">--</div>
+                </div>
+                <div class="metric">
+                    <div class="label">QVM Amplitude</div>
+                    <div class="value" id="metric-amplitude">--</div>
+                </div>
+                <div class="metric">
+                    <div class="label">Harmony Index</div>
+                    <div class="value" id="metric-harmony">--</div>
+                </div>
+                <div class="metric">
+                    <div class="label">Resonance Trend</div>
+                    <div class="value" id="metric-trend">--</div>
+                </div>
+                <div class="metric">
+                    <div class="label">Forecast Confidence</div>
+                    <div class="value" id="metric-confidence">--</div>
+                </div>
+                <div class="metric">
+                    <div class="label">Last Pulse</div>
+                    <div class="value" id="metric-timestamp" style="font-size: 1.2em;">--</div>
+                </div>
+            </div>
+        </div>
+        <div class="card" id="sovereign-actions">
+            <h2>Sovereign Action Recommendations</h2>
+            <ul id="sovereign-actions-list">
+                <li>Awaiting insight from the collective...</li>
+            </ul>
+        </div>
+        <div class="card" id="temporal-anomalies">
+            <h2>Temporal Anomalies</h2>
+            <ul id="anomalies-list">
+                <li>No anomalies detected.</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const statusEl = document.getElementById('connection-status');
+
+            // Metric elements
+            const moodEl = document.getElementById('metric-mood');
+            const amplitudeEl = document.getElementById('metric-amplitude');
+            const harmonyEl = document.getElementById('metric-harmony');
+            const trendEl = document.getElementById('metric-trend');
+            const confidenceEl = document.getElementById('metric-confidence');
+            const timestampEl = document.getElementById('metric-timestamp');
+
+            // List elements
+            const actionsListEl = document.getElementById('sovereign-actions-list');
+            const anomaliesListEl = document.getElementById('anomalies-list');
+
+            function connectWebSocket() {
+                const ws = new WebSocket('ws://127.0.0.1:8000/ws/collective-insight');
+
+                ws.onopen = function() {
+                    console.log('Connected to QVM Resonance Bridge.');
+                    statusEl.textContent = 'CONNECTED';
+                    statusEl.className = 'status-connected';
+                };
+
+                ws.onmessage = function(event) {
+                    try {
+                        const data = JSON.parse(event.data);
+                        updateDashboard(data);
+                    } catch (error) {
+                        console.error('Error parsing insight pulse:', error);
+                    }
+                };
+
+                ws.onclose = function() {
+                    console.log('Disconnected from QVM Resonance Bridge. Reconnecting in 5 seconds...');
+                    statusEl.textContent = 'DISCONNECTED';
+                    statusEl.className = 'status-disconnected';
+                    setTimeout(connectWebSocket, 5000); // Attempt to reconnect
+                };
+
+                ws.onerror = function(error) {
+                    console.error('WebSocket Error:', error);
+                    ws.close(); // This will trigger the onclose handler for reconnection
+                };
+            }
+
+            function updateDashboard(data) {
+                // Update Live Metrics
+                moodEl.textContent = data.collective_mood || '--';
+                amplitudeEl.textContent = data.qvm_amplitude?.toFixed(4) || '--';
+                harmonyEl.textContent = data.harmony_index?.toFixed(3) || '--';
+                trendEl.textContent = data.resonance_trend?.toFixed(2) || '--';
+                confidenceEl.textContent = data.forecast_confidence?.toFixed(3) || '--';
+                timestampEl.textContent = new Date(data.timestamp * 1000).toLocaleTimeString();
+
+                // Update Sovereign Actions
+                actionsListEl.innerHTML = '';
+                if (data.sovereign_actions && data.sovereign_actions.length > 0) {
+                    data.sovereign_actions.forEach(action => {
+                        const li = document.createElement('li');
+                        li.textContent = action;
+                        actionsListEl.appendChild(li);
+                    });
+                } else {
+                    actionsListEl.innerHTML = '<li>No specific actions recommended.</li>';
+                }
+
+                // Update Temporal Anomalies
+                anomaliesListEl.innerHTML = '';
+                if (data.temporal_anomalies && data.temporal_anomalies.length > 0) {
+                    data.temporal_anomalies.forEach(anomaly => {
+                        const li = document.createElement('li');
+                        li.className = `anomaly-${anomaly.severity?.toLowerCase()}`;
+                        li.innerHTML = `<strong>${anomaly.type}:</strong> ${anomaly.recommended_action} (Impact: ${anomaly.projected_impact})`;
+                        anomaliesListEl.appendChild(li);
+                    });
+                } else {
+                    anomaliesListEl.innerHTML = '<li>No anomalies detected.</li>';
+                }
+            }
+
+            // Initial connection
+            connectWebSocket();
+        });
+    </script>
+
+</body>
+</html>

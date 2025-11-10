@@ -1,0 +1,8 @@
+[build]
+builder = "nixpacks"
+# Tell Nixpacks where the application root is
+path = "."
+
+[deploy]
+# The command to start the application
+startCommand = "uvicorn server.main:app --host 0.0.0.0 --port $PORT"

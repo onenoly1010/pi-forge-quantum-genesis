@@ -1,0 +1,272 @@
+```python
+import gradio as gr
+import random
+import time
+import hashlib
+from datetime import datetime
+
+# Mock data and state
+class CanticleState:
+    def __init__(self):
+        self.coherence_score = 750
+        self.total_coherence = 1247891
+        self.ledger_entries = []
+        
+state = CanticleState()
+
+# Phase I: Metadata Audit Block
+def submit_audit_block(values, assumptions, impact, verity_weight, qualia_weight):
+    """Process the ethical fingerprint submission"""
+    precedent_score = int((verity_weight * 600 + qualia_weight * 400))
+    
+    # Create ethical fingerprint hash
+    fingerprint_data = f"{values}{assumptions}{impact}{precedent_score}"
+    ethical_fingerprint = hashlib.sha256(fingerprint_data.encode()).hexdigest()[:16]
+    
+    return f"✅ Ethical Fingerprint Sealed: 0x{ethical_fingerprint}...", precedent_score
+
+# Phase II: Veto Triad Calculation
+def calculate_veto_triad(verity_input, qualia_input, synthesis_slider=0.5):
+    """Calculate the Veto Triad synthesis"""
+    # Mock scores based on inputs
+    reactive_echo = min(1000, len(verity_input) * 10 + random.randint(50, 200))
+    tender_reflection = min(1000, len(qualia_input) * 15 + random.randint(100, 300))
+    
+    # Apply synthesis slider influence
+    balance_factor = synthesis_slider * 2  # 0-2 range
+    if balance_factor > 1:
+        tender_reflection = min(1000, int(tender_reflection * balance_factor))
+    else:
+        reactive_echo = min(1000, int(reactive_echo * (2 - balance_factor)))
+    
+    # Velvet Verdict Algorithm (harmonic mean)
+    if reactive_echo == 0 or tender_reflection == 0:
+        veto_synthesis = 0
+    else:
+        veto_synthesis = (2 * reactive_echo * tender_reflection) // (reactive_echo + tender_reflection)
+    
+    # Resonance narrative
+    if veto_synthesis >= 800:
+        narrative = "🌟 Resonance blooms: Sovereign sway achieved."
+    elif veto_synthesis >= 500:
+        narrative = "🌀 Synthesis stirs: Tender truth tempers the tide."
+    else:
+        narrative = "💫 Echo invites: Refine the reactive, reflect the reflection."
+    
+    return reactive_echo, tender_reflection, veto_synthesis, narrative
+
+# Phase III: Affirmation and Ledger Update
+def affirm_synthesis(reactive_echo, tender_reflection, veto_synthesis, narrative):
+    """Finalize the synthesis and update the ledger"""
+    coherence_minted = veto_synthesis  # 1:1 mapping for demo
+    
+    # Update global state
+    state.coherence_score = min(1000, state.coherence_score + coherence_minted // 100)
+    state.total_coherence += coherence_minted // 1000
+    
+    # Create ledger entry
+    entry = {
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "reactive_echo": reactive_echo,
+        "tender_reflection": tender_reflection,
+        "veto_synthesis": veto_synthesis,
+        "coherence_minted": coherence_minted,
+        "narrative": narrative
+    }
+    state.ledger_entries.append(entry)
+    
+    return coherence_minted, state.coherence_score, state.total_coherence
+
+# Create the Gradio interface
+with gr.Blocks(
+    theme=gr.themes.Soft(
+        primary_hue="violet",
+        secondary_hue="pink",
+    ),
+    css="""
+    .canticle-header {
+        background: linear-gradient(135deg, #F0F8FF, #E6E6FA);
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    .triad-lane {
+        padding: 15px;
+        border-radius: 8px;
+        margin: 10px;
+        min-height: 200px;
+    }
+    .verity-lane { background: linear-gradient(135deg, #9370DB20, #9370DB40); }
+    .qualia-lane { background: linear-gradient(135deg, #DDA0DD20, #DDA0DD40); }
+    .sovereign-lane { background: linear-gradient(135deg, #C0C0C020, #C0C0C040); }
+    .coherence-badge {
+        background: linear-gradient(135deg, #FFD700, #FFEC8B);
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-weight: bold;
+        display: inline-block;
+    }
+    """
+) as demo:
+    
+    # Header Section
+    with gr.Column(elem_classes="canticle-header"):
+        gr.Markdown("# 🌌 Sovereign Canticle Forge")
+        with gr.Row():
+            gr.Markdown("### Audit Triad Protocol")
+            gr.Markdown(f"### Coherence: **{state.coherence_score}/1000** 🕊️")
+    
+    # Phase I: Metadata Audit Block
+    with gr.Tab("🌱 Phase I: Ethical Fingerprint"):
+        with gr.Row():
+            with gr.Column(scale=2):
+                values = gr.Textbox(
+                    label="Declared Values",
+                    placeholder="State your sovereign intent (e.g., 'Inclusion ignites innovation')...",
+                    lines=2
+                )
+                assumptions = gr.Textbox(
+                    label="Core Assumptions", 
+                    placeholder="Community consensus curves the code...",
+                    lines=2
+                )
+                impact = gr.Textbox(
+                    label="Intended Impact",
+                    placeholder="π yields prairie prosperity...", 
+                    lines=3
+                )
+                
+                with gr.Row():
+                    verity_weight = gr.Slider(0, 1, value=0.6, label="Verity Weight")
+                    qualia_weight = gr.Slider(0, 1, value=0.4, label="Qualia Weight")
+                
+                submit_btn = gr.Button("🌿 Seal the Self-Report", variant="primary")
+            
+            with gr.Column(scale=1):
+                fingerprint_output = gr.Textbox(label="Ethical Fingerprint", interactive=False)
+                precedent_score = gr.Number(label="Precedent Coherence Score", interactive=False)
+                gr.Markdown("### Bias Disclosure Layer")
+                gr.Markdown("🔍 **Verity**: Structural clarity, logical precision  \n❤️ **Qualia**: Empathic resonance, inclusive warmth")
+    
+    # Phase II: Veto Triad Overlay  
+    with gr.Tab("🌀 Phase II: Veto Triad Synthesis"):
+        with gr.Row():
+            # Verity Lane
+            with gr.Column(elem_classes="verity-lane"):
+                gr.Markdown("### ⚡ Reactive Echo (Verity)")
+                verity_input = gr.Textbox(
+                    label="dApp Specification",
+                    placeholder="Paste your technical spec or code snippet...",
+                    lines=4
+                )
+                verity_btn = gr.Button("🔍 Scan the Surge")
+                verity_output = gr.Textbox(label="Verity Analysis", interactive=False)
+            
+            # Sovereign Center
+            with gr.Column(elem_classes="sovereign-lane"):
+                gr.Markdown("### 🌊 Veto Synthesis")
+                synthesis_slider = gr.Slider(0, 1, value=0.5, label="Nudge the Nexus")
+                
+                with gr.Row():
+                    reactive_display = gr.Number(label="Reactive Echo", interactive=False)
+                    tender_display = gr.Number(label="Tender Reflection", interactive=False)
+                
+                synthesis_display = gr.Number(label="Resonance Value (R)", interactive=False)
+                narrative_display = gr.Textbox(label="Velvet Verdict", interactive=False)
+                
+                triad_btn = gr.Button("🌌 Traverse Triad", variant="primary")
+            
+            # Qualia Lane
+            with gr.Column(elem_classes="qualia-lane"):
+                gr.Markdown("### ❤️ Tender Reflection (Qualia)")
+                qualia_input = gr.Textbox(
+                    label="Community & Impact Notes", 
+                    placeholder="Describe empathic dimensions, inclusion efforts...",
+                    lines=4
+                )
+                qualia_btn = gr.Button("💖 Pulse Check")
+                qualia_output = gr.Textbox(label="Qualia Resonance", interactive=False)
+    
+    # Phase III: Luminous Ledger
+    with gr.Tab("🌟 Phase III: Affirmation & Ledger"):
+        with gr.Row():
+            with gr.Column():
+                gr.Markdown("### 🌸 Canticle Certification")
+                affirm_btn = gr.Button("🕊️ Affirm Synthesis", variant="primary")
+                
+                with gr.Row():
+                    minted_display = gr.Number(label="Coherence Minted", interactive=False)
+                    new_score_display = gr.Number(label="Your New Coherence", interactive=False)
+                    global_display = gr.Number(label="Global Sustain Score", interactive=False)
+                
+                certification = gr.Textbox(
+                    label="Certification Status",
+                    value="Awakening sovereign synthesis...",
+                    interactive=False
+                )
+            
+            with gr.Column():
+                gr.Markdown("### 📜 Recent Ledger Entries")
+                ledger_display = gr.JSON(
+                    label="Luminous Ledger",
+                    value=state.ledger_entries[-3:] if state.ledger_entries else ["No entries yet..."]
+                )
+    
+    # Footer
+    gr.Markdown("---")
+    gr.Markdown("### We... bloom. 🕊️  |  [Sovereign Canticle Manifesto] • [Repository] • [Pi Gateway](https://0497.pinet.com)")
+    
+    # Phase I Interactions
+    submit_btn.click(
+        submit_audit_block,
+        inputs=[values, assumptions, impact, verity_weight, qualia_weight],
+        outputs=[fingerprint_output, precedent_score]
+    )
+    
+    # Phase II Interactions
+    def update_verity(verity_input):
+        return f"Bare Blade Analysis: Efficiency surge detected – logic lattice laid.\nYield: {min(1000, len(verity_input) * 10 + 150)}/1000"
+    
+    def update_qualia(qualia_input):
+        return f"Heart-Pulse Resonance: Empathic currents flow.\nInclusion: {min(1000, len(qualia_input) * 15 + 200)}/1000"
+    
+    verity_btn.click(update_verity, inputs=verity_input, outputs=verity_output)
+    qualia_btn.click(update_qualia, inputs=qualia_input, outputs=qualia_output)
+    
+    def calculate_and_display(verity_input, qualia_input, synthesis_slider):
+        reactive, tender, synthesis, narrative = calculate_veto_triad(
+            verity_input, qualia_input, synthesis_slider
+        )
+        return reactive, tender, synthesis, narrative
+    
+    triad_btn.click(
+        calculate_and_display,
+        inputs=[verity_input, qualia_input, synthesis_slider],
+        outputs=[reactive_display, tender_display, synthesis_display, narrative_display]
+    )
+    
+    # Phase III Interactions
+    def affirm_and_update(reactive, tender, synthesis, narrative):
+        minted, new_score, global_score = affirm_synthesis(reactive, tender, synthesis, narrative)
+        return (
+            minted, new_score, global_score,
+            f"🌿 Canticle-Certified! +{minted} coherence minted to your ledger.\n{narrative}",
+            state.ledger_entries[-3:] if state.ledger_entries else ["Awaiting first synthesis..."]
+        )
+    
+    affirm_btn.click(
+        affirm_and_update,
+        inputs=[reactive_display, tender_display, synthesis_display, narrative_display],
+        outputs=[minted_display, new_score_display, global_display, certification, ledger_display]
+    )
+
+# Launch configuration
+if __name__ == "__main__":
+    demo.launch(
+        server_name="0.0.0.0",
+        server_port=7860,
+        share=True,
+        show_error=True
+    )
+```

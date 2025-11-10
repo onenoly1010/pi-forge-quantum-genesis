@@ -1,0 +1,13 @@
+﻿FROM python:3.11-slim
+
+WORKDIR /app/backend
+
+COPY backend/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY backend/ .
+
+ENV PORT=8080
+EXPOSE $PORT
+
+CMD ["python", "-m", "gunicorn", "-w", "2", "-k", "gevent", "-b", "0.0.0.0:8080", "app:app"]
