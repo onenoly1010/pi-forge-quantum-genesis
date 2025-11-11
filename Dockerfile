@@ -1,13 +1,14 @@
 ﻿FROM python:3.11-slim
 
-WORKDIR /app/backend
+WORKDIR /app
 
-COPY backend/requirements.txt .
+COPY server/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY backend/ .
+COPY server/ ./server/
+COPY frontend/ ./frontend/
+COPY . .
 
-ENV PORT=8080
-EXPOSE $PORT
+EXPOSE 8000
 
-CMD ["python", "-m", "gunicorn", "-w", "2", "-k", "gevent", "-b", "0.0.0.0:8080", "app:app"]
+CMD ["python", "-m", "uvicorn", "server.main:app", "--host", "0.0.0.0", "--port", "8000"]
