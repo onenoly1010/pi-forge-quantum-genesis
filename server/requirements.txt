@@ -1,4 +1,6 @@
-fastapi
-uvicorn[standard]
-supabase-py
-python-dotenv
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+supabase==2.3.0
+python-dotenv==1.0.0
+flask==2.3.3
+gradio==4.0.0
