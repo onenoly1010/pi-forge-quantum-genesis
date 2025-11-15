@@ -112,3 +112,5 @@ try {
 } catch {
     Write-Host "📋 Please visit: https://railway.app/dashboard" -ForegroundColor Yellow
 }
+
+.\scripts\demo.ps1 -Interactive
