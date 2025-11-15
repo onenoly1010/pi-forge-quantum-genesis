@@ -1,0 +1,124 @@
+{
+    "python.defaultInterpreterPath": "./.venv/Scripts/python.exe",
+    "python.terminal.activateEnvironment": true,
+    "python.formatting.provider": "black",
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": false,
+    "python.linting.flake8Enabled": true,
+    "python.linting.mypyEnabled": true,
+    
+    // Quantum Resonance Lattice specific settings
+    "files.associations": {
+        "*.ps1": "powershell",
+        "copilot-instructions.md": "markdown",
+        "QUANTUM_BLOG_SERIES.md": "markdown"
+    },
+    
+    // Terminal settings for quantum development
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
+    "terminal.integrated.profiles.windows": {
+        "PowerShell": {
+            "source": "PowerShell",
+            "args": ["-NoExit", "-Command", "& {Write-Host '🌌 Quantum Development Environment Activated' -ForegroundColor Cyan}"]
+        },
+        "Quantum Dev": {
+            "path": "pwsh.exe",
+            "args": ["-NoExit", "-Command", "& {if (Test-Path .venv) { .venv/Scripts/Activate.ps1 }; Write-Host '🧠 Quantum Lattice Ready' -ForegroundColor Magenta}"]
+        }
+    },
+    
+    // Live Server settings for ceremonial interface
+    "liveServer.settings.port": 8080,
+    "liveServer.settings.root": "/frontend",
+    "liveServer.settings.CustomBrowser": "chrome",
+    
+    // Editor settings for quantum coding
+    "editor.fontSize": 14,
+    "editor.fontFamily": "'Cascadia Code', 'Fira Code', 'JetBrains Mono', Consolas, 'Courier New', monospace",
+    "editor.fontLigatures": true,
+    "editor.minimap.enabled": true,
+    "editor.wordWrap": "on",
+    "editor.rulers": [88, 120],
+    
+    // Quantum-themed color customization
+    "workbench.colorTheme": "Dark+ (default dark)",
+    "workbench.colorCustomizations": {
+        "terminal.background": "#0a0e27",
+        "terminal.foreground": "#8b9dc3",
+        "titleBar.activeBackground": "#1e1e2e",
+        "statusBar.background": "#2d1b69",
+        "activityBar.background": "#1e1e2e"
+    },
+    
+    // File explorer settings
+    "explorer.confirmDragAndDrop": false,
+    "explorer.confirmDelete": false,
+    "files.exclude": {
+        "**/__pycache__": true,
+        "**/*.pyc": true,
+        ".venv": false,
+        "**/.git": true,
+        "**/.DS_Store": true,
+        "**/node_modules": true
+    },
+    
+    // Auto-save for rapid quantum development
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 1000,
+    
+    // Debugging settings
+    "debug.inlineValues": "auto",
+    "debug.openExplorerOnEnd": true,
+    
+    // Git settings
+    "git.enableSmartCommit": true,
+    "git.confirmSync": false,
+    "git.autofetch": true,
+    
+    // Extension settings
+    "jupyter.askForKernelRestart": false,
+    "jupyter.alwaysTrustNotebooks": true,
+    
+    // Copilot settings for quantum development
+    "github.copilot.enable": {
+        "*": true,
+        "yaml": true,
+        "plaintext": false,
+        "markdown": true,
+        "python": true
+    },
+    
+    // Custom keybindings hints
+    "workbench.tips.enabled": true,
+    "workbench.startupEditor": "readme",
+    
+    // Quantum development workflow
+    "tasks.autoDetect": "on",
+    "problems.decorations.enabled": true,
+    
+    // Language specific settings
+    "[python]": {
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        },
+        "editor.rulers": [88, 120]
+    },
+    
+    "[markdown]": {
+        "editor.wordWrap": "on",
+        "editor.quickSuggestions": {
+            "comments": "off",
+            "strings": "off",
+            "other": "off"
+        }
+    },
+    
+    "[yaml]": {
+        "editor.defaultFormatter": "redhat.vscode-yaml"
+    },
+    
+    "[json]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    }
+}
