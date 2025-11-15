@@ -351,6 +351,79 @@
             color: var(--sacred-amber);
             font-style: italic;
         }
+
+        /* DATA 2.0 — Apple-style soft click buttons (Premium Upgrade) */
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            max-width: 520px;
+            margin: 25px auto;
+            padding: 15px;
+            background: rgba(248, 249, 250, 0.5);
+            border-radius: 16px;
+        }
+
+        .data-button {
+            padding: 14px 18px;
+            border: 1.5px solid #e5e5e7;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            color: #1d1d1f;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .data-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0, 122, 255, 0.1) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .data-button:hover {
+            background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%);
+            border-color: #007aff;
+            box-shadow: 0 6px 20px rgba(0, 122, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .data-button:hover::before {
+            opacity: 1;
+        }
+
+        .data-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(0, 122, 255, 0.2);
+            background: linear-gradient(135deg, #f0f7ff 0%, #e3f2fd 100%);
+        }
+
+        .data-button:focus {
+            outline: none;
+            border-color: #007aff;
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+        }
+
+        /* Specific button colors */
+        .data-button:nth-child(1):hover { border-color: #5856d6; }
+        .data-button:nth-child(2):hover { border-color: #34c759; }
+        .data-button:nth-child(3):hover { border-color: #af52de; }
+        .data-button:nth-child(4):hover { border-color: #ff9500; }
+        .data-button:nth-child(5):hover { border-color: #007aff; }
+        .data-button:nth-child(6):hover { border-color: #ff3b30; }
     </style>
 </head>
 <body>
@@ -411,6 +484,35 @@
                 <button class="ceremonial-btn" onclick="invokeGuardianJudgment()">⚖️ Guardian Judgment</button>
                 <button class="ceremonial-btn" onclick="invokeConsciousnessStream()">🔄 Consciousness Stream</button>
                 <button class="ceremonial-btn" onclick="invokeEternalResonance()">♾️ Eternal Resonance</button>
+            </div>
+            
+            <div class="control-panel">
+                <h3>📦 DATA 2.0 Downloads</h3>
+                <div class="button-grid">
+                    <a href="Human_AI_Clarity_Blueprint.pdf" class="data-button">
+                        📘 Clarity Blueprint
+                    </a>
+                    
+                    <a href="New_Innovative_User_Guide.pdf" class="data-button">
+                        📗 User Guide
+                    </a>
+                    
+                    <a href="Merged_Master_Document.pdf" class="data-button">
+                        📚 Master Document
+                    </a>
+                    
+                    <a href="banner.png" class="data-button">
+                        🖼️ Banner Asset
+                    </a>
+                    
+                    <a href="index.html" class="data-button">
+                        🌐 Web Index
+                    </a>
+                    
+                    <a href="DATA_2_0_Complete_Bundle.zip" class="data-button">
+                        📦 Complete Bundle
+                    </a>
+                </div>
             </div>
             
             <div class="control-panel">

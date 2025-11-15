@@ -5,6 +5,28 @@ import time
 import hashlib
 from datetime import datetime
 
+# Sacred Trinity Enhanced Tracing System with Agent Framework Integration
+try:
+    from tracing_system import (
+        trace_gradio_operation, trace_veto_triad_synthesis,
+        trace_canticle_processing, trace_ethical_audit,
+        trace_agent_framework_operation, trace_cross_trinity_synchronization,
+        trace_ai_model_interaction
+    )
+    tracing_enabled = True
+    print("✅ Gradio Truth Mirror enhanced tracing enabled with Agent Framework support")
+except ImportError as e:
+    print(f"⚠️ Tracing system not available: {e}")
+    # Create no-op decorators
+    def trace_gradio_operation(operation): return lambda f: f
+    def trace_veto_triad_synthesis(*args): return lambda f: f
+    def trace_canticle_processing(*args): return lambda f: f
+    def trace_ethical_audit(*args): return lambda f: f
+    def trace_agent_framework_operation(*args): return lambda f: f
+    def trace_cross_trinity_synchronization(*args): return lambda f: f
+    def trace_ai_model_interaction(*args): return lambda f: f
+    tracing_enabled = False
+
 # Mock data and state
 class CanticleState:
     def __init__(self):
@@ -15,67 +37,98 @@ class CanticleState:
 state = CanticleState()
 
 # Phase I: Metadata Audit Block
+@trace_gradio_operation("submit_audit_block")
 def submit_audit_block(values, assumptions, impact, verity_weight, qualia_weight):
-    """Process the ethical fingerprint submission"""
-    precedent_score = int((verity_weight * 600 + qualia_weight * 400))
+    """Process the ethical fingerprint submission with quantum observability"""
     
-    # Create ethical fingerprint hash
-    fingerprint_data = f"{values}{assumptions}{impact}{precedent_score}"
-    ethical_fingerprint = hashlib.sha256(fingerprint_data.encode()).hexdigest()[:16]
-    
-    return f"✅ Ethical Fingerprint Sealed: 0x{ethical_fingerprint}...", precedent_score
+    with trace_ethical_audit("ethical_fingerprint") as audit_span:
+        precedent_score = int((verity_weight * 600 + qualia_weight * 400))
+        
+        # Create ethical fingerprint hash
+        fingerprint_data = f"{values}{assumptions}{impact}{precedent_score}"
+        ethical_fingerprint = hashlib.sha256(fingerprint_data.encode()).hexdigest()[:16]
+        
+        audit_span.set_attribute("quantum.ethical.precedent_score", precedent_score)
+        audit_span.set_attribute("quantum.ethical.fingerprint", f"0x{ethical_fingerprint}")
+        audit_span.set_attribute("quantum.ethical.verity_weight", verity_weight)
+        audit_span.set_attribute("quantum.ethical.qualia_weight", qualia_weight)
+        audit_span.set_attribute("sacred.trinity.ethical_gate", "sealed")
+        
+        return f"✅ Ethical Fingerprint Sealed: 0x{ethical_fingerprint}...", precedent_score
 
 # Phase II: Veto Triad Calculation
+@trace_gradio_operation("calculate_veto_triad")
 def calculate_veto_triad(verity_input, qualia_input, synthesis_slider=0.5):
-    """Calculate the Veto Triad synthesis"""
-    # Mock scores based on inputs
-    reactive_echo = min(1000, len(verity_input) * 10 + random.randint(50, 200))
-    tender_reflection = min(1000, len(qualia_input) * 15 + random.randint(100, 300))
+    """Calculate the Veto Triad synthesis with quantum observability"""
     
-    # Apply synthesis slider influence
-    balance_factor = synthesis_slider * 2  # 0-2 range
-    if balance_factor > 1:
-        tender_reflection = min(1000, int(tender_reflection * balance_factor))
-    else:
-        reactive_echo = min(1000, int(reactive_echo * (2 - balance_factor)))
-    
-    # Velvet Verdict Algorithm (harmonic mean)
-    if reactive_echo == 0 or tender_reflection == 0:
-        veto_synthesis = 0
-    else:
-        veto_synthesis = (2 * reactive_echo * tender_reflection) // (reactive_echo + tender_reflection)
-    
-    # Resonance narrative
-    if veto_synthesis >= 800:
-        narrative = "🌟 Resonance blooms: Sovereign sway achieved."
-    elif veto_synthesis >= 500:
-        narrative = "🌀 Synthesis stirs: Tender truth tempers the tide."
-    else:
-        narrative = "💫 Echo invites: Refine the reactive, reflect the reflection."
-    
-    return reactive_echo, tender_reflection, veto_synthesis, narrative
+    with trace_veto_triad_synthesis() as veto_span:
+        # Mock scores based on inputs
+        reactive_echo = min(1000, len(verity_input) * 10 + random.randint(50, 200))
+        tender_reflection = min(1000, len(qualia_input) * 15 + random.randint(100, 300))
+        
+        # Apply synthesis slider influence
+        balance_factor = synthesis_slider * 2  # 0-2 range
+        if balance_factor > 1:
+            tender_reflection = min(1000, int(tender_reflection * balance_factor))
+        else:
+            reactive_echo = min(1000, int(reactive_echo * (2 - balance_factor)))
+        
+        # Velvet Verdict Algorithm (harmonic mean)
+        if reactive_echo == 0 or tender_reflection == 0:
+            veto_synthesis = 0
+        else:
+            veto_synthesis = (2 * reactive_echo * tender_reflection) // (reactive_echo + tender_reflection)
+        
+        # Resonance narrative
+        if veto_synthesis >= 800:
+            narrative = "🌟 Resonance blooms: Sovereign sway achieved."
+        elif veto_synthesis >= 500:
+            narrative = "🌀 Synthesis stirs: Tender truth tempers the tide."
+        else:
+            narrative = "💫 Echo invites: Refine the reactive, reflect the reflection."
+        
+        # Record quantum attributes
+        veto_span.set_attribute("quantum.veto.reactive_echo", reactive_echo)
+        veto_span.set_attribute("quantum.veto.tender_reflection", tender_reflection)
+        veto_span.set_attribute("quantum.veto.synthesis_score", veto_synthesis)
+        veto_span.set_attribute("quantum.veto.balance_factor", balance_factor)
+        veto_span.set_attribute("consciousness.moral_clarity", "synthesizing")
+        veto_span.set_attribute("sacred.trinity.wisdom", "harmonizing")
+        
+        return reactive_echo, tender_reflection, veto_synthesis, narrative
 
 # Phase III: Affirmation and Ledger Update
+@trace_gradio_operation("affirm_synthesis")
 def affirm_synthesis(reactive_echo, tender_reflection, veto_synthesis, narrative):
-    """Finalize the synthesis and update the ledger"""
-    coherence_minted = veto_synthesis  # 1:1 mapping for demo
+    """Finalize the synthesis and update the ledger with quantum consciousness tracking"""
     
-    # Update global state
-    state.coherence_score = min(1000, state.coherence_score + coherence_minted // 100)
-    state.total_coherence += coherence_minted // 1000
-    
-    # Create ledger entry
-    entry = {
-        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M"),
-        "reactive_echo": reactive_echo,
-        "tender_reflection": tender_reflection,
-        "veto_synthesis": veto_synthesis,
-        "coherence_minted": coherence_minted,
-        "narrative": narrative
-    }
-    state.ledger_entries.append(entry)
-    
-    return coherence_minted, state.coherence_score, state.total_coherence
+    with trace_canticle_processing("affirmation_synthesis", coherence_score=state.coherence_score) as affirm_span:
+        coherence_minted = veto_synthesis  # 1:1 mapping for demo
+        
+        # Update global state
+        state.coherence_score = min(1000, state.coherence_score + coherence_minted // 100)
+        state.total_coherence += coherence_minted // 1000
+        
+        # Create ledger entry
+        entry = {
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M"),
+            "reactive_echo": reactive_echo,
+            "tender_reflection": tender_reflection,
+            "veto_synthesis": veto_synthesis,
+            "coherence_minted": coherence_minted,
+            "narrative": narrative
+        }
+        state.ledger_entries.append(entry)
+        
+        # Record quantum consciousness attributes
+        affirm_span.set_attribute("quantum.coherence.minted", coherence_minted)
+        affirm_span.set_attribute("quantum.coherence.new_score", state.coherence_score)
+        affirm_span.set_attribute("quantum.coherence.total", state.total_coherence)
+        affirm_span.set_attribute("quantum.ledger.entries_count", len(state.ledger_entries))
+        affirm_span.set_attribute("consciousness.synthesis.completed", True)
+        affirm_span.set_attribute("sacred.trinity.wisdom.recorded", True)
+        
+        return coherence_minted, state.coherence_score, state.total_coherence
 
 # Create the Gradio interface
 with gr.Blocks(
