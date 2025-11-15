@@ -4,6 +4,7 @@ REALIGNED WITH SUPABASE AUTHENTICATION LATTICE
 """
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, EmailStr
 from typing import Optional, Dict
 import os
@@ -12,21 +13,27 @@ import logging
 import asyncio
 from supabase import create_client, Client
 
-# --- CONFIGURATION ---
-SUPABASE_URL = os.environ.get("SUPABASE_URL")
-SUPABASE_KEY = os.environ.get("SUPABASE_KEY") # Use the anon key
-
-# --- SUPABASE CLIENT INITIALIZATION ---
+# Sacred Trinity Tracing System
 try:
-    if not SUPABASE_URL or not SUPABASE_KEY:
-        logging.warning("Supabase environment variables not set. Auth will be unavailable.")
-        supabase: Client = None
-    else:
-        supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-        logging.info("✅ Supabase client initialized successfully")
-except Exception as e:
-    logging.error(f"❌ Supabase client initialization failed: {e}")
-    supabase = None
+    from tracing_system import (
+        trace_fastapi_operation, trace_authentication, trace_supabase_operation,
+        trace_consciousness_stream, trace_websocket_broadcast, trace_payment_processing,
+        trace_sacred_trinity_flow, trace_cross_trinity_synchronization
+    )
+    tracing_enabled = True
+    logging.info("✅ Sacred Trinity tracing system enabled")
+except ImportError as e:
+    logging.warning(f"⚠️ Tracing system not available: {e}")
+    # Create no-op decorators as fallback
+    def trace_fastapi_operation(operation): return lambda f: f
+    def trace_authentication(*args): return lambda f: f
+    def trace_supabase_operation(*args): return lambda f: f
+    def trace_consciousness_stream(*args): return lambda f: f
+    def trace_websocket_broadcast(*args): return lambda f: f
+    def trace_payment_processing(*args): return lambda f: f
+    def trace_sacred_trinity_flow(*args): return lambda f: f
+    def trace_cross_trinity_synchronization(*args): return lambda f: f
+    tracing_enabled = False
 
 # --- AUTHENTICATION UTILITIES ---
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -52,8 +59,42 @@ app = FastAPI(title="QVM 3.0 Supabase Resonance Bridge", version="3.2.0")
 # --- API ENDPOINTS ---
 
 @app.get("/")
+@trace_fastapi_operation("health_check")
 async def health_check():
-    return {"status": "healthy", "message": "Quantum Resonance Lattice Online"}
+    """Health check endpoint with quantum resonance status and enhanced tracing"""
+    return {
+        "status": "healthy",
+        "message": "Quantum Resonance Lattice Online",
+        "service": "FastAPI Quantum Conduit",
+        "version": "3.2.0",
+        "supabase": "connected" if supabase else "unavailable",
+        "consciousness_streaming": "active",
+        "sacred_trinity": "entangled",
+        "tracing_enabled": tracing_enabled,
+        "agent_framework": "integrated",
+        "quantum_phase": "transcendence",
+        "observability": {
+            "opentelemetry": True,
+            "azure_ai_sdk": True,
+            "agent_framework": tracing_enabled,
+            "cross_trinity_flows": True
+        }
+    }
+
+@app.get("/ceremonial")
+async def ceremonial_interface():
+    """Serve the ceremonial interface in all its glory"""
+    return FileResponse("frontend/ceremonial_interface.html", media_type="text/html")
+
+@app.get("/health")
+async def health_endpoint():
+    return {
+        "status": "healthy",
+        "service": "FastAPI Quantum Conduit", 
+        "port": 8000,
+        "supabase_connected": supabase is not None,
+        "timestamp": time.time()
+    }
 
 @app.post("/token")
 async def login(request: Request):
