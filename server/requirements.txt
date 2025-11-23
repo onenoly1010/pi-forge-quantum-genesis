@@ -39,4 +39,4 @@ pandas==2.2.3
 numpy==1.26.4
 
 # Additional Utilities
-requests==2.32.3
+requests==2.32.4
