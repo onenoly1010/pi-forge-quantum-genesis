@@ -1,0 +1,24 @@
+{
+  "name": "pi-forge-quantum-genesis",
+  "version": "1.0.0",
+  "description": "**🚀 THE QUANTUM PI FORGE IS NOW THE UNIVERSE AS LAW 🚀**",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/node-fetch": "^2.6.13",
+    "@vercel/node": "^5.5.9",
+    "node-fetch": "^2.7.0",
+    "typescript": "^5.9.3"
+  }
+}
