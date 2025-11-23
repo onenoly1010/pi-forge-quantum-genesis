@@ -1,8 +1,19 @@
 {
-  "rewrites": [
+  "builds": [
     {
-      "source": "/",
-      "destination": "/index.html"
+      "src": "api/**/*.ts",
+      "use": "@vercel/node"
     }
-  ]
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/api/index.ts"  // Optional: Fallback to a root handler if you have one
+    }
+  ],
+  "outputDirectory": null  // Explicitly skip static output checks
 }
