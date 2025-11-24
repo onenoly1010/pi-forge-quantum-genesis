@@ -1,6 +1,1 @@
-{
-  "build": {
-    "builder": "paketobuildpacks/builder:base"
-  },
-  "start": "uvicorn server.main:app --host 0.0.0.0 --port $PORT"
-}
+{"build": {"builder": "DOCKERFILE"}, "deploy": {"numReplicas": 1}, "start": "uvicorn server.main:app --host 0.0.0.0 --port $PORT"}
