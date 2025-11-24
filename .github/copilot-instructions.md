@@ -177,21 +177,47 @@ async def test_endpoint():
 
 ## Quick Reference
 
-```bash
-# Development
+### Development Commands
+
+```powershell
+# Windows/PowerShell
 .\scripts\run.ps1                    # Start all services
+```
+
+```bash
+# Individual services (cross-platform)
 uvicorn server.main:app --reload    # FastAPI only
 python server/app.py                # Flask only
 python server/canticle_interface.py # Gradio only
+```
 
-# Testing
+### Testing Commands
+
+```bash
 pytest server/ -v                   # Run all tests
 curl http://localhost:8000/         # FastAPI health
 curl http://localhost:5000/health   # Flask health
+```
 
-# Environment
-cp .env.example .env                # Setup environment
-python -c "import os; from supabase import create_client; print('✅' if create_client(os.getenv('SUPABASE_URL'), os.getenv('SUPABASE_KEY')) else '❌')"
+### Environment Setup
+
+```bash
+cp .env.example .env                # Setup environment file
+```
+
+```python
+# Test Supabase connection
+import os
+from supabase import create_client
+
+try:
+    client = create_client(
+        os.getenv('SUPABASE_URL', ''),
+        os.getenv('SUPABASE_KEY', '')
+    )
+    print('✅ Supabase connection successful')
+except Exception as e:
+    print(f'❌ Supabase connection failed: {e}')
 ```
 
 ## Project-Specific Conventions
