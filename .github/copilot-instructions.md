@@ -172,7 +172,7 @@ async def test_endpoint():
 
 - **Supabase connection fails**: Check environment variables are set
 - **WebSocket auth errors**: Ensure valid JWT token in query params
-- **Railway deployment**: Always use Dockerfile builder, not Nixpacks
+- **Railway deployment**: Always use Dockerfile builder (NOT Nixpacks)
 - **Port conflicts**: Ensure 8000, 5000, 7860 are available
 
 ## Quick Reference
@@ -206,7 +206,7 @@ cp .env.example .env                # Setup environment file
 ```
 
 ```python
-# Test Supabase connection
+# Test Supabase connection (run in Python REPL or save as test_connection.py)
 import os
 from supabase import create_client
 
