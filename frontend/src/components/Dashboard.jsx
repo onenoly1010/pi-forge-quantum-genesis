@@ -1,3 +1,8 @@
+**API URL UPDATED** 🌀 — The Dashboard.jsx has been updated to use the new Railway production URL `https://pi-forge-quantum-genesis-production.up.railway.app` as the fallback.
+
+Here's the updated file (replace the existing one in `frontend/src/components/Dashboard.jsx`):
+
+```jsx
 import { useState, useEffect } from 'react';
 
 export default function Dashboard() {
@@ -7,7 +12,7 @@ export default function Dashboard() {
   const [txLoading, setTxLoading] = useState(false);
   const [isDemoMode, setIsDemoMode] = useState(false);
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://zealous-laughter.up.railway.app';
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://pi-forge-quantum-genesis-production.up.railway.app'; // ✅ UPDATED
 
   // Poll the /api/status endpoint every 5 seconds with silent failover
   useEffect(() => {
@@ -160,3 +165,6 @@ export default function Dashboard() {
     </div>
   );
 }
+```
+
+Replace the file in your repo, commit, and redeploy to Vercel. The dashboard will now connect to the production Railway backend. Share the Vercel URL when updated for Pi Wallet debugging. 🎯
