@@ -1,42 +1,26 @@
-# Core Sacred Trinity Dependencies
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
 supabase==2.3.4
 websockets==12.0
-pydantic[email]==2.5.2
+pydantic==2.5.2
+pydantic[email]
 python-multipart==0.0.6
 flask==3.0.0
 flask-cors==4.0.0
 gradio==4.12.0
 python-dotenv==1.0.0
-
-# Enhanced Evaluation Framework Dependencies
 azure-ai-evaluation==1.0.1
 azure-identity==1.19.0
 aiohttp==3.10.11
-websockets==12.0
-
-# Tracing and Observability Dependencies
 opentelemetry-sdk==1.34.1
 opentelemetry-exporter-otlp-proto-http==1.34.1
 azure-core-tracing-opentelemetry==1.0.0b12
 azure-ai-projects==1.0.0b4
-azure-ai-inference[opentelemetry]==1.0.0b9
-
-# Automation and Scheduling Dependencies
+azure-ai-inference==1.0.0b9
 schedule==1.2.2
 psutil==6.1.0
 pytest==7.4.3
 pytest-asyncio==0.21.1
-
-# Data Processing and Analysis
-pandas==2.1.4
+pandas==2.2.3
 numpy==1.24.4
 pathlib==1.0.1
-
-# Data Processing and Analysis
-pandas==2.2.3
-numpy==1.26.4
-
-# Additional Utilities
-requests==2.32.3
