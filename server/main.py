@@ -35,6 +35,20 @@ except ImportError as e:
     def trace_cross_trinity_synchronization(*args): return lambda f: f
     tracing_enabled = False
 
+# --- PYDANTIC MODELS ---
+class AnalyzeRequest(BaseModel):
+    user: str
+    amount: float
+
+class AnalyzeResponse(BaseModel):
+    status: str
+    message: str
+
+# --- SECURITY ANALYSIS CONSTANTS ---
+HIGH_AMOUNT_THRESHOLD = 10000.0  # Block transactions over this amount
+MEDIUM_AMOUNT_THRESHOLD = 1000.0  # Warn for transactions over this amount
+ANONYMOUS_USER_IDENTIFIERS = ["anonymous", "guest", "unknown", ""]
+
 # --- AUTHENTICATION UTILITIES ---
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -130,6 +144,46 @@ async def register(request: Request):
 @app.get("/users/me")
 async def read_users_me(current_user = Depends(get_current_user)):
     return current_user
+
+@app.post("/api/analyze", response_model=AnalyzeResponse)
+async def analyze_transaction(request: AnalyzeRequest):
+    """
+    Analyze a transaction for security risks.
+    
+    Returns:
+        - BLOCKED: Transaction is blocked (high amount or anonymous user)
+        - WARNING: Transaction requires attention (medium amount)
+        - APPROVED: Transaction is approved
+    """
+    user = request.user.strip().lower()
+    amount = request.amount
+    
+    # Check for anonymous users
+    if user in ANONYMOUS_USER_IDENTIFIERS:
+        return AnalyzeResponse(
+            status="BLOCKED",
+            message="Transaction blocked: anonymous users are not allowed"
+        )
+    
+    # Check for high amount threshold
+    if amount > HIGH_AMOUNT_THRESHOLD:
+        return AnalyzeResponse(
+            status="BLOCKED",
+            message=f"Transaction blocked: amount ${amount:.2f} exceeds maximum allowed threshold of ${HIGH_AMOUNT_THRESHOLD:.2f}"
+        )
+    
+    # Check for medium amount threshold (warning)
+    if amount > MEDIUM_AMOUNT_THRESHOLD:
+        return AnalyzeResponse(
+            status="WARNING",
+            message=f"Transaction requires review: amount ${amount:.2f} is above warning threshold of ${MEDIUM_AMOUNT_THRESHOLD:.2f}"
+        )
+    
+    # Transaction approved
+    return AnalyzeResponse(
+        status="APPROVED",
+        message=f"Transaction approved for user '{request.user}' with amount ${amount:.2f}"
+    )
 
 # --- SECURE WEBSOCKET (REMAINS CONCEPTUALLY SIMILAR) ---
 @app.websocket("/ws/collective-insight")
