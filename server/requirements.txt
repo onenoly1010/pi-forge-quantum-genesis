@@ -6,7 +6,7 @@ pydantic==2.5.2
 pydantic[email]
 python-multipart==0.0.6
 flask==3.0.0
-flask-cors==4.0.0
+flask-cors==6.0.0
 gradio==5.31.0
 python-dotenv==1.0.0
 azure-ai-evaluation==1.0.1
