@@ -1,19 +1,22 @@
 {
-  "builds": [
-    {
-      "src": "api/**/*.ts",
-      "use": "@vercel/node"
-    }
+  "version": 2,
+  "public": true,
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "https://quantumpiforge.com/api/$1" },
+    { "source": "/health",      "destination": "https://quantumpiforge.com/health" },
+    { "source": "/ws",          "destination": "wss://quantumpiforge.com/ws" },
+    { "source": "/socket.io/(.*)", "destination": "wss://quantumpiforge.com/socket.io/$1" },
+    { "source": "/(.*)",        "destination": "/index.html" }
   ],
-  "routes": [
+  "headers": [
     {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/api/index.ts"  // Optional: Fallback to a root handler if you have one
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" }
+      ]
     }
-  ],
-  "outputDirectory": null  // Explicitly skip static output checks
+  ]
 }
