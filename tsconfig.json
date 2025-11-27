@@ -13,6 +13,6 @@
     "resolveJsonModule": true,
     "isolatedModules": true
   },
-  "include": ["api/**/*.ts", "*.ts"],
+  "include": ["api/**/*.ts", "guardian-alerts.ts"],
   "exclude": ["node_modules"]
 }
