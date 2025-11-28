@@ -1,0 +1,19 @@
+{
+  "name": "pi-forge-quantum-genesis",
+  "version": "1.0.0",
+  "description": "Quantum Resonance Lattice - Ethical AI App Builder on Pi Network",
+  "private": true,
+  "scripts": {
+    "type-check": "tsc --noEmit",
+    "build": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@vercel/node": "^5.5.13"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.10",
+    "@types/node-fetch": "^2.6.12",
+    "node-fetch": "^2.7.0",
+    "typescript": "^5.7.2"
+  }
+}
