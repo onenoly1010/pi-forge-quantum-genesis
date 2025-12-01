@@ -1,0 +1,23 @@
+name: Ritual Vow Enforcer
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  enforce-vows:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate Commit Vows
+        run: |
+          commits=$(git log -1 --pretty=%B)
+          if [[ ! $commits =~ ^(INGEST|AUDIT|BROADCAST|RESONANCE|EXPAND|MAINTAIN) ]]; then
+            echo "❌ Invalid commit vow prefix."
+            exit 1
+          fi
+          if [[ ! $commits =~ (🔨|⛓️|🛡️|📡|🧭) ]]; then
+            echo "❌ Missing guardian glyph."
+            exit 1
+          fi
+          echo "✅ Commit vow validated."
