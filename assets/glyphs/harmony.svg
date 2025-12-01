@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <title>Harmony Glyph - Phase III</title>
+  <desc>Blue harmony phase representing integration and synchronization</desc>
+  
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="90" fill="none" stroke="#4444ff" stroke-width="3"/>
+  
+  <!-- Interlocking circles - unity -->
+  <circle cx="75" cy="85" r="35" fill="none" stroke="#4444ff" stroke-width="2"/>
+  <circle cx="125" cy="85" r="35" fill="none" stroke="#4444ff" stroke-width="2"/>
+  <circle cx="100" cy="125" r="35" fill="none" stroke="#4444ff" stroke-width="2"/>
+  
+  <!-- Central harmony point -->
+  <circle cx="100" cy="100" r="15" fill="#4444ff" fill-opacity="0.4"/>
+  
+  <!-- Connecting lines - resonance -->
+  <line x1="75" y1="85" x2="100" y2="100" stroke="#4444ff" stroke-width="1.5"/>
+  <line x1="125" y1="85" x2="100" y2="100" stroke="#4444ff" stroke-width="1.5"/>
+  <line x1="100" y1="125" x2="100" y2="100" stroke="#4444ff" stroke-width="1.5"/>
+  
+  <!-- Outer harmony wave -->
+  <path d="M20,100 Q60,60 100,100 Q140,140 180,100" fill="none" stroke="#4444ff" stroke-width="1.5" stroke-opacity="0.6"/>
+  <path d="M100,20 Q60,60 100,100 Q140,140 100,180" fill="none" stroke="#4444ff" stroke-width="1.5" stroke-opacity="0.6"/>
+  
+  <!-- Center point -->
+  <circle cx="100" cy="100" r="5" fill="#4444ff"/>
+</svg>
