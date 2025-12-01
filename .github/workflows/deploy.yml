@@ -48,6 +48,8 @@ jobs:
   deploy-railway:
     needs: build-and-push
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     if: github.ref == 'refs/heads/main'
 
     steps:
@@ -56,15 +58,25 @@ jobs:
 
       - name: Deploy to Railway
         run: |
-          echo "🚀 Deployment triggered for Pi Forge Quantum Genesis"
-          echo "Services: FastAPI (8000), Flask (5000), Gradio (7860)"
-          echo "Configure RAILWAY_TOKEN secret for automated deployment"
+          if [ -n "$RAILWAY_TOKEN" ]; then
+            echo "🚀 Deploying to Railway..."
+            # Install Railway CLI and deploy
+            npm install -g @railway/cli
+            railway up
+          else
+            echo "⚠️ RAILWAY_TOKEN not configured"
+            echo "📋 To enable automated deployment:"
+            echo "   1. Generate a Railway token at https://railway.app/account/tokens"
+            echo "   2. Add RAILWAY_TOKEN to repository secrets"
+            echo "   Services: FastAPI (8000), Flask (5000), Gradio (7860)"
+          fi
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
   notify:
     needs: [build-and-push, deploy-railway]
     runs-on: ubuntu-latest
+    permissions: {}
     if: always()
 
     steps:
