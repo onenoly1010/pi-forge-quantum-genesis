@@ -13,6 +13,9 @@ on:
           - enhanced
           - transcendent
 
+permissions:
+  contents: read
+
 jobs:
   mandala-activation:
     name: 🔥 Mandala Fire Activation
