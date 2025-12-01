@@ -1,0 +1,39 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy placeholder
+        run: |
+          echo "🚀 Deployment triggered for Pi Forge Quantum Genesis"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Commit: ${{ github.sha }}"
+          echo ""
+          echo "To configure actual deployment, set up the following secrets:"
+          echo "  - RAILWAY_TOKEN: Railway deployment token"
+          echo "  - SUPABASE_URL: Supabase project URL"
+          echo "  - SUPABASE_KEY: Supabase anon key"
+          echo "  - JWT_SECRET: Secret for JWT token signing"
+          echo ""
+          echo "Deployment steps would include:"
+          echo "  1. Build Docker image"
+          echo "  2. Push to container registry"
+          echo "  3. Deploy to Railway/Vercel"
+          echo ""
+          echo "✅ Placeholder deployment complete"
+
+      # Uncomment and configure when ready for production:
+      # - name: Deploy to Railway
+      #   uses: railway/railway-deploy@v1
+      #   with:
+      #     token: ${{ secrets.RAILWAY_TOKEN }}
