@@ -28,8 +28,9 @@ jobs:
           node-version: '20'
       
       - name: Activate Mandala Pulse
+        env:
+          RESONANCE_LEVEL: ${{ github.event.inputs.resonance_level }}
         run: |
           echo "🔥 Initiating Mandala Fire System..."
-          echo "   Resonance Level: ${{ github.event.inputs.resonance_level }}"
-          node .scripts/mandala-pulse.js
+          node .scripts/mandala-pulse.js "${{ github.event.inputs.resonance_level }}"
           echo "🔥 Mandala Fire System: Activation complete"
