@@ -19,6 +19,13 @@ const path = require('path');
 const LOGS_DIR = path.join(process.cwd(), 'logs');
 const TEST_URL = process.env.SMOKE_TEST_URL || 'http://localhost:8000';
 const TIMESTAMP = new Date().toISOString().replace(/[:.]/g, '-');
+const IS_CI = process.env.CI === 'true';
+
+// Warn if using default URL in CI
+if (!process.env.SMOKE_TEST_URL && IS_CI) {
+  console.warn('⚠️ SMOKE_TEST_URL not set - using default localhost:8000');
+  console.warn('   Set the SMOKE_TEST_URL repository variable for production testing');
+}
 
 // Artifact paths with smoke- prefix
 const ARTIFACTS = {
