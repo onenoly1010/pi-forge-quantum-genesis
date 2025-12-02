@@ -116,3 +116,16 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+*.tgz
+package-lock.json
+yarn.lock
+
+# Press Agent logs
+press-agent/logs/
