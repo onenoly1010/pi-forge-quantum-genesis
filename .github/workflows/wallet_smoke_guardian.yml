@@ -12,6 +12,11 @@ on:
 env:
   ARTIFACT_NAME: smoke-artifacts-${{ github.run_id }}-${{ github.run_number }}
 
+# Minimal permissions for security
+permissions:
+  contents: read
+  actions: write  # Required for artifact upload
+
 jobs:
   smoke-test:
     runs-on: ubuntu-latest
