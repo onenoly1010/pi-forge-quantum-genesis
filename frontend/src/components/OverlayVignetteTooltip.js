@@ -58,6 +58,13 @@ const OverlayVignetteTooltip = {
         SECTION: 'section'
     },
     
+    // Threshold constants (matching ScenarioSelector.sol contract)
+    THRESHOLDS: {
+        ARM_THRESHOLD: 902,      // 0.902 scaled by 1000
+        ES_THRESHOLD: 50,        // Minimum ethical score
+        ATTESTATION_REQUIRED: 3  // Triad attestation requirement
+    },
+    
     // Default configuration
     defaults: {
         state: 'idle',
@@ -567,7 +574,7 @@ const OverlayVignetteTooltip = {
         const items = [];
         
         if (data.armScore !== undefined) {
-            const armStatus = data.armScore >= 902 ? '✓' : '✗';
+            const armStatus = data.armScore >= this.THRESHOLDS.ARM_THRESHOLD ? '✓' : '✗';
             items.push(`
                 <div class="ovt-qualified-item">
                     <span class="check-icon">${armStatus}</span>
@@ -577,7 +584,7 @@ const OverlayVignetteTooltip = {
         }
         
         if (data.esScore !== undefined) {
-            const esStatus = data.esScore >= 50 ? '✓' : '✗';
+            const esStatus = data.esScore >= this.THRESHOLDS.ES_THRESHOLD ? '✓' : '✗';
             items.push(`
                 <div class="ovt-qualified-item">
                     <span class="check-icon">${esStatus}</span>
@@ -587,11 +594,11 @@ const OverlayVignetteTooltip = {
         }
         
         if (data.attestationCount !== undefined) {
-            const attStatus = data.attestationCount >= 3 ? '✓' : '○';
+            const attStatus = data.attestationCount >= this.THRESHOLDS.ATTESTATION_REQUIRED ? '✓' : '○';
             items.push(`
                 <div class="ovt-qualified-item">
                     <span class="check-icon">${attStatus}</span>
-                    <span>Attestations: ${data.attestationCount}/3</span>
+                    <span>Attestations: ${data.attestationCount}/${this.THRESHOLDS.ATTESTATION_REQUIRED}</span>
                 </div>
             `);
         }
