@@ -20,7 +20,9 @@ const PORT = process.env.PRESS_AGENT_PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-// In-memory storage for articles (production would use database)
+// In-memory storage for articles (production should use database)
+// NOTE: Data will be lost on server restart. For production, implement
+// database persistence (e.g., Supabase, MongoDB, or PostgreSQL)
 const articles = new Map();
 const scheduledPublications = new Map();
 
@@ -521,8 +523,8 @@ app.get('/api/logs', (req, res) => {
     });
 });
 
-// Scheduled job to process pending publications
-cron.schedule('* * * * *', async () => {
+// Scheduled job to process pending publications (runs every 5 minutes)
+cron.schedule('*/5 * * * *', async () => {
     const now = new Date();
     
     for (const [scheduleId, schedule] of scheduledPublications) {

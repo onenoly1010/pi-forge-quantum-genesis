@@ -282,6 +282,21 @@ function getTemplate(templateId) {
 }
 
 /**
+ * Escape HTML entities to prevent XSS
+ * @param {string} str - String to escape
+ * @returns {string} Escaped string
+ */
+function escapeHtml(str) {
+    if (typeof str !== 'string') return str;
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+/**
  * Populate template content with custom data
  * @param {string} template - Template string with {{placeholders}}
  * @param {Object} data - Data to populate placeholders
@@ -290,10 +305,13 @@ function getTemplate(templateId) {
 function populateTemplate(template, data) {
     let result = template;
     
-    // Replace all {{placeholder}} with corresponding data values
+    // Replace all {{placeholder}} with corresponding data values (HTML escaped)
     const placeholderRegex = /\{\{(\w+)\}\}/g;
     result = result.replace(placeholderRegex, (match, key) => {
-        return data[key] !== undefined ? data[key] : match;
+        if (data[key] !== undefined) {
+            return escapeHtml(data[key]);
+        }
+        return match;
     });
     
     // Set default date if not provided

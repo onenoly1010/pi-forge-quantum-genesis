@@ -3,6 +3,11 @@
  * 
  * Handles publication of articles to WordPress CMS
  * using the WordPress REST API.
+ * 
+ * SECURITY NOTE: Always use HTTPS URLs for WordPress sites to ensure
+ * credentials are transmitted securely. Basic authentication is used
+ * with Application Passwords, which is the recommended method for
+ * WordPress REST API authentication.
  */
 
 const logger = require('../logger');
@@ -11,7 +16,7 @@ class WordPressPublisher {
     /**
      * Create WordPress publisher instance
      * @param {Object} config - WordPress configuration
-     * @param {string} config.siteUrl - WordPress site URL
+     * @param {string} config.siteUrl - WordPress site URL (must use HTTPS in production)
      * @param {string} config.username - WordPress username
      * @param {string} config.password - WordPress application password
      */
@@ -20,6 +25,11 @@ class WordPressPublisher {
         this.username = config.username;
         this.password = config.password;
         this.apiBase = `${this.siteUrl}/wp-json/wp/v2`;
+        
+        // Warn if not using HTTPS
+        if (!this.siteUrl.startsWith('https://')) {
+            logger.warn('WordPress site URL is not using HTTPS. This is insecure for production use.');
+        }
     }
 
     /**
