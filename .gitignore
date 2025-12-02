@@ -116,3 +116,13 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Solidity / Hardhat / Foundry
+node_modules/
+cache/
+out/
+artifacts/
+typechain/
+typechain-types/
+.openzeppelin/
+broadcast/
