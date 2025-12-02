@@ -1,0 +1,145 @@
+name: Wallet Smoke Guardian
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */6 * * *'  # Run every 6 hours
+
+env:
+  ARTIFACT_NAME: smoke-artifacts-${{ github.run_id }}-${{ github.run_number }}
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          npm init -y
+          npm install playwright @playwright/test
+          npx playwright install chromium --with-deps
+
+      - name: Create logs directory
+        run: mkdir -p logs
+
+      - name: Run Wallet Smoke Test
+        id: smoke_test
+        continue-on-error: true
+        run: |
+          node scripts/wallet_smoke_guardian.js
+        env:
+          SMOKE_TEST_URL: ${{ vars.SMOKE_TEST_URL || 'http://localhost:8000' }}
+          CI: true
+
+      - name: Prune large traces on success
+        if: steps.smoke_test.outcome == 'success'
+        run: |
+          echo "🎉 Smoke test passed! Pruning large trace files to save storage..."
+          # Remove trace files larger than 5MB on success
+          find logs -name "smoke-trace-*.zip" -size +5M -delete 2>/dev/null || true
+          # Keep only the most recent screenshot on success
+          ls -t logs/smoke-screenshot-*.png 2>/dev/null | tail -n +2 | xargs rm -f 2>/dev/null || true
+          echo "✅ Pruning complete"
+
+      - name: Upload smoke test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: |
+            logs/smoke-*.png
+            logs/smoke-*.har
+            logs/smoke-*.log
+            logs/smoke-*.zip
+          retention-days: 14
+          if-no-files-found: ignore
+
+      - name: Set failure message
+        if: steps.smoke_test.outcome == 'failure'
+        id: failure_info
+        run: |
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
+          echo "artifact_url=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_OUTPUT
+
+      - name: Notify Slack on failure
+        if: steps.smoke_test.outcome == 'failure' && vars.GUARDIAN_SLACK_WEBHOOK_URL != ''
+        uses: slackapi/slack-github-action@v1.26.0
+        with:
+          payload: |
+            {
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "🚨 Wallet Smoke Test Failed",
+                    "emoji": true
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Repository:*\n${{ github.repository }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Branch:*\n${{ github.ref_name }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Run ID:*\n${{ github.run_id }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Timestamp:*\n${{ steps.failure_info.outputs.timestamp }}"
+                    }
+                  ]
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Diagnostic Artifacts:* `${{ env.ARTIFACT_NAME }}`\n\nArtifacts include: screenshots, HAR network log, console log, and Playwright trace."
+                  }
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View Run & Artifacts",
+                        "emoji": true
+                      },
+                      "url": "${{ steps.failure_info.outputs.artifact_url }}"
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ vars.GUARDIAN_SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+      - name: Fail the job if smoke test failed
+        if: steps.smoke_test.outcome == 'failure'
+        run: |
+          echo "❌ Smoke test failed. Check artifacts for diagnostic bundle."
+          exit 1

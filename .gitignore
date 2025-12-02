@@ -116,3 +116,13 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Smoke test artifacts (generated during CI runs)
+logs/smoke-*.png
+logs/smoke-*.har
+logs/smoke-*.log
+logs/smoke-*.zip
+
+# Node modules (for Playwright tests)
+node_modules/
+package-lock.json
