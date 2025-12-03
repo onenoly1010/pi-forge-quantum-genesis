@@ -381,7 +381,9 @@
 
         function initializeWebSocket() {
             try {
-                wsConnection = new WebSocket('ws://' + window.location.host + '/ws/collective-insight');
+                // Use secure WebSocket (wss://) in production, fallback to ws:// for local development
+                const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                wsConnection = new WebSocket(wsProtocol + '//' + window.location.host + '/ws/collective-insight');
                 wsConnection.onmessage = (event) => {
                     const data = JSON.parse(event.data);
                     updateTelemetry(data);

@@ -64,6 +64,21 @@ class QuantumEngine:
         }
     
     def process_pioneer_engagement(self, engagement):
+        """
+        Process a pioneer engagement through the quantum engine.
+        
+        Args:
+            engagement (dict): Engagement data containing:
+                - query (str): The user's query or action
+                - timestamp (float, optional): When the engagement occurred
+        
+        Returns:
+            dict: Cascade result containing:
+                - timestamp (float): Processing timestamp
+                - query (str): Original query
+                - resonance (float): Resonance score (0.5-1.0)
+                - archetype (str): Matched archetype (sage, explorer, creator, guardian)
+        """
         cascade = {
             'timestamp': time.time(),
             'query': engagement.get('query', 'Unknown'),

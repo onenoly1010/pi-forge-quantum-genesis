@@ -232,19 +232,6 @@ class ConnectionTracker:
 
 connection_tracker = ConnectionTracker(max_connections=10000)
 
-# Rate limiting middleware
-async def rate_limit_check(request: Request):
-    """Check rate limit for incoming request"""
-    client_ip = request.client.host if request.client else "unknown"
-    
-    if not rate_limiter.is_allowed(client_ip):
-        raise HTTPException(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail="Rate limit exceeded. Please wait before making more requests."
-        )
-    
-    connection_tracker.track_request()
-
 # --- FASTAPI APPLICATION ---
 app = FastAPI(
     title="QVM 3.0 Supabase Resonance Bridge", 
@@ -255,13 +242,32 @@ app = FastAPI(
 )
 
 # Add CORS middleware for frontend access
+# NOTE: In production, replace "*" with specific allowed origins like:
+# ["https://your-domain.com", "https://api.your-domain.com"]
+allowed_origins = os.environ.get("CORS_ORIGINS", "*").split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure appropriately for production
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Rate limiting middleware applied to all requests
+@app.middleware("http")
+async def rate_limit_middleware(request: Request, call_next):
+    """Apply rate limiting to all HTTP requests"""
+    client_ip = request.client.host if request.client else "unknown"
+    
+    if not rate_limiter.is_allowed(client_ip):
+        return JSONResponse(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            content={"detail": "Rate limit exceeded. Please wait before making more requests."}
+        )
+    
+    connection_tracker.track_request()
+    response = await call_next(request)
+    return response
 
 # --- API ENDPOINTS ---
 
@@ -442,26 +448,41 @@ async def create_dapp(dapp_request: DAppCreateRequest, user = Depends(get_option
 
 @app.get("/api/dapps")
 async def list_dapps(user = Depends(get_optional_user)):
-    """List all dApps (filtered by user if authenticated)"""
+    """List dApps - authenticated users see only their own dApps, anonymous users see public dApps"""
     if user:
+        # Authenticated users see only their own dApps for security
         user_dapps = [d for d in dapps_registry.values() if d["owner"] == user.email]
-        return {"dapps": user_dapps, "total": len(user_dapps)}
-    return {"dapps": list(dapps_registry.values()), "total": len(dapps_registry)}
+        return {"dapps": user_dapps, "total": len(user_dapps), "authenticated": True}
+    # Anonymous users see all public dApps (status != 'draft')
+    public_dapps = [d for d in dapps_registry.values() if d.get("status") != "draft"]
+    return {"dapps": public_dapps, "total": len(public_dapps), "authenticated": False}
 
 @app.get("/api/dapps/{dapp_id}")
-async def get_dapp(dapp_id: str):
-    """Get details of a specific dApp"""
-    if dapp_id not in dapps_registry:
-        raise HTTPException(status_code=404, detail="dApp not found")
-    return dapps_registry[dapp_id]
-
-@app.post("/api/dapps/{dapp_id}/deploy")
-async def deploy_dapp(dapp_id: str, network: str = "testnet"):
-    """Deploy a dApp to Pi Network (testnet or mainnet)"""
+async def get_dapp(dapp_id: str, user = Depends(get_optional_user)):
+    """Get details of a specific dApp (owner or public only)"""
     if dapp_id not in dapps_registry:
         raise HTTPException(status_code=404, detail="dApp not found")
     
     dapp = dapps_registry[dapp_id]
+    
+    # Only owner can see draft dApps, otherwise only public dApps
+    if dapp.get("status") == "draft":
+        if not user or dapp["owner"] != user.email:
+            raise HTTPException(status_code=404, detail="dApp not found")
+    
+    return dapp
+
+@app.post("/api/dapps/{dapp_id}/deploy")
+async def deploy_dapp(dapp_id: str, network: str = "testnet", user = Depends(get_optional_user)):
+    """Deploy a dApp to Pi Network (testnet or mainnet) - owner only"""
+    if dapp_id not in dapps_registry:
+        raise HTTPException(status_code=404, detail="dApp not found")
+    
+    dapp = dapps_registry[dapp_id]
+    
+    # Only owner can deploy
+    if user and dapp["owner"] != "anonymous" and dapp["owner"] != user.email:
+        raise HTTPException(status_code=403, detail="Only the dApp owner can deploy")
     
     # Simulate deployment
     contract_address = f"0x{hashlib.sha256(f'{dapp_id}{network}{time.time()}'.encode()).hexdigest()[:40]}"
