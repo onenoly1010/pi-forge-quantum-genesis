@@ -1,8 +1,4 @@
 """
-SUPREME CREDENTIALS - QVM 3.0 RECURSION PROTOCOL
-REALIGNED WITH SUPABASE AUTHENTICATION LATTICE
-PRODUCTION-READY WITH CYBER SAMURAI GUARDIAN, DAPP CREATION, AND GOVERNANCE
-"""
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.responses import FileResponse, JSONResponse
@@ -27,27 +23,16 @@ except ImportError:
     Client = None  # Define Client as None when not available
     logging.warning("⚠️ Supabase client not available")
 
-# Sacred Trinity Tracing System
-try:
-    from tracing_system import (
-        trace_fastapi_operation, trace_authentication, trace_supabase_operation,
-        trace_consciousness_stream, trace_websocket_broadcast, trace_payment_processing,
-        trace_sacred_trinity_flow, trace_cross_trinity_synchronization
-    )
-    tracing_enabled = True
-    logging.info("✅ Sacred Trinity tracing system enabled")
-except ImportError as e:
-    logging.warning(f"⚠️ Tracing system not available: {e}")
-    # Create no-op decorators as fallback
-    def trace_fastapi_operation(operation): return lambda f: f
-    def trace_authentication(*args): return lambda f: f
-    def trace_supabase_operation(*args): return lambda f: f
-    def trace_consciousness_stream(*args): return lambda f: f
-    def trace_websocket_broadcast(*args): return lambda f: f
-    def trace_payment_processing(*args): return lambda f: f
-    def trace_sacred_trinity_flow(*args): return lambda f: f
-    def trace_cross_trinity_synchronization(*args): return lambda f: f
-    tracing_enabled = False
+# Use the centralized tracing_system (lazy init + safe null-context fallbacks)
+from tracing_system import (
+    trace_fastapi_operation,
+    trace_payment_processing,
+    trace_payment_visualization_flow,
+    trace_consciousness_stream,
+    get_tracing_system,
+)
+tracing_enabled = True  # tracing_system handles missing SDKs and returns nullcontext spans
+logging.info("✅ Tracing system delegated to tracing_system")
 
 # --- SUPABASE CLIENT INITIALIZATION ---
 supabase = None
@@ -215,16 +200,14 @@ class ConnectionTracker:
         else:
             self._current_second_requests += 1
     
-    def add_ws_connection(self):
+def add_ws_connection(self):
         self.active_ws_connections += 1
-    
     def remove_ws_connection(self):
         self.active_ws_connections = max(0, self.active_ws_connections - 1)
-    
     def get_metrics(self) -> Dict:
         return {
             "active_websocket_connections": self.active_ws_connections,
-            "total_requests_served": self.total_requests,
+            "total_requests": self.total_requests,
             "requests_per_second": self.requests_per_second,
             "max_connections": self.max_connections,
             "capacity_utilization": round(self.active_ws_connections / self.max_connections * 100, 2)
@@ -253,11 +236,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Derive a privacy-conscious client id for rate limiting
+def _get_client_id(request):
+    # Prefer X-Forwarded-For if present (trusted proxy scenario), else fall back to peer host.
+    xff = request.headers.get("x-forwarded-for")
+    if xff:
+        # canonicalize to only first address and avoid logging full IP list
+        return xff.split(",")[0].strip()
+    if request.client and getattr(request.client, "host", None):
+        return request.client.host
+    return "unknown"
+
 # Rate limiting middleware applied to all requests
 @app.middleware("http")
 async def rate_limit_middleware(request: Request, call_next):
     """Apply rate limiting to all HTTP requests"""
-    client_ip = request.client.host if request.client else "unknown"
+    client_ip = _get_client_id(request)
     
     if not rate_limiter.is_allowed(client_ip):
         return JSONResponse(
@@ -269,8 +263,7 @@ async def rate_limit_middleware(request: Request, call_next):
     response = await call_next(request)
     return response
 
-# --- API ENDPOINTS ---
-
+# --- API ENDPOINTS --- 
 @app.get("/")
 @trace_fastapi_operation("health_check")
 async def health_check():
@@ -652,7 +645,7 @@ async def get_quantum_telemetry():
 
 @app.post("/api/ethical-audit")
 async def perform_ethical_audit(audit_request: EthicalAuditRequest):
-    """Perform an ethical audit on a transaction"""
+    """Perform an ethical audit on a transaction""" 
     
     # Simulate ethical audit with Guardian
     risk_score = round(random.uniform(0.01, 0.08), 3)
@@ -684,28 +677,34 @@ async def verify_payment(payment: PaymentVerificationRequest):
     """Verify a Pi Network payment and trigger resonance visualization"""
     global guardian_metrics
     
-    # Simulate payment verification
-    verification_hash = hashlib.sha256(f"{payment.payment_id}{time.time()}".encode()).hexdigest()
-    
-    payment_record = {
-        "payment_id": payment.payment_id,
-        "amount": payment.amount,
-        "status": "verified",
-        "tx_hash": f"0x{verification_hash[:64]}",
-        "resonance_state": random.choice(["foundation", "growth", "harmony", "transcendence"]),
-        "verified_at": datetime.utcnow().isoformat(),
-        "metadata": payment.metadata
-    }
-    
-    payment_records.append(payment_record)
-    guardian_metrics["monitored_transactions"] += 1
-    
-    return {
-        "success": True,
-        "message": "Payment verified successfully",
-        "payment": payment_record,
-        "resonance_trigger": True
-    }
+    # Wrap critical operation with tracing span (no-op if tracing disabled)
+    with trace_payment_processing(payment_id=getattr(payment, "payment_id", None) or "unknown", amount=payment.amount):
+        # Simulate payment verification
+        verification_hash = hashlib.sha256(f"{payment.payment_id}{time.time()}".encode()).hexdigest()
+        
+        payment_record = {
+            "payment_id": payment.payment_id,
+            "amount": payment.amount,
+            "status": "verified" if not getattr(globals().get('CONFIG', {}), 'sandbox_mode', False) else "sandbox-verified",
+            "tx_hash": f"0x{verification_hash[:64]}",
+            "resonance_state": random.choice(["foundation", "growth", "harmony", "transcendence"]),
+            "verified_at": datetime.utcnow().isoformat(),
+            "metadata": payment.metadata
+        }
+        
+        payment_records.append(payment_record)
+        try:
+            guardian.record_transaction(verification_hash, amount=payment.amount)
+        except Exception:
+            logger = logging.getLogger(__name__)
+            logger.debug("guardian.record_transaction failed", exc_info=True)
+        
+        return {
+            "success": True,
+            "message": "Payment verified successfully",
+            "payment": payment_record,
+            "resonance_trigger": True
+        }
 
 @app.get("/api/payments")
 async def list_payments(limit: int = 10):
@@ -824,26 +823,63 @@ async def websocket_collective_insight(websocket: WebSocket, token: Optional[str
 @app.websocket("/ws/guardian-alerts")
 async def websocket_guardian_alerts(websocket: WebSocket):
     """Real-time Cyber Samurai Guardian alert stream"""
+    # Accept token from Authorization: Bearer <token> or query param token
+    auth = websocket.headers.get("authorization", "")
+    token = None
+    if isinstance(auth, str) and auth.lower().startswith("bearer "):
+        token = auth.split(" ", 1)[1].strip()
+    else:
+        token = websocket.query_params.get("token")
+
+    if not token:
+        # best-effort alert to guardian/monitoring and close connection
+        try:
+            guardian.raise_alert("ws_auth_missing", {"path": str(getattr(websocket, 'url', 'unknown'))})
+        except Exception:
+            pass
+        await websocket.close(code=4401)
+        return
+
+    # If supabase available, attempt token validation (best-effort). Otherwise apply demo/guest rules.
+    if supabase is not None:
+        try:
+            user = supabase.auth.get_user(token)  # best-effort; adjust to your supabase client API
+            if user is None or not user.get("id"):
+                await websocket.close(code=4403)
+                return
+        except Exception:
+            await websocket.close(code=4403)
+            return
+    else:
+        # Demo-mode rule: allow tokens that follow a known dev prefix; otherwise deny
+        if not (isinstance(token, str) and token.startswith("dev-")):
+            await websocket.close(code=4403)
+            return
+
     await websocket.accept()
     logging.info("Guardian alert WebSocket connected")
-    
-    try:
-        while True:
-            # Send guardian status updates
-            alert_data = {
-                "type": "guardian_status",
-                "latency_ns": guardian_metrics["latency_ns"],
-                "harmonic_stability": guardian_metrics["harmonic_stability"],
-                "threat_level": guardian_metrics["threat_level"],
-                "active_alerts": len(guardian_metrics["active_alerts"]),
-                "monitored_transactions": guardian_metrics["monitored_transactions"],
-                "status": "active",
-                "timestamp": time.time()
-            }
-            await websocket.send_json(alert_data)
-            await asyncio.sleep(10)
-    except WebSocketDisconnect:
-        logging.info("Guardian alert WebSocket disconnected")
+
+    # Wrap stream handling with a tracing span (no-op if tracing disabled)
+    with trace_consciousness_stream(connection_id=str(id(websocket)), user_id=(token[:8] + "...") if token else None):
+        try:
+            while True:
+                # Send guardian status updates
+                alert_data = {
+                    "type": "guardian_status",
+                    "latency_ns": guardian_metrics["latency_ns"],
+                    "harmonic_stability": guardian_metrics["harmonic_stability"],
+                    "threat_level": guardian_metrics["threat_level"],
+                    "active_alerts": len(guardian_metrics["active_alerts"]),
+                    "monitored_transactions": guardian_metrics["monitored_transactions"],
+                    "status": "active",
+                    "timestamp": time.time()
+                }
+                await websocket.send_json(alert_data)
+                await asyncio.sleep(10)
+        except WebSocketDisconnect:
+            logging.info("Guardian alert WebSocket disconnected")
+        except Exception as e:
+            logging.warning(f"Guardian WebSocket error: {e}")
 
 # --- STARTUP EVENT ---
 @app.on_event("startup")
@@ -858,7 +894,11 @@ async def startup_event():
     logging.info("📊 Quantum Telemetry: STREAMING")
     logging.info("🔐 Ethical Audit System: ARMED")
     logging.info(f"🌐 Supabase: {'CONNECTED' if supabase else 'NOT CONFIGURED'}")
-    logging.info(f"🔍 Tracing: {'ENABLED' if tracing_enabled else 'DISABLED'}")
+    try:
+        system, _, _, _ = get_tracing_system()
+        logging.info("🔍 Tracing: %s", "ENABLED" if system is not None else "DISABLED")
+    except Exception:
+        logging.info("🔍 Tracing: DISABLED")
     logging.info("=" * 60)
     logging.info("✨ Pi Forge Quantum Genesis - Ready for 60M+ Users")
     logging.info("=" * 60)
@@ -868,3 +908,4 @@ if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))
     uvicorn.run("main:app", host="0.0.0.0", port=port, log_level="info", reload=True)
+"""
