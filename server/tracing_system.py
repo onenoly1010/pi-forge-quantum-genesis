@@ -14,6 +14,11 @@ Provides distributed tracing across:
 import os
 import logging
 from typing import Dict, Any
+from functools import wraps
+
+# Initialize logger first to avoid reference errors
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 ### Set up for OpenTelemetry tracing ###
 try:
@@ -59,9 +64,6 @@ try:
 except ImportError:
     ai_inference_available = False
     logger.warning("Azure AI Inference SDK not available")
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 class QuantumTracingSystem:
     """Enhanced Sacred Trinity OpenTelemetry Tracing System with Agent Framework support"""
@@ -215,6 +217,7 @@ def gradio_tracer():
 def trace_fastapi_operation(operation: str):
     """Decorator for tracing FastAPI operations"""
     def decorator(func):
+        @wraps(func)
         async def wrapper(*args, **kwargs):
             with tracing_system.create_quantum_span(
                 fastapi_tracer, operation, "fastapi",
@@ -234,6 +237,7 @@ def trace_fastapi_operation(operation: str):
 def trace_flask_operation(operation: str):
     """Decorator for tracing Flask operations"""
     def decorator(func):
+        @wraps(func)
         def wrapper(*args, **kwargs):
             with tracing_system.create_quantum_span(
                 flask_tracer, operation, "flask",
@@ -253,6 +257,7 @@ def trace_flask_operation(operation: str):
 def trace_gradio_operation(operation: str):
     """Decorator for tracing Gradio operations"""
     def decorator(func):
+        @wraps(func)
         def wrapper(*args, **kwargs):
             with tracing_system.create_quantum_span(
                 gradio_tracer, operation, "gradio",
