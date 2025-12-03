@@ -94,20 +94,35 @@ class SmartContractAudit(BaseModel):
 
 # --- CYBER SAMURAI GUARDIAN STATE ---
 class CyberSamuraiGuardian:
-    """Guardian monitoring system for quantum resonance and system health"""
+    """Guardian monitoring system for quantum resonance and system health
     
-    def __init__(self):
+    Note: In simulation mode, latency values are generated for demonstration.
+    In production, integrate with actual performance monitoring tools.
+    """
+    
+    def __init__(self, simulation_mode: bool = True):
         self.latency_threshold_ns = 5  # Sub-5 nanosecond target
         self.current_latency_ns = 4.2
         self.harmonic_stability = 0.985
         self.alerts: List[Dict] = []
         self.last_check = time.time()
         self.guardian_active = True
+        self.simulation_mode = simulation_mode
         
     def check_latency(self) -> Dict:
-        """Monitor system latency against quantum benchmarks"""
-        # Simulate latency measurement (in production, would use actual metrics)
-        self.current_latency_ns = random.uniform(3.5, 5.5)
+        """Monitor system latency against quantum benchmarks
+        
+        In simulation mode: generates representative latency values
+        In production mode: would integrate with actual performance metrics
+        """
+        if self.simulation_mode:
+            # Simulation mode: generate representative latency values
+            self.current_latency_ns = random.uniform(3.5, 5.5)
+        else:
+            # Production mode: would use actual performance counters
+            # Example: self.current_latency_ns = get_actual_system_latency()
+            self.current_latency_ns = time.perf_counter_ns() % 10  # Placeholder
+            
         breach = self.current_latency_ns > self.latency_threshold_ns
         
         if breach:
@@ -122,7 +137,8 @@ class CyberSamuraiGuardian:
             "latency_ns": round(self.current_latency_ns, 2),
             "threshold_ns": self.latency_threshold_ns,
             "within_threshold": not breach,
-            "harmonic_stability": round(self.harmonic_stability, 4)
+            "harmonic_stability": round(self.harmonic_stability, 4),
+            "simulation_mode": self.simulation_mode
         }
     
     def get_status(self) -> Dict:
@@ -136,10 +152,12 @@ class CyberSamuraiGuardian:
             "total_alerts": len(self.alerts),
             "recent_alerts": self.alerts[-5:] if self.alerts else [],
             "last_check_timestamp": self.last_check,
-            "quantum_coherence": "stable" if latency_check["within_threshold"] else "rebalancing"
+            "quantum_coherence": "stable" if latency_check["within_threshold"] else "rebalancing",
+            "simulation_mode": self.simulation_mode
         }
 
-guardian = CyberSamuraiGuardian()
+# Initialize guardian in simulation mode (set to False for production with real metrics)
+guardian = CyberSamuraiGuardian(simulation_mode=True)
 
 async def get_current_user(request: Request):
     auth_header = request.headers.get("Authorization")
@@ -166,9 +184,13 @@ app = FastAPI(
 )
 
 # Add CORS middleware for cross-origin requests
+# In production, CORS_ORIGINS env var should be set to specific domains
+cors_origins = os.environ.get("CORS_ORIGINS", "http://localhost:3000,http://localhost:5000,http://localhost:7860")
+allowed_origins = [origin.strip() for origin in cors_origins.split(",")]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, restrict to specific origins
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -439,28 +461,62 @@ async def list_proposals():
 
 @app.post("/api/contracts/audit")
 async def audit_smart_contract(audit: SmartContractAudit):
-    """Perform AI-powered smart contract audit"""
+    """Perform smart contract security audit
+    
+    Note: This is a demonstration audit system using pattern-based analysis.
+    For production use, integrate with established security tools like:
+    - Slither, Mythril, or Securify for Solidity
+    - Manual expert review for critical contracts
+    
+    The current implementation provides:
+    - Basic pattern-based vulnerability detection
+    - Complexity estimation
+    - Educational recommendations
+    
+    It should NOT be used as the sole security verification for
+    production smart contracts handling real value.
+    """
     start_time = time.perf_counter_ns()
     
-    # Simulate comprehensive contract analysis
+    # Pattern-based analysis (demonstration - not production-grade)
     code_length = len(audit.contract_code)
     complexity_score = min(code_length / 5000, 1.0)
+    code_lower = audit.contract_code.lower()
     
     vulnerabilities = []
-    if "transfer(" in audit.contract_code.lower() and "require(" not in audit.contract_code.lower():
+    
+    # Check for common vulnerability patterns
+    # Note: These are educational examples, not comprehensive security checks
+    if "transfer(" in code_lower and "require(" not in code_lower:
         vulnerabilities.append({
-            "type": "missing_access_control",
+            "type": "potential_missing_access_control",
             "severity": "medium",
-            "line": "estimated: transfer function",
-            "recommendation": "Add require() checks for authorization"
+            "description": "Transfer function detected without visible require() checks",
+            "recommendation": "Add require() checks for authorization before transfers"
         })
     
-    if "selfdestruct" in audit.contract_code.lower():
+    if "selfdestruct" in code_lower:
         vulnerabilities.append({
-            "type": "selfdestruct_vulnerability",
+            "type": "selfdestruct_present",
             "severity": "high",
-            "line": "contains selfdestruct",
-            "recommendation": "Consider removing selfdestruct or adding strict access controls"
+            "description": "Contract contains selfdestruct functionality",
+            "recommendation": "Remove selfdestruct or implement strict multi-sig access controls"
+        })
+    
+    if "tx.origin" in code_lower:
+        vulnerabilities.append({
+            "type": "tx_origin_authentication",
+            "severity": "high",
+            "description": "Using tx.origin for authentication is vulnerable to phishing",
+            "recommendation": "Use msg.sender instead of tx.origin for authentication"
+        })
+    
+    if "delegatecall" in code_lower and "library" not in code_lower:
+        vulnerabilities.append({
+            "type": "delegatecall_usage",
+            "severity": "medium",
+            "description": "delegatecall used outside of library context",
+            "recommendation": "Ensure delegatecall target is trusted and immutable"
         })
     
     processing_time_ns = time.perf_counter_ns() - start_time
@@ -468,21 +524,33 @@ async def audit_smart_contract(audit: SmartContractAudit):
     return {
         "contract_name": audit.contract_name,
         "audit_depth": audit.audit_depth,
+        "audit_type": "pattern_based_demonstration",
+        "disclaimer": "This is a demonstration audit. For production contracts, use professional audit services.",
         "complexity_score": round(complexity_score, 2),
         "vulnerabilities": vulnerabilities,
         "vulnerability_count": len(vulnerabilities),
         "gas_optimization": {
             "score": round(random.uniform(0.7, 0.95), 2),
-            "suggestions": ["Consider using uint256 for gas efficiency"]
+            "suggestions": [
+                "Consider using uint256 for gas efficiency",
+                "Pack storage variables to save gas",
+                "Use events for cheaper data storage"
+            ]
         },
         "ethical_compliance": {
             "passed": len([v for v in vulnerabilities if v["severity"] == "high"]) == 0,
             "fairness_score": round(random.uniform(0.85, 0.98), 2),
-            "transparency_score": round(random.uniform(0.8, 0.95), 2)
+            "transparency_score": round(random.uniform(0.8, 0.95), 2),
+            "note": "Ethical compliance scores are indicative only"
         },
-        "overall_score": round(1.0 - (len(vulnerabilities) * 0.15), 2),
+        "overall_score": round(max(0, 1.0 - (len(vulnerabilities) * 0.15)), 2),
         "processing_time_ns": processing_time_ns,
-        "auditor": "Quantum Pi Forge AI Auditor",
+        "auditor": "Quantum Pi Forge Pattern Analyzer",
+        "recommended_next_steps": [
+            "Professional audit for production contracts",
+            "Manual code review",
+            "Formal verification for critical functions"
+        ],
         "timestamp": time.time()
     }
 
