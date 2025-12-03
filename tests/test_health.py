@@ -23,7 +23,7 @@ def test_health_endpoint_returns_200_and_keys():
     assert 'timestamp' in data
 
 
-@pytest.mark.parametrize('path', ['/','/api/metrics'])
+@pytest.mark.parametrize('path', ['/', '/api/metrics'])
 def test_additional_endpoints(path):
     resp = client.get(path)
     assert resp.status_code == 200
