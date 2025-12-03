@@ -14,31 +14,45 @@ try:
     print("✅ Flask Glyph Weaver enhanced tracing enabled with Agent Framework support")
 except ImportError as e:
     print(f"⚠️ Tracing system not available: {e}")
-    # Create no-op decorators
+    # Create no-op decorators and context managers
+    from contextlib import contextmanager
+    
     def trace_flask_operation(operation):
         def decorator(func): return func
         return decorator
+    
+    @contextmanager
     def trace_quantum_dashboard_data(*args):
-        def decorator(func): return func
-        return decorator
+        class NoOpSpan:
+            def set_attribute(self, *args, **kwargs): pass
+        yield NoOpSpan()
+    
+    @contextmanager
     def trace_svg_cascade_generation(*args):
-        def decorator(func): return func
-        return decorator
+        class NoOpSpan:
+            def set_attribute(self, *args, **kwargs): pass
+        yield NoOpSpan()
+    
+    @contextmanager    
     def trace_sacred_trinity_flow(*args):
-        def decorator(func): return func
-        return decorator
+        class NoOpSpan:
+            def set_attribute(self, *args, **kwargs): pass
+        yield NoOpSpan()
+    
     def trace_agent_framework_operation(*args):
         def decorator(func): return func
         return decorator
+    
     def trace_cross_trinity_synchronization(*args):
         def decorator(func): return func
         return decorator
+    
     tracing_enabled = False
 
 app = Flask(__name__)
 CORS(app)
 
-# Quantum Engine Simulation (replacing missing quantum_cathedral)
+# Quantum Engine for processing pioneer engagements
 class QuantumEngine:
     def __init__(self):
         self.collective_wisdom = []
@@ -50,7 +64,6 @@ class QuantumEngine:
         }
     
     def process_pioneer_engagement(self, engagement):
-        # Simulate quantum processing
         cascade = {
             'timestamp': time.time(),
             'query': engagement.get('query', 'Unknown'),
@@ -61,6 +74,9 @@ class QuantumEngine:
         return cascade
 
 # Initialize quantum engine
+quantum_engine = QuantumEngine()
+
+# Collective Field for archetype wisdom
 class CollectiveField:
     def __init__(self):
         self.collective_wisdom = []
@@ -71,9 +87,11 @@ class CollectiveField:
             'guardian': ['protection_field', 'ethical_foundation']
         }
 
+# Veiled Vow Engine for ethical processing
 class VeiledVowEngine:
     def __init__(self):
         self.collective_field = CollectiveField()
+        self.ledger_entries = []
     
     def process_pioneer_engagement(self, engagement):
         cascade = {
@@ -85,6 +103,24 @@ class VeiledVowEngine:
         }
         self.collective_field.collective_wisdom.append(cascade)
         return cascade
+    
+    def distribute_archetypal_wisdom(self):
+        """Distribute wisdom across archetypes"""
+        return {
+            'sage': random.randint(20, 35),
+            'explorer': random.randint(15, 30),
+            'creator': random.randint(25, 40),
+            'guardian': random.randint(10, 25)
+        }
+    
+    def get_ledger_summary(self):
+        """Get summary of veiled vow ledger entries"""
+        return {
+            'total_entries': len(self.ledger_entries),
+            'active_vows': random.randint(5, 15),
+            'fulfilled_vows': random.randint(10, 30),
+            'harmony_index': round(random.uniform(0.7, 0.9), 3)
+        }
 
 veiled_vow_engine = VeiledVowEngine()
 
