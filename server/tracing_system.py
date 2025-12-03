@@ -14,6 +14,7 @@ Provides distributed tracing across:
 import os
 import logging
 from typing import Dict, Any
+from functools import wraps
 
 ### Set up for OpenTelemetry tracing ###
 try:
@@ -51,17 +52,20 @@ try:
     ai_projects_available = True
 except ImportError:
     ai_projects_available = False
-    logger.warning("Azure AI Projects SDK not available")
 
 try:
     from azure.ai.inference.tracing import AIInferenceInstrumentor
     ai_inference_available = True
 except ImportError:
     ai_inference_available = False
-    logger.warning("Azure AI Inference SDK not available")
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+if not ai_projects_available:
+    logger.warning("Azure AI Projects SDK not available")
+if not ai_inference_available:
+    logger.warning("Azure AI Inference SDK not available")
 
 class QuantumTracingSystem:
     """Enhanced Sacred Trinity OpenTelemetry Tracing System with Agent Framework support"""
@@ -215,9 +219,14 @@ def gradio_tracer():
 def trace_fastapi_operation(operation: str):
     """Decorator for tracing FastAPI operations"""
     def decorator(func):
+        @wraps(func)
         async def wrapper(*args, **kwargs):
-            with tracing_system.create_quantum_span(
-                fastapi_tracer, operation, "fastapi",
+            system, tracer, _, _ = get_tracing_system()
+            if system is None:
+                # Tracing not available, just call the function
+                return await func(*args, **kwargs)
+            with system.create_quantum_span(
+                tracer, operation, "fastapi",
                 **{"function": func.__name__}
             ) as span:
                 try:
@@ -234,9 +243,14 @@ def trace_fastapi_operation(operation: str):
 def trace_flask_operation(operation: str):
     """Decorator for tracing Flask operations"""
     def decorator(func):
+        @wraps(func)
         def wrapper(*args, **kwargs):
-            with tracing_system.create_quantum_span(
-                flask_tracer, operation, "flask",
+            system, _, tracer, _ = get_tracing_system()
+            if system is None:
+                # Tracing not available, just call the function
+                return func(*args, **kwargs)
+            with system.create_quantum_span(
+                tracer, operation, "flask",
                 **{"function": func.__name__}
             ) as span:
                 try:
@@ -253,9 +267,14 @@ def trace_flask_operation(operation: str):
 def trace_gradio_operation(operation: str):
     """Decorator for tracing Gradio operations"""
     def decorator(func):
+        @wraps(func)
         def wrapper(*args, **kwargs):
-            with tracing_system.create_quantum_span(
-                gradio_tracer, operation, "gradio",
+            system, _, _, tracer = get_tracing_system()
+            if system is None:
+                # Tracing not available, just call the function
+                return func(*args, **kwargs)
+            with system.create_quantum_span(
+                tracer, operation, "gradio",
                 **{"function": func.__name__}
             ) as span:
                 try:
