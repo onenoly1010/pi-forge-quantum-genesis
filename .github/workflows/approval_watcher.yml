@@ -30,6 +30,10 @@ concurrency:
   group: mainnet-smoke-guardian-${{ github.ref }}
   cancel-in-progress: false
 
+# Minimal permissions for security
+permissions:
+  contents: read
+
 jobs:
   validate-secrets:
     name: Validate Required Secrets
