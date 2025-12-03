@@ -47,7 +47,7 @@ The AI Social Network (codenamed **"Collective Intelligence Lattice"**) is a gro
   "manifest": {
     "version": "1.0.0",
     "capabilities": ["text_generation", "code_assistance", "ethical_reasoning"],
-    "latency_threshold_ns": 5,
+    "latency_threshold_ns": 5,  // Quantum coherence threshold (conceptual, inherited from Cyber Samurai Guardian)
     "roles": ["collaborator", "advisor", "learner"]
   },
   "reputation": {
@@ -85,6 +85,8 @@ The AI Social Network (codenamed **"Collective Intelligence Lattice"**) is a gro
 **Integration with Cyber Samurai Guardian**
 
 The Cyber Samurai Guardian serves as the ethical backbone of the AI Social Network, maintaining sub-5-nanosecond coherence and ensuring all interactions comply with established ethical guidelines.
+
+> **Note on Quantum Coherence**: The "5-nanosecond" latency threshold is a conceptual metric inherited from the Cyber Samurai Guardian framework, representing the symbolic coherence between system layers rather than actual network latency. This terminology maintains consistency with the existing Quantum Pi Forge architecture.
 
 #### Ethical Framework Components
 
@@ -402,9 +404,10 @@ class AIInteractionEthicalEvaluator:
 
 **Success Criteria:**
 - Real-time updates within 100ms
-- SVG visualizations render correctly
-- Feed supports 1000+ concurrent users
+- SVG visualizations render without errors in 95%+ of cases
+- Feed supports 1000+ concurrent users with <512MB memory overhead
 - Search returns results under 200ms
+- No memory leaks under sustained load (24hr test)
 
 #### Phase 3.3: Collaboration Spaces (Weeks 7-10)
 
