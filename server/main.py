@@ -1,4 +1,7 @@
 """
+QVM 3.0 Supabase Resonance Bridge
+FastAPI Production Server for Pi Forge Quantum Genesis
+"""
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.responses import FileResponse, JSONResponse
@@ -200,10 +203,12 @@ class ConnectionTracker:
         else:
             self._current_second_requests += 1
     
-def add_ws_connection(self):
+    def add_ws_connection(self):
         self.active_ws_connections += 1
+    
     def remove_ws_connection(self):
         self.active_ws_connections = max(0, self.active_ws_connections - 1)
+    
     def get_metrics(self) -> Dict:
         return {
             "active_websocket_connections": self.active_ws_connections,
@@ -907,5 +912,6 @@ async def startup_event():
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))
-    uvicorn.run("main:app", host="0.0.0.0", port=port, log_level="info", reload=True)
-"""
+    # Only enable reload in development (when DEBUG env var is set)
+    debug_mode = os.environ.get("DEBUG", "false").lower() == "true"
+    uvicorn.run("main:app", host="0.0.0.0", port=port, log_level="info", reload=debug_mode)
