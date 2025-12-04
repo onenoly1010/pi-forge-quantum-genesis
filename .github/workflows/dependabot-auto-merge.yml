@@ -15,6 +15,18 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
+      - name: Validate REPO_MERGE_TOKEN secret
+        env:
+          REPO_MERGE_TOKEN: ${{ secrets.REPO_MERGE_TOKEN }}
+        run: |
+          if [ -z "${REPO_MERGE_TOKEN}" ]; then
+            echo "::warning::REPO_MERGE_TOKEN secret is not configured. The workflow will fall back to GITHUB_TOKEN which may have insufficient permissions to merge PRs."
+            echo "::warning::To enable auto-merge, create a Personal Access Token with 'repo' and 'read:org' scopes and add it as a repository secret named 'REPO_MERGE_TOKEN'."
+            echo "::warning::See docs/dependabot-auto-merge.md for setup instructions."
+          else
+            echo "✅ REPO_MERGE_TOKEN is configured"
+          fi
+
       - name: Checkout (for local script logging only)
         uses: actions/checkout@v4
 
