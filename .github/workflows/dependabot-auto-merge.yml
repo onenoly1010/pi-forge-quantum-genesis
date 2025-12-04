@@ -5,9 +5,8 @@ on:
     types: [opened, labeled, reopened, synchronize, edited]
 
 permissions:
-  contents: write
+  contents: read
   pull-requests: write
-  checks: read
 
 jobs:
   dependabot-auto-merge:
@@ -27,6 +26,7 @@ jobs:
 
       - name: Run Dependabot auto-merge gate
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO_MERGE_TOKEN: ${{ secrets.REPO_MERGE_TOKEN }}
