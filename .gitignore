@@ -117,6 +117,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# Node.js
+node_modules/
 # Windows executables and binaries (excluded from Pi Studio packages)
 *.exe
 *.dll
