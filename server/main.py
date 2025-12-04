@@ -912,4 +912,6 @@ async def startup_event():
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))
-    uvicorn.run("main:app", host="0.0.0.0", port=port, log_level="info", reload=True)
+    # Only enable reload in development (when DEBUG env var is set)
+    debug_mode = os.environ.get("DEBUG", "false").lower() == "true"
+    uvicorn.run("main:app", host="0.0.0.0", port=port, log_level="info", reload=debug_mode)

@@ -46,7 +46,8 @@ jobs:
       - name: Run unit tests
         run: |
           cd tests
-          python -m pytest -v --tb=short || echo "Tests completed with some failures"
+          python -m pytest -v --tb=short
+        continue-on-error: true
 
   build-and-package:
     name: Build and Package
