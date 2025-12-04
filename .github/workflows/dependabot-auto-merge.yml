@@ -5,14 +5,15 @@ on:
     types: [opened, labeled, reopened, synchronize, edited]
 
 permissions:
-  contents: write
+  contents: read
   pull-requests: write
-  checks: read
 
 jobs:
   dependabot-auto-merge:
     name: Dependabot Auto-Merge Gate
     runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout (for local script logging only)
         uses: actions/checkout@v4
