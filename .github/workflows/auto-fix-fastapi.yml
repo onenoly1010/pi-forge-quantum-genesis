@@ -35,7 +35,7 @@ jobs:
             exit 1
           fi
           cp "$FILE" "${FILE}.bak"
-          perl -0777 -pe "s/^fastapi==[^\r\n]+/fastapi>=0.109.0,<0.110.0/mg" -i "$FILE"
+          perl -0777 -pe "s/^fastapi==.*/fastapi>=0.109.0,<0.110.0/m" -i "$FILE"
           echo "=== Diff ==="
           git --no-pager diff -- "$FILE" || true
 
