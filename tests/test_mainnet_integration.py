@@ -276,7 +276,7 @@ class TestTracingSystem:
         """Test tracing system initializes lazily"""
         from tracing_system import get_tracing_system
         
-        system, fastapi, flask, gradio = get_tracing_system()
+        _, _, _, _ = get_tracing_system()
         
         # System should initialize (may be None if OTLP not available)
         # but function should not raise
