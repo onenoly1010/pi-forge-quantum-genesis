@@ -54,10 +54,8 @@ jobs:
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: ${{ env.COMMIT_MSG }}
           title: ${{ env.COMMIT_MSG }}
           body: |
             Bumps FastAPI to >=0.109.0,<0.110.0 to resolve pip dependency conflict with gradio==5.31.0.
             See failing CI job: https://github.com/onenoly1010/pi-forge-quantum-genesis/actions/runs/19921783065/job/57123443495 (ref: 30cd602663b76ed33c42b5270e771e6307b4c1af)
           base: main
-          head: ${{ env.BRANCH }}
