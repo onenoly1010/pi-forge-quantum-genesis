@@ -129,3 +129,22 @@ yarn.lock
 
 # Press Agent logs
 press-agent/logs/
+# Windows executables and binaries (excluded from Pi Studio packages)
+*.exe
+*.dll
+*.msi
+
+# Node modules
+node_modules/
+
+# Build artifacts
+build/
+artifacts/
+
+# IDE/Editor settings
+.vs/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db

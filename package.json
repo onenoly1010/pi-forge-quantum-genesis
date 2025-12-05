@@ -1,0 +1,22 @@
+{
+  "name": "pi-forge-quantum-genesis",
+  "version": "1.0.0",
+  "description": "Pi Forge Quantum Genesis - Multi-application repository with FastAPI, Flask, and Gradio",
+  "main": "index.html",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@vercel/node": "^5.1.8",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "MIT"
+}
