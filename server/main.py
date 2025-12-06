@@ -410,7 +410,10 @@ async def guardian_alerts():
 # --- GOVERNANCE SIMULATION ENDPOINTS ---
 
 @app.post("/api/governance/propose")
-async def create_proposal(proposal: GovernanceProposal):
+async def create_proposal(
+    proposal: GovernanceProposal,
+    current_user: dict = Depends(get_current_user)
+):
     """Create a new governance proposal"""
     proposal_id = hashlib.sha256(f"{proposal.title}{time.time()}".encode()).hexdigest()[:12]
     
