@@ -28,23 +28,16 @@ class TestMainnetIntegration:
         assert "app_id" in PI_NETWORK_CONFIG
         assert PI_NETWORK_CONFIG["network"] in ["mainnet", "testnet"]
     
-    def test_mainnet_mode_default(self):
+    def test_mainnet_mode_default(self, monkeypatch):
         """Test that mainnet is the default network mode"""
-        import os
-        # Clear any env override
-        original = os.environ.get("PI_NETWORK_MODE")
-        if "PI_NETWORK_MODE" in os.environ:
-            del os.environ["PI_NETWORK_MODE"]
+        # Safely remove PI_NETWORK_MODE for this test
+        monkeypatch.delenv("PI_NETWORK_MODE", raising=False)
         
         # Re-import to get fresh config
         import importlib
         import main
         importlib.reload(main)
         
-        # Restore original
-        if original:
-            os.environ["PI_NETWORK_MODE"] = original
-            
         assert main.PI_NETWORK_CONFIG["network"] == "mainnet"
 
 
