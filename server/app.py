@@ -1,4 +1,4 @@
-﻿from flask import Flask, jsonify, render_template_string
+﻿from flask import Flask, jsonify
 from flask_cors import CORS
 import time
 import random
