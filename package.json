@@ -4,5 +4,16 @@
   "private": true,
   "scripts": {
     "build": "mkdir -p public && cp -r frontend/. public/"
+  "description": "Pi Forge Quantum Genesis - Multi-application deployment",
+  "private": true,
+  "scripts": {
+    "build": "echo \"No build step defined\""
+  },
+  "dependencies": {
+    "@vercel/node": "^3.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0"
   }
 }
