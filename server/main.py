@@ -463,7 +463,7 @@ async def list_proposals():
 # --- SMART CONTRACT AUDIT ENDPOINTS ---
 
 @app.post("/api/contracts/audit")
-async def audit_smart_contract(audit: SmartContractAudit):
+async def audit_smart_contract(audit: SmartContractAudit, current_user=Depends(get_current_user)):
     """Perform smart contract security audit
     
     Note: This is a demonstration audit system using pattern-based analysis.
