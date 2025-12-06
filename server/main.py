@@ -291,7 +291,7 @@ async def pi_network_status():
     }
 
 @app.post("/api/verify-payment")
-async def verify_payment(payment: PaymentVerification):
+async def verify_payment(payment: PaymentVerification, current_user = Depends(get_current_user)):
     """Verify and process a Pi Network payment on mainnet"""
     start_time = time.perf_counter_ns()
     
