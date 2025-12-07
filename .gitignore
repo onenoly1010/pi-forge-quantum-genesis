@@ -116,3 +116,35 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+*.tgz
+package-lock.json
+yarn.lock
+
+# Press Agent logs
+press-agent/logs/
+# Windows executables and binaries (excluded from Pi Studio packages)
+*.exe
+*.dll
+*.msi
+
+# Node modules
+node_modules/
+
+# Build artifacts
+build/
+artifacts/
+
+# IDE/Editor settings
+.vs/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db

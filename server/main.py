@@ -24,25 +24,82 @@ logger = logging.getLogger(__name__)
 
 # Sacred Trinity Tracing System
 try:
-    from tracing_system import (
-        trace_fastapi_operation, trace_authentication, trace_supabase_operation,
-        trace_consciousness_stream, trace_websocket_broadcast, trace_payment_processing,
-        trace_sacred_trinity_flow, trace_cross_trinity_synchronization
-    )
-    tracing_enabled = True
-    logging.info("✅ Sacred Trinity tracing system enabled")
-except ImportError as e:
-    logging.warning(f"⚠️ Tracing system not available: {e}")
-    # Create no-op decorators as fallback
-    def trace_fastapi_operation(operation): return lambda f: f
-    def trace_authentication(*args): return lambda f: f
-    def trace_supabase_operation(*args): return lambda f: f
-    def trace_consciousness_stream(*args): return lambda f: f
-    def trace_websocket_broadcast(*args): return lambda f: f
-    def trace_payment_processing(*args): return lambda f: f
-    def trace_sacred_trinity_flow(*args): return lambda f: f
-    def trace_cross_trinity_synchronization(*args): return lambda f: f
-    tracing_enabled = False
+    from supabase import create_client, Client
+    supabase_available = True
+except ImportError:
+    supabase_available = False
+    Client = None  # Define Client as None when not available
+    logging.warning("⚠️ Supabase client not available")
+
+# Use the centralized tracing_system (lazy init + safe null-context fallbacks)
+from tracing_system import (
+    trace_fastapi_operation,
+    trace_payment_processing,
+    trace_payment_visualization_flow,
+    trace_consciousness_stream,
+    get_tracing_system,
+)
+tracing_enabled = True  # tracing_system handles missing SDKs and returns nullcontext spans
+logging.info("✅ Tracing system delegated to tracing_system")
+
+# --- SUPABASE CLIENT INITIALIZATION ---
+supabase = None
+if supabase_available:
+    try:
+        supabase_url = os.environ.get("SUPABASE_URL")
+        supabase_key = os.environ.get("SUPABASE_KEY")
+        if supabase_url and supabase_key:
+            supabase = create_client(supabase_url, supabase_key)
+            logging.info("✅ Supabase client initialized")
+        else:
+            logging.warning("⚠️ Supabase URL or Key not configured")
+    except Exception as e:
+        logging.error(f"❌ Supabase initialization failed: {e}")
+
+# --- PYDANTIC MODELS FOR API ---
+class PaymentVerificationRequest(BaseModel):
+    payment_id: str = Field(..., description="Pi Network payment ID")
+    amount: float = Field(..., gt=0, description="Payment amount in Pi")
+    metadata: Optional[Dict[str, Any]] = Field(default=None, description="Payment metadata")
+
+class EthicalAuditRequest(BaseModel):
+    transaction_id: str = Field(..., description="Transaction ID to audit")
+    amount: float = Field(..., gt=0, description="Transaction amount")
+    user_context: Optional[str] = Field(default=None, description="User context for audit")
+
+class DAppCreateRequest(BaseModel):
+    name: str = Field(..., min_length=3, max_length=50, description="dApp name")
+    description: str = Field(..., min_length=10, max_length=500, description="dApp description")
+    app_type: str = Field(..., description="Type of dApp (defi, nft, social, utility)")
+    smart_contract_template: Optional[str] = Field(default="basic", description="Smart contract template")
+
+class GovernanceProposalRequest(BaseModel):
+    title: str = Field(..., min_length=5, max_length=100, description="Proposal title")
+    description: str = Field(..., min_length=20, max_length=2000, description="Proposal description")
+    proposal_type: str = Field(..., description="Type of proposal (feature, policy, treasury)")
+    voting_duration_days: int = Field(default=7, ge=1, le=30, description="Voting duration in days")
+
+class GovernanceVoteRequest(BaseModel):
+    proposal_id: str = Field(..., description="Proposal ID to vote on")
+    vote: str = Field(..., description="Vote: 'for', 'against', or 'abstain'")
+    voting_power: Optional[float] = Field(default=1.0, description="Voting power")
+
+# --- IN-MEMORY STORAGE FOR DEMO (Production would use Supabase) ---
+guardian_metrics = {
+    "latency_ns": 4,
+    "harmonic_stability": 0.982,
+    "threat_level": "low",
+    "active_alerts": [],
+    "monitored_transactions": 0,
+    "blocked_threats": 0,
+    "last_scan": time.time()
+}
+
+dapps_registry: Dict[str, Dict] = {}
+governance_proposals: Dict[str, Dict] = {}
+user_votes: Dict[str, Dict[str, str]] = defaultdict(dict)
+payment_records: List[Dict] = []
+connected_users: Dict[str, WebSocket] = {}
 
 # --- SUPABASE CLIENT INITIALIZATION ---
 supabase: Optional[Client] = None
@@ -164,7 +221,11 @@ async def get_current_user(request: Request):
     if not auth_header:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authorization header missing")
     
-    token = auth_header.split(" ")[1]
+    parts = auth_header.split(" ")
+    if len(parts) != 2:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authorization header format")
+    
+    token = parts[1]
     if not supabase:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Auth service is not configured")
 
@@ -173,6 +234,108 @@ async def get_current_user(request: Request):
         return user_response.user
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Could not validate credentials: {e}")
+
+async def get_optional_user(request: Request):
+    """Optional user authentication - returns None if not authenticated"""
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not supabase:
+        return None
+    try:
+        parts = auth_header.split(" ")
+        if len(parts) != 2:
+            return None
+        token = parts[1]
+        user_response = supabase.auth.get_user(token)
+        return user_response.user
+    except Exception:
+        return None
+
+# =============================================================================
+# RATE LIMITING AND SCALABILITY FEATURES
+# =============================================================================
+
+class RateLimiter:
+    """Simple in-memory rate limiter for API endpoints (for production use Redis)"""
+    def __init__(self, requests_per_minute: int = 60):
+        self.requests_per_minute = requests_per_minute
+        self.requests: Dict[str, List[float]] = defaultdict(list)
+        self._cleanup_interval = 60  # seconds
+        self._last_cleanup = time.time()
+    
+    def is_allowed(self, client_id: str) -> bool:
+        """Check if request is allowed for client"""
+        now = time.time()
+        
+        # Periodic cleanup of old entries
+        if now - self._last_cleanup > self._cleanup_interval:
+            self._cleanup()
+            self._last_cleanup = now
+        
+        # Get requests in the last minute
+        window_start = now - 60
+        client_requests = self.requests[client_id]
+        
+        # Remove old requests
+        self.requests[client_id] = [t for t in client_requests if t > window_start]
+        
+        # Check limit
+        if len(self.requests[client_id]) >= self.requests_per_minute:
+            return False
+        
+        # Record new request
+        self.requests[client_id].append(now)
+        return True
+    
+    def _cleanup(self):
+        """Remove stale entries"""
+        window_start = time.time() - 60
+        for client_id in list(self.requests.keys()):
+            self.requests[client_id] = [t for t in self.requests[client_id] if t > window_start]
+            if not self.requests[client_id]:
+                del self.requests[client_id]
+
+# Initialize rate limiter (60 requests per minute per IP)
+rate_limiter = RateLimiter(requests_per_minute=60)
+
+# Connection tracking for scalability metrics
+class ConnectionTracker:
+    """Track active connections for load monitoring"""
+    def __init__(self, max_connections: int = 10000):
+        self.max_connections = max_connections
+        self.active_ws_connections = 0
+        self.total_requests = 0
+        self.requests_per_second = 0
+        self._last_second = int(time.time())
+        self._current_second_requests = 0
+    
+    def track_request(self):
+        """Track a new request"""
+        self.total_requests += 1
+        current_second = int(time.time())
+        
+        if current_second != self._last_second:
+            self.requests_per_second = self._current_second_requests
+            self._current_second_requests = 1
+            self._last_second = current_second
+        else:
+            self._current_second_requests += 1
+    
+    def add_ws_connection(self):
+        self.active_ws_connections += 1
+    
+    def remove_ws_connection(self):
+        self.active_ws_connections = max(0, self.active_ws_connections - 1)
+    
+    def get_metrics(self) -> Dict:
+        return {
+            "active_websocket_connections": self.active_ws_connections,
+            "total_requests": self.total_requests,
+            "requests_per_second": self.requests_per_second,
+            "max_connections": self.max_connections,
+            "capacity_utilization": round(self.active_ws_connections / self.max_connections * 100, 2)
+        }
+
+connection_tracker = ConnectionTracker(max_connections=10000)
 
 # --- FASTAPI APPLICATION ---
 app = FastAPI(
@@ -196,8 +359,46 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- API ENDPOINTS ---
+# Add CORS middleware for frontend access
+# NOTE: In production, replace "*" with specific allowed origins like:
+# ["https://your-domain.com", "https://api.your-domain.com"]
+allowed_origins = os.environ.get("CORS_ORIGINS", "*").split(",")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
+# Derive a privacy-conscious client id for rate limiting
+def _get_client_id(request):
+    # Prefer X-Forwarded-For if present (trusted proxy scenario), else fall back to peer host.
+    xff = request.headers.get("x-forwarded-for")
+    if xff:
+        # canonicalize to only first address and avoid logging full IP list
+        return xff.split(",")[0].strip()
+    if request.client and getattr(request.client, "host", None):
+        return request.client.host
+    return "unknown"
+
+# Rate limiting middleware applied to all requests
+@app.middleware("http")
+async def rate_limit_middleware(request: Request, call_next):
+    """Apply rate limiting to all HTTP requests"""
+    client_ip = _get_client_id(request)
+    
+    if not rate_limiter.is_allowed(client_ip):
+        return JSONResponse(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            content={"detail": "Rate limit exceeded. Please wait before making more requests."}
+        )
+    
+    connection_tracker.track_request()
+    response = await call_next(request)
+    return response
+
+# --- API ENDPOINTS --- 
 @app.get("/")
 @trace_fastapi_operation("health_check")
 async def health_check():
@@ -230,6 +431,11 @@ async def health_check():
 async def ceremonial_interface():
     """Serve the ceremonial interface in all its glory"""
     return FileResponse("frontend/ceremonial_interface.html", media_type="text/html")
+
+@app.get("/dashboard")
+async def production_dashboard():
+    """Serve the production dashboard with all user-centric features"""
+    return FileResponse("frontend/production_dashboard.html", media_type="text/html")
 
 @app.get("/health")
 async def health_endpoint():
@@ -559,22 +765,115 @@ async def audit_smart_contract(audit: SmartContractAudit, current_user=Depends(g
 
 # --- SECURE WEBSOCKET (REMAINS CONCEPTUALLY SIMILAR) ---
 @app.websocket("/ws/collective-insight")
-async def websocket_collective_insight(websocket: WebSocket, token: str):
-    if not supabase:
-        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
-        return
+async def websocket_collective_insight(websocket: WebSocket, token: Optional[str] = None):
+    """Real-time collective insight WebSocket with quantum telemetry"""
+    user_email = "anonymous"
+    
+    if token and supabase:
+        try:
+            user_response = supabase.auth.get_user(token)
+            user_email = user_response.user.email
+        except Exception:
+            pass  # Continue with anonymous access
+    
+    await websocket.accept()
+    connection_id = hashlib.sha256(f"{user_email}{time.time()}".encode()).hexdigest()[:8]
+    connected_users[connection_id] = websocket
+    connection_tracker.add_ws_connection()
+    logging.info(f"User {user_email} connected to collective insight WebSocket (ID: {connection_id})")
+    
     try:
-        user_response = supabase.auth.get_user(token)
-        user = user_response.user
-        await websocket.accept()
-        logging.info(f"User {user.email} connected to collective insight WebSocket.")
         while True:
-            # This part remains the same
-            await websocket.send_json({"message": f"Real-time pulse for {user.email}"})
-            await asyncio.sleep(30)
-    except Exception:
-        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
-        logging.warning("WebSocket connection closed due to invalid token.")
+            # Send real-time quantum telemetry
+            telemetry = {
+                "type": "quantum_pulse",
+                "collective_mood": random.choice(["optimistic", "neutral", "contemplative", "harmonious"]),
+                "qvm_amplitude": round(random.uniform(0.8, 1.2), 4),
+                "harmony_index": round(random.uniform(0.68, 0.76), 3),
+                "resonance_trend": round(random.uniform(-0.1, 0.1), 2),
+                "forecast_confidence": round(random.uniform(0.7, 0.95), 3),
+                "quantum_phase": random.choice(["foundation", "growth", "harmony", "transcendence"]),
+                "sovereign_actions": [
+                    "Continue current resonance pattern",
+                    "Monitor harmony fluctuations"
+                ],
+                "temporal_anomalies": [],
+                "connected_users": len(connected_users),
+                "guardian_status": guardian_metrics["threat_level"],
+                "timestamp": time.time()
+            }
+            await websocket.send_json(telemetry)
+            await asyncio.sleep(5)  # Send updates every 5 seconds
+    except WebSocketDisconnect:
+        del connected_users[connection_id]
+        connection_tracker.remove_ws_connection()
+        logging.info(f"User {user_email} disconnected from WebSocket")
+    except Exception as e:
+        if connection_id in connected_users:
+            del connected_users[connection_id]
+            connection_tracker.remove_ws_connection()
+        logging.warning(f"WebSocket error: {e}")
+
+@app.websocket("/ws/guardian-alerts")
+async def websocket_guardian_alerts(websocket: WebSocket):
+    """Real-time Cyber Samurai Guardian alert stream"""
+    # Accept token from Authorization: Bearer <token> or query param token
+    auth = websocket.headers.get("authorization", "")
+    token = None
+    if isinstance(auth, str) and auth.lower().startswith("bearer "):
+        token = auth.split(" ", 1)[1].strip()
+    else:
+        token = websocket.query_params.get("token")
+
+    if not token:
+        # best-effort alert to guardian/monitoring and close connection
+        try:
+            guardian.raise_alert("ws_auth_missing", {"path": str(getattr(websocket, 'url', 'unknown'))})
+        except Exception:
+            pass
+        await websocket.close(code=4401)
+        return
+
+    # If supabase available, attempt token validation (best-effort). Otherwise apply demo/guest rules.
+    if supabase is not None:
+        try:
+            user = supabase.auth.get_user(token)  # best-effort; adjust to your supabase client API
+            if user is None or not user.get("id"):
+                await websocket.close(code=4403)
+                return
+        except Exception:
+            await websocket.close(code=4403)
+            return
+    else:
+        # Demo-mode rule: allow tokens that follow a known dev prefix; otherwise deny
+        if not (isinstance(token, str) and token.startswith("dev-")):
+            await websocket.close(code=4403)
+            return
+
+    await websocket.accept()
+    logging.info("Guardian alert WebSocket connected")
+
+    # Wrap stream handling with a tracing span (no-op if tracing disabled)
+    with trace_consciousness_stream(connection_id=str(id(websocket)), user_id=(token[:8] + "...") if token else None):
+        try:
+            while True:
+                # Send guardian status updates
+                alert_data = {
+                    "type": "guardian_status",
+                    "latency_ns": guardian_metrics["latency_ns"],
+                    "harmonic_stability": guardian_metrics["harmonic_stability"],
+                    "threat_level": guardian_metrics["threat_level"],
+                    "active_alerts": len(guardian_metrics["active_alerts"]),
+                    "monitored_transactions": guardian_metrics["monitored_transactions"],
+                    "status": "active",
+                    "timestamp": time.time()
+                }
+                await websocket.send_json(alert_data)
+                await asyncio.sleep(10)
+        except WebSocketDisconnect:
+            logging.info("Guardian alert WebSocket disconnected")
+        except Exception as e:
+            logging.warning(f"Guardian WebSocket error: {e}")
 
 # --- STARTUP EVENT ---
 @app.on_event("startup")
@@ -591,4 +890,6 @@ async def startup_event():
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))
-    uvicorn.run("main:app", host="0.0.0.0", port=port, log_level="info", reload=True)
+    # Only enable reload in development (when DEBUG env var is set)
+    debug_mode = os.environ.get("DEBUG", "false").lower() == "true"
+    uvicorn.run("main:app", host="0.0.0.0", port=port, log_level="info", reload=debug_mode)
