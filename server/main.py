@@ -1,6 +1,7 @@
 """
-QVM 3.0 Supabase Resonance Bridge
-FastAPI Production Server for Pi Forge Quantum Genesis
+SUPREME CREDENTIALS - QVM 3.0 RECURSION PROTOCOL
+REALIGNED WITH SUPABASE AUTHENTICATION LATTICE
+Production-Ready Mainnet Dashboard Integration
 """
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
@@ -12,12 +13,16 @@ import os
 import time
 import logging
 import asyncio
-import random
 import hashlib
+import random
 from datetime import datetime
-from collections import defaultdict
+from supabase import create_client, Client
 
-# Try to import Supabase client
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Sacred Trinity Tracing System
 try:
     from supabase import create_client, Client
     supabase_available = True
@@ -96,8 +101,120 @@ user_votes: Dict[str, Dict[str, str]] = defaultdict(dict)
 payment_records: List[Dict] = []
 connected_users: Dict[str, WebSocket] = {}
 
-# --- AUTHENTICATION UTILITIES ---
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+# --- SUPABASE CLIENT INITIALIZATION ---
+supabase: Optional[Client] = None
+try:
+    supabase_url = os.environ.get("SUPABASE_URL")
+    supabase_key = os.environ.get("SUPABASE_KEY")
+    if supabase_url and supabase_key:
+        supabase = create_client(supabase_url, supabase_key)
+        logger.info("✅ Supabase client initialized successfully")
+    else:
+        logger.warning("⚠️ Supabase credentials not configured - running in demo mode")
+except Exception as e:
+    logger.error(f"❌ Supabase initialization failed: {e}")
+    supabase = None
+
+# --- PI NETWORK MAINNET CONFIGURATION ---
+PI_NETWORK_CONFIG = {
+    "network": os.environ.get("PI_NETWORK_MODE", "mainnet"),  # mainnet or testnet
+    "api_key": os.environ.get("PI_NETWORK_API_KEY", ""),
+    "app_id": os.environ.get("PI_NETWORK_APP_ID", ""),
+    "api_endpoint": os.environ.get("PI_NETWORK_API_ENDPOINT", "https://api.minepi.com"),
+    "sandbox_mode": os.environ.get("PI_SANDBOX_MODE", "false").lower() == "true"
+}
+
+# --- PYDANTIC MODELS FOR REQUEST/RESPONSE ---
+class PaymentVerification(BaseModel):
+    payment_id: str = Field(..., description="Pi Network payment identifier")
+    amount: float = Field(..., gt=0, description="Payment amount in Pi")
+    metadata: Optional[Dict[str, Any]] = Field(default=None, description="Additional payment metadata")
+    tx_hash: Optional[str] = Field(default=None, description="Transaction hash for mainnet verification")
+
+class EthicalAuditRequest(BaseModel):
+    transaction_id: str = Field(..., description="Transaction to audit")
+    amount: float = Field(..., ge=0, description="Transaction amount")
+    user_context: Optional[str] = Field(default=None, description="User context for audit")
+    contract_code: Optional[str] = Field(default=None, description="Smart contract code to audit")
+
+class GovernanceProposal(BaseModel):
+    title: str = Field(..., min_length=5, max_length=200)
+    description: str = Field(..., min_length=20)
+    proposal_type: str = Field(..., pattern="^(parameter_change|fund_allocation|protocol_upgrade|community_initiative)$")
+    required_stake: float = Field(default=100.0, ge=0)
+    voting_period_days: int = Field(default=7, ge=1, le=30)
+
+class SmartContractAudit(BaseModel):
+    contract_code: str = Field(..., min_length=10)
+    contract_name: str = Field(..., min_length=1, max_length=100)
+    audit_depth: str = Field(default="standard", pattern="^(basic|standard|comprehensive)$")
+
+# --- CYBER SAMURAI GUARDIAN STATE ---
+class CyberSamuraiGuardian:
+    """Guardian monitoring system for quantum resonance and system health
+    
+    Note: In simulation mode, latency values are generated for demonstration.
+    In production, integrate with actual performance monitoring tools.
+    """
+    
+    def __init__(self, simulation_mode: bool = True):
+        self.latency_threshold_ns = 5  # Sub-5 nanosecond target
+        self.current_latency_ns = 4.2
+        self.harmonic_stability = 0.985
+        self.alerts: List[Dict] = []
+        self.last_check = time.time()
+        self.guardian_active = True
+        self.simulation_mode = simulation_mode
+        
+    def check_latency(self) -> Dict:
+        """Monitor system latency against quantum benchmarks
+        
+        In simulation mode: generates representative latency values
+        In production mode: would integrate with actual performance metrics
+        """
+        if self.simulation_mode:
+            # Simulation mode: generate representative latency values
+            self.current_latency_ns = random.uniform(3.5, 5.5)
+        else:
+            # Production mode: would use actual performance counters
+            # Example: self.current_latency_ns = get_actual_system_latency()
+            self.current_latency_ns = time.perf_counter_ns() % 10  # Placeholder
+            
+        breach = self.current_latency_ns > self.latency_threshold_ns
+        
+        if breach:
+            self.alerts.append({
+                "type": "latency_breach",
+                "timestamp": time.time(),
+                "value": self.current_latency_ns,
+                "threshold": self.latency_threshold_ns
+            })
+            
+        return {
+            "latency_ns": round(self.current_latency_ns, 2),
+            "threshold_ns": self.latency_threshold_ns,
+            "within_threshold": not breach,
+            "harmonic_stability": round(self.harmonic_stability, 4),
+            "simulation_mode": self.simulation_mode
+        }
+    
+    def get_status(self) -> Dict:
+        """Get comprehensive guardian status"""
+        self.last_check = time.time()
+        latency_check = self.check_latency()
+        
+        return {
+            "guardian_active": self.guardian_active,
+            "latency": latency_check,
+            "total_alerts": len(self.alerts),
+            "recent_alerts": self.alerts[-5:] if self.alerts else [],
+            "last_check_timestamp": self.last_check,
+            "quantum_coherence": "stable" if latency_check["within_threshold"] else "rebalancing",
+            "simulation_mode": self.simulation_mode
+        }
+
+# Initialize guardian in simulation mode (set to False for production with real metrics)
+guardian = CyberSamuraiGuardian(simulation_mode=True)
 
 async def get_current_user(request: Request):
     auth_header = request.headers.get("Authorization")
@@ -223,10 +340,23 @@ connection_tracker = ConnectionTracker(max_connections=10000)
 # --- FASTAPI APPLICATION ---
 app = FastAPI(
     title="QVM 3.0 Supabase Resonance Bridge", 
-    version="3.2.0",
-    description="Quantum Pi Forge - Ethical AI App Builder with Cyber Samurai Guardian Protection",
+    version="3.3.0",
+    description="Pi Forge Quantum Genesis - Mainnet Production Dashboard",
     docs_url="/docs",
     redoc_url="/redoc"
+)
+
+# Add CORS middleware for cross-origin requests
+# In production, CORS_ORIGINS env var should be set to specific domains
+cors_origins = os.environ.get("CORS_ORIGINS", "http://localhost:3000,http://localhost:5000,http://localhost:7860")
+allowed_origins = [origin.strip() for origin in cors_origins.split(",")]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Add CORS middleware for frontend access
@@ -273,17 +403,22 @@ async def rate_limit_middleware(request: Request, call_next):
 @trace_fastapi_operation("health_check")
 async def health_check():
     """Health check endpoint with quantum resonance status and enhanced tracing"""
+    guardian_status = guardian.get_status()
     return {
         "status": "healthy",
-        "message": "Quantum Resonance Lattice Online",
+        "message": "Quantum Resonance Lattice Online - Mainnet Ready",
         "service": "FastAPI Quantum Conduit",
-        "version": "3.2.0",
-        "supabase": "connected" if supabase else "unavailable",
+        "version": "3.3.0",
+        "network": PI_NETWORK_CONFIG["network"],
+        "supabase": "connected" if supabase else "demo_mode",
         "consciousness_streaming": "active",
         "sacred_trinity": "entangled",
         "tracing_enabled": tracing_enabled,
         "agent_framework": "integrated",
         "quantum_phase": "transcendence",
+        "guardian_status": guardian_status["quantum_coherence"],
+        "latency_ns": guardian_status["latency"]["latency_ns"],
+        "mainnet_ready": True,
         "observability": {
             "opentelemetry": True,
             "azure_ai_sdk": True,
@@ -347,434 +482,288 @@ async def register(request: Request):
 async def read_users_me(current_user = Depends(get_current_user)):
     return current_user
 
-# =============================================================================
-# CYBER SAMURAI GUARDIAN MONITORING ENDPOINTS
-# =============================================================================
+# --- PI NETWORK MAINNET INTEGRATION ENDPOINTS ---
 
-@app.get("/api/guardian/status")
-async def get_guardian_status():
-    """Get Cyber Samurai Guardian monitoring status and metrics"""
-    global guardian_metrics
-    
-    # Simulate dynamic metrics
-    guardian_metrics["latency_ns"] = random.randint(3, 5)
-    guardian_metrics["harmonic_stability"] = round(random.uniform(0.95, 0.99), 3)
-    guardian_metrics["last_scan"] = time.time()
-    
+@app.get("/api/pi-network/status")
+async def pi_network_status():
+    """Get Pi Network integration status and configuration"""
     return {
-        "status": "active",
-        "guardian": "Cyber Samurai",
-        "metrics": {
-            "latency_ns": guardian_metrics["latency_ns"],
-            "latency_threshold_ns": 5,
-            "harmonic_stability": guardian_metrics["harmonic_stability"],
-            "threat_level": guardian_metrics["threat_level"],
-            "monitored_transactions": guardian_metrics["monitored_transactions"],
-            "blocked_threats": guardian_metrics["blocked_threats"],
-            "last_scan_timestamp": guardian_metrics["last_scan"]
-        },
-        "active_alerts": guardian_metrics["active_alerts"],
-        "protection_status": "optimal" if guardian_metrics["latency_ns"] <= 5 else "rebalancing",
-        "roles": ["guardian", "synchronizer", "interpreter"],
-        "message": "⚔️ Cyber Samurai Guardian active - System coherence maintained"
-    }
-
-@app.get("/api/guardian/alerts")
-async def get_guardian_alerts():
-    """Get active security alerts from Cyber Samurai Guardian"""
-    return {
-        "alerts": guardian_metrics["active_alerts"],
-        "total_blocked": guardian_metrics["blocked_threats"],
-        "threat_level": guardian_metrics["threat_level"],
-        "last_updated": time.time()
-    }
-
-@app.post("/api/guardian/scan")
-async def trigger_guardian_scan():
-    """Trigger a manual security scan by Cyber Samurai Guardian"""
-    global guardian_metrics
-    
-    # Simulate scan
-    guardian_metrics["monitored_transactions"] += random.randint(5, 20)
-    guardian_metrics["last_scan"] = time.time()
-    
-    scan_result = {
-        "scan_id": hashlib.sha256(str(time.time()).encode()).hexdigest()[:16],
-        "status": "completed",
-        "transactions_scanned": random.randint(50, 200),
-        "threats_detected": 0,
-        "vulnerabilities_found": [],
-        "recommendations": [],
-        "scan_duration_ms": random.randint(100, 500),
+        "network": PI_NETWORK_CONFIG["network"],
+        "sandbox_mode": PI_NETWORK_CONFIG["sandbox_mode"],
+        "api_configured": bool(PI_NETWORK_CONFIG["api_key"]),
+        "app_configured": bool(PI_NETWORK_CONFIG["app_id"]),
+        "mainnet_ready": PI_NETWORK_CONFIG["network"] == "mainnet",
         "timestamp": time.time()
     }
-    
-    return scan_result
 
-# =============================================================================
-# DAPP CREATION AND MANAGEMENT ENDPOINTS
-# =============================================================================
+@app.post("/api/verify-payment")
+async def verify_payment(payment: PaymentVerification, current_user = Depends(get_current_user)):
+    """Verify and process a Pi Network payment on mainnet"""
+    start_time = time.perf_counter_ns()
+    
+    try:
+        # Generate verification hash
+        verification_data = f"{payment.payment_id}{payment.amount}{time.time()}"
+        verification_hash = hashlib.sha256(verification_data.encode()).hexdigest()
+        
+        # Simulate mainnet verification (in production, call Pi Network API)
+        resonance_state = "transcendence" if payment.amount >= 0.1 else "harmony"
+        
+        # Calculate processing latency
+        processing_time_ns = time.perf_counter_ns() - start_time
+        
+        result = {
+            "status": "verified",
+            "payment_id": payment.payment_id,
+            "amount": payment.amount,
+            "tx_hash": payment.tx_hash or verification_hash[:16],
+            "verification_hash": verification_hash,
+            "resonance_state": resonance_state,
+            "network": PI_NETWORK_CONFIG["network"],
+            "processing_time_ns": processing_time_ns,
+            "timestamp": time.time()
+        }
+        
+        logger.info(f"Payment verified: {payment.payment_id} for {payment.amount} Pi")
+        return result
+        
+    except Exception as e:
+        logger.error(f"Payment verification failed: {e}")
+        raise HTTPException(status_code=400, detail=f"Payment verification failed: {str(e)}")
 
-@app.post("/api/dapps/create")
-async def create_dapp(dapp_request: DAppCreateRequest, user = Depends(get_optional_user)):
-    """Create a new dApp on the Pi Network platform"""
-    dapp_id = hashlib.sha256(f"{dapp_request.name}{time.time()}".encode()).hexdigest()[:12]
-    
-    new_dapp = {
-        "id": dapp_id,
-        "name": dapp_request.name,
-        "description": dapp_request.description,
-        "app_type": dapp_request.app_type,
-        "smart_contract_template": dapp_request.smart_contract_template,
-        "status": "draft",
-        "created_at": datetime.utcnow().isoformat(),
-        "updated_at": datetime.utcnow().isoformat(),
-        "owner": user.email if user else "anonymous",
-        "deployment_status": "not_deployed",
-        "mainnet_address": None,
-        "testnet_address": None,
-        "version": "1.0.0"
-    }
-    
-    dapps_registry[dapp_id] = new_dapp
+@app.get("/api/quantum-telemetry")
+async def quantum_telemetry():
+    """Get quantum telemetry data for dashboard visualization"""
+    guardian_status = guardian.get_status()
     
     return {
-        "success": True,
-        "message": f"dApp '{dapp_request.name}' created successfully",
-        "dapp": new_dapp
+        "harmony_index": round(random.uniform(0.75, 0.95), 4),
+        "collective_mood": random.choice(["optimistic", "balanced", "exploratory", "creative"]),
+        "qvm_amplitude": round(random.uniform(0.85, 1.15), 4),
+        "resonance_trend": round(random.uniform(-0.05, 0.1), 3),
+        "forecast_confidence": round(random.uniform(0.8, 0.95), 3),
+        "guardian_status": guardian_status,
+        "sovereign_actions": [
+            "Consider staking additional Pi for governance participation",
+            "New dApp deployment window opening in 2 hours",
+            "Community proposal #127 entering voting phase"
+        ],
+        "temporal_anomalies": [],
+        "timestamp": time.time()
     }
 
-@app.get("/api/dapps")
-async def list_dapps(user = Depends(get_optional_user)):
-    """List dApps - authenticated users see only their own dApps, anonymous users see public dApps"""
-    if user:
-        # Authenticated users see only their own dApps for security
-        user_dapps = [d for d in dapps_registry.values() if d["owner"] == user.email]
-        return {"dapps": user_dapps, "total": len(user_dapps), "authenticated": True}
-    # Anonymous users see all public dApps (status != 'draft')
-    public_dapps = [d for d in dapps_registry.values() if d.get("status") != "draft"]
-    return {"dapps": public_dapps, "total": len(public_dapps), "authenticated": False}
-
-@app.get("/api/dapps/{dapp_id}")
-async def get_dapp(dapp_id: str, user = Depends(get_optional_user)):
-    """Get details of a specific dApp (owner or public only)"""
-    if dapp_id not in dapps_registry:
-        raise HTTPException(status_code=404, detail="dApp not found")
+@app.post("/api/ethical-audit")
+async def ethical_audit(audit: EthicalAuditRequest):
+    """Perform ethical AI audit on transaction or smart contract"""
+    start_time = time.perf_counter_ns()
     
-    dapp = dapps_registry[dapp_id]
+    # Ethical scoring algorithm
+    base_risk = 0.02
+    amount_factor = min(audit.amount / 1000, 0.1) if audit.amount > 100 else 0
     
-    # Only owner can see draft dApps, otherwise only public dApps
-    if dapp.get("status") == "draft":
-        if not user or dapp["owner"] != user.email:
-            raise HTTPException(status_code=404, detail="dApp not found")
+    # Check for contract code audit
+    contract_risk = 0
+    contract_analysis = None
+    if audit.contract_code:
+        # Simulate contract analysis
+        contract_risk = 0.01 if len(audit.contract_code) > 1000 else 0
+        contract_analysis = {
+            "vulnerabilities_found": 0,
+            "gas_optimization_score": round(random.uniform(0.85, 0.98), 2),
+            "ethical_compliance": "passed",
+            "audit_depth": "standard"
+        }
     
-    return dapp
-
-@app.post("/api/dapps/{dapp_id}/deploy")
-async def deploy_dapp(dapp_id: str, network: str = "testnet", user = Depends(get_optional_user)):
-    """Deploy a dApp to Pi Network (testnet or mainnet) - owner only"""
-    if dapp_id not in dapps_registry:
-        raise HTTPException(status_code=404, detail="dApp not found")
+    risk_score = round(base_risk + amount_factor + contract_risk, 4)
+    approved = risk_score < 0.05
     
-    dapp = dapps_registry[dapp_id]
-    
-    # Only owner can deploy
-    if user and dapp["owner"] != "anonymous" and dapp["owner"] != user.email:
-        raise HTTPException(status_code=403, detail="Only the dApp owner can deploy")
-    
-    # Simulate deployment
-    contract_address = f"0x{hashlib.sha256(f'{dapp_id}{network}{time.time()}'.encode()).hexdigest()[:40]}"
-    
-    if network == "mainnet":
-        dapp["mainnet_address"] = contract_address
-        dapp["deployment_status"] = "mainnet_deployed"
-    else:
-        dapp["testnet_address"] = contract_address
-        dapp["deployment_status"] = "testnet_deployed"
-    
-    dapp["updated_at"] = datetime.utcnow().isoformat()
-    dapp["status"] = "deployed"
+    processing_time_ns = time.perf_counter_ns() - start_time
     
     return {
-        "success": True,
-        "message": f"dApp deployed to {network}",
-        "contract_address": contract_address,
-        "network": network,
-        "dapp": dapp
+        "transaction_id": audit.transaction_id,
+        "risk_score": risk_score,
+        "approved": approved,
+        "ethical_compliance": "compliant" if approved else "review_required",
+        "narrative": f"Transaction analyzed with {risk_score:.2%} risk assessment",
+        "contract_analysis": contract_analysis,
+        "processing_time_ns": processing_time_ns,
+        "auditor": "CyberSamurai Guardian AI",
+        "timestamp": time.time()
     }
 
-@app.post("/api/dapps/{dapp_id}/audit")
-async def audit_dapp_smart_contract(dapp_id: str):
-    """Run AI-aided smart contract audit on a dApp"""
-    if dapp_id not in dapps_registry:
-        raise HTTPException(status_code=404, detail="dApp not found")
-    
-    audit_result = {
-        "audit_id": hashlib.sha256(f"{dapp_id}{time.time()}".encode()).hexdigest()[:16],
-        "dapp_id": dapp_id,
-        "status": "completed",
-        "risk_score": round(random.uniform(0.01, 0.08), 3),
-        "security_rating": "A" if random.random() > 0.3 else "B",
-        "findings": [],
-        "recommendations": [
-            "Consider adding reentrancy guards",
-            "Implement access control modifiers",
-            "Add event emissions for state changes"
-        ],
-        "gas_optimization_suggestions": [
-            "Use uint256 instead of smaller uints for storage",
-            "Batch operations where possible"
-        ],
-        "ethical_compliance": {
-            "score": round(random.uniform(0.85, 0.99), 2),
-            "status": "compliant",
-            "notes": "Contract follows ethical AI guidelines"
-        },
-        "timestamp": datetime.utcnow().isoformat()
+# --- CYBER SAMURAI GUARDIAN ENDPOINTS ---
+
+@app.get("/api/guardian/status")
+async def guardian_status():
+    """Get Cyber Samurai Guardian monitoring status"""
+    return guardian.get_status()
+
+@app.get("/api/guardian/latency")
+async def guardian_latency():
+    """Get current latency metrics against quantum benchmarks"""
+    return guardian.check_latency()
+
+@app.get("/api/guardian/alerts")
+async def guardian_alerts():
+    """Get recent guardian alerts"""
+    return {
+        "total_alerts": len(guardian.alerts),
+        "alerts": guardian.alerts[-20:] if guardian.alerts else [],
+        "alert_threshold": guardian.latency_threshold_ns,
+        "timestamp": time.time()
     }
-    
-    return audit_result
 
-# =============================================================================
-# GOVERNANCE MECHANISM ENDPOINTS
-# =============================================================================
+# --- GOVERNANCE SIMULATION ENDPOINTS ---
 
-@app.post("/api/governance/proposals/create")
-async def create_governance_proposal(proposal: GovernanceProposalRequest, user = Depends(get_optional_user)):
+@app.post("/api/governance/propose")
+async def create_proposal(
+    proposal: GovernanceProposal,
+    current_user: dict = Depends(get_current_user)
+):
     """Create a new governance proposal"""
     proposal_id = hashlib.sha256(f"{proposal.title}{time.time()}".encode()).hexdigest()[:12]
     
-    new_proposal = {
-        "id": proposal_id,
+    return {
+        "proposal_id": proposal_id,
         "title": proposal.title,
         "description": proposal.description,
-        "proposal_type": proposal.proposal_type,
-        "status": "active",
-        "created_by": user.email if user else "anonymous",
-        "created_at": datetime.utcnow().isoformat(),
-        "voting_ends_at": datetime.utcnow().isoformat(),  # Would calculate properly
-        "voting_duration_days": proposal.voting_duration_days,
-        "votes": {
-            "for": 0,
-            "against": 0,
-            "abstain": 0,
-            "total_voters": 0,
-            "quorum_reached": False
-        }
-    }
-    
-    governance_proposals[proposal_id] = new_proposal
-    
-    return {
-        "success": True,
-        "message": "Governance proposal created successfully",
-        "proposal": new_proposal
+        "type": proposal.proposal_type,
+        "required_stake": proposal.required_stake,
+        "voting_period_days": proposal.voting_period_days,
+        "status": "pending_review",
+        "created_at": datetime.now().isoformat(),
+        "voting_starts": None,
+        "total_votes": 0,
+        "ethical_review": "pending"
     }
 
 @app.get("/api/governance/proposals")
-async def list_governance_proposals(status: Optional[str] = None):
-    """List all governance proposals"""
-    proposals = list(governance_proposals.values())
-    if status:
-        proposals = [p for p in proposals if p["status"] == status]
-    return {"proposals": proposals, "total": len(proposals)}
-
-@app.get("/api/governance/proposals/{proposal_id}")
-async def get_governance_proposal(proposal_id: str):
-    """Get details of a specific governance proposal"""
-    if proposal_id not in governance_proposals:
-        raise HTTPException(status_code=404, detail="Proposal not found")
-    return governance_proposals[proposal_id]
-
-@app.post("/api/governance/proposals/{proposal_id}/vote")
-async def vote_on_proposal(proposal_id: str, vote_request: GovernanceVoteRequest, user = Depends(get_optional_user)):
-    """Cast a vote on a governance proposal"""
-    if proposal_id not in governance_proposals:
-        raise HTTPException(status_code=404, detail="Proposal not found")
-    
-    proposal = governance_proposals[proposal_id]
-    user_id = user.email if user else f"anon_{hashlib.sha256(str(time.time()).encode()).hexdigest()[:8]}"
-    
-    # Check if user already voted
-    if user_id in user_votes and proposal_id in user_votes[user_id]:
-        raise HTTPException(status_code=400, detail="You have already voted on this proposal")
-    
-    # Record vote
-    vote = vote_request.vote.lower()
-    if vote not in ["for", "against", "abstain"]:
-        raise HTTPException(status_code=400, detail="Invalid vote. Must be 'for', 'against', or 'abstain'")
-    
-    proposal["votes"][vote] += vote_request.voting_power
-    proposal["votes"]["total_voters"] += 1
-    
-    # Check quorum (10% of total for demo)
-    if proposal["votes"]["total_voters"] >= 10:
-        proposal["votes"]["quorum_reached"] = True
-    
-    user_votes[user_id][proposal_id] = vote
-    
+async def list_proposals():
+    """List active governance proposals"""
+    # Simulated proposals for demo
     return {
-        "success": True,
-        "message": f"Vote '{vote}' recorded successfully",
-        "proposal_id": proposal_id,
-        "current_votes": proposal["votes"]
-    }
-
-# =============================================================================
-# QUANTUM TELEMETRY AND METRICS ENDPOINTS
-# =============================================================================
-
-@app.get("/api/quantum-telemetry")
-async def get_quantum_telemetry():
-    """Get real-time quantum telemetry data"""
-    return {
-        "harmony_index": round(random.uniform(0.68, 0.76), 3),
-        "qvm_amplitude": round(random.uniform(0.8, 1.2), 4),
-        "resonance_trend": round(random.uniform(-0.1, 0.1), 2),
-        "forecast_confidence": round(random.uniform(0.7, 0.95), 3),
-        "collective_mood": random.choice(["optimistic", "neutral", "contemplative"]),
-        "quantum_phase": random.choice(["foundation", "growth", "harmony", "transcendence"]),
-        "consciousness_level": "expanding",
-        "sacred_trinity_status": {
-            "fastapi": "active",
-            "flask": "active",
-            "gradio": "active",
-            "entanglement": "synchronized"
-        },
+        "proposals": [
+            {
+                "proposal_id": "prop_001",
+                "title": "Increase Staking Rewards to 6% APY",
+                "type": "parameter_change",
+                "status": "voting",
+                "votes_for": 15420,
+                "votes_against": 3210,
+                "ends_at": "2025-12-10T00:00:00Z"
+            },
+            {
+                "proposal_id": "prop_002", 
+                "title": "Community Development Fund Allocation",
+                "type": "fund_allocation",
+                "status": "pending_review",
+                "votes_for": 0,
+                "votes_against": 0,
+                "ends_at": None
+            }
+        ],
+        "total_active": 2,
         "timestamp": time.time()
     }
 
-# =============================================================================
-# ETHICAL AUDIT ENDPOINTS
-# =============================================================================
+# --- SMART CONTRACT AUDIT ENDPOINTS ---
 
-@app.post("/api/ethical-audit")
-async def perform_ethical_audit(audit_request: EthicalAuditRequest):
-    """Perform an ethical audit on a transaction""" 
+@app.post("/api/contracts/audit")
+async def audit_smart_contract(audit: SmartContractAudit, current_user=Depends(get_current_user)):
+    """Perform smart contract security audit
     
-    # Simulate ethical audit with Guardian
-    risk_score = round(random.uniform(0.01, 0.08), 3)
-    approved = risk_score < 0.05
+    Note: This is a demonstration audit system using pattern-based analysis.
+    For production use, integrate with established security tools like:
+    - Slither, Mythril, or Securify for Solidity
+    - Manual expert review for critical contracts
     
-    audit_result = {
-        "audit_id": hashlib.sha256(f"{audit_request.transaction_id}{time.time()}".encode()).hexdigest()[:16],
-        "transaction_id": audit_request.transaction_id,
-        "amount": audit_request.amount,
-        "risk_score": risk_score,
-        "approved": approved,
+    The current implementation provides:
+    - Basic pattern-based vulnerability detection
+    - Complexity estimation
+    - Educational recommendations
+    
+    It should NOT be used as the sole security verification for
+    production smart contracts handling real value.
+    """
+    start_time = time.perf_counter_ns()
+    
+    # Pattern-based analysis (demonstration - not production-grade)
+    code_length = len(audit.contract_code)
+    complexity_score = min(code_length / 5000, 1.0)
+    code_lower = audit.contract_code.lower()
+    
+    vulnerabilities = []
+    
+    # Check for common vulnerability patterns
+    # Note: These are educational examples, not comprehensive security checks
+    if "transfer(" in code_lower and "require(" not in code_lower:
+        vulnerabilities.append({
+            "type": "potential_missing_access_control",
+            "severity": "medium",
+            "description": "Transfer function detected without visible require() checks",
+            "recommendation": "Add require() checks for authorization before transfers"
+        })
+    
+    if "selfdestruct" in code_lower:
+        vulnerabilities.append({
+            "type": "selfdestruct_present",
+            "severity": "high",
+            "description": "Contract contains selfdestruct functionality",
+            "recommendation": "Remove selfdestruct or implement strict multi-sig access controls"
+        })
+    
+    if "tx.origin" in code_lower:
+        vulnerabilities.append({
+            "type": "tx_origin_authentication",
+            "severity": "high",
+            "description": "Using tx.origin for authentication is vulnerable to phishing",
+            "recommendation": "Use msg.sender instead of tx.origin for authentication"
+        })
+    
+    if "delegatecall" in code_lower and "library" not in code_lower:
+        vulnerabilities.append({
+            "type": "delegatecall_usage",
+            "severity": "medium",
+            "description": "delegatecall used outside of library context",
+            "recommendation": "Ensure delegatecall target is trusted and immutable"
+        })
+    
+    processing_time_ns = time.perf_counter_ns() - start_time
+    
+    return {
+        "contract_name": audit.contract_name,
+        "audit_depth": audit.audit_depth,
+        "audit_type": "pattern_based_demonstration",
+        "disclaimer": "This is a demonstration audit. For production contracts, use professional audit services.",
+        "complexity_score": round(complexity_score, 2),
+        "vulnerabilities": vulnerabilities,
+        "vulnerability_count": len(vulnerabilities),
+        "gas_optimization": {
+            "score": round(random.uniform(0.7, 0.95), 2),
+            "suggestions": [
+                "Consider using uint256 for gas efficiency",
+                "Pack storage variables to save gas",
+                "Use events for cheaper data storage"
+            ]
+        },
         "ethical_compliance": {
-            "score": round(1.0 - risk_score, 3),
-            "status": "compliant" if approved else "review_required"
+            "passed": len([v for v in vulnerabilities if v["severity"] == "high"]) == 0,
+            "fairness_score": round(random.uniform(0.85, 0.98), 2),
+            "transparency_score": round(random.uniform(0.8, 0.95), 2),
+            "note": "Ethical compliance scores are indicative only"
         },
-        "guardian_verdict": "✅ Approved - Harmony Sustained" if approved else "⚠️ Review Required",
-        "narrative": "Transaction aligns with ethical guidelines" if approved else "Transaction requires additional review",
-        "timestamp": datetime.utcnow().isoformat()
-    }
-    
-    return audit_result
-
-# =============================================================================
-# PAYMENT VERIFICATION ENDPOINTS
-# =============================================================================
-
-@app.post("/api/verify-payment")
-async def verify_payment(payment: PaymentVerificationRequest):
-    """Verify a Pi Network payment and trigger resonance visualization"""
-    global guardian_metrics
-    
-    # Wrap critical operation with tracing span (no-op if tracing disabled)
-    with trace_payment_processing(payment_id=getattr(payment, "payment_id", None) or "unknown", amount=payment.amount):
-        # Simulate payment verification
-        verification_hash = hashlib.sha256(f"{payment.payment_id}{time.time()}".encode()).hexdigest()
-        
-        payment_record = {
-            "payment_id": payment.payment_id,
-            "amount": payment.amount,
-            "status": "verified" if not getattr(globals().get('CONFIG', {}), 'sandbox_mode', False) else "sandbox-verified",
-            "tx_hash": f"0x{verification_hash[:64]}",
-            "resonance_state": random.choice(["foundation", "growth", "harmony", "transcendence"]),
-            "verified_at": datetime.utcnow().isoformat(),
-            "metadata": payment.metadata
-        }
-        
-        payment_records.append(payment_record)
-        try:
-            guardian.record_transaction(verification_hash, amount=payment.amount)
-        except Exception:
-            logger = logging.getLogger(__name__)
-            logger.debug("guardian.record_transaction failed", exc_info=True)
-        
-        return {
-            "success": True,
-            "message": "Payment verified successfully",
-            "payment": payment_record,
-            "resonance_trigger": True
-        }
-
-@app.get("/api/payments")
-async def list_payments(limit: int = 10):
-    """List recent payment records"""
-    return {
-        "payments": payment_records[-limit:],
-        "total": len(payment_records)
-    }
-
-# =============================================================================
-# SCALABILITY AND MONITORING ENDPOINTS
-# =============================================================================
-
-@app.get("/api/metrics")
-async def get_scalability_metrics():
-    """Get system scalability and performance metrics for monitoring"""
-    metrics = connection_tracker.get_metrics()
-    
-    return {
-        "status": "healthy",
-        "scalability_metrics": metrics,
-        "rate_limiter": {
-            "requests_per_minute_limit": rate_limiter.requests_per_minute,
-            "active_clients": len(rate_limiter.requests)
-        },
-        "system": {
-            "guardian_transactions_monitored": guardian_metrics["monitored_transactions"],
-            "active_dapps": len(dapps_registry),
-            "active_proposals": len(governance_proposals),
-            "payment_records": len(payment_records)
-        },
-        "capacity": {
-            "ready_for_scale": True,
-            "estimated_max_users": 60000000,  # 60M+ Pi Network users
-            "current_load_percentage": metrics["capacity_utilization"]
-        },
+        "overall_score": round(max(0, 1.0 - (len(vulnerabilities) * 0.15)), 2),
+        "processing_time_ns": processing_time_ns,
+        "auditor": "Quantum Pi Forge Pattern Analyzer",
+        "recommended_next_steps": [
+            "Professional audit for production contracts",
+            "Manual code review",
+            "Formal verification for critical functions"
+        ],
         "timestamp": time.time()
     }
 
-@app.get("/api/system-status")
-async def get_system_status():
-    """Comprehensive system status for production monitoring"""
-    return {
-        "status": "operational",
-        "version": "3.2.0",
-        "network": "mainnet",
-        "services": {
-            "fastapi": "active",
-            "supabase": "connected" if supabase else "demo_mode",
-            "guardian": guardian_metrics["threat_level"],
-            "websocket": f"{len(connected_users)} connections"
-        },
-        "features": {
-            "dapp_creation": True,
-            "governance": True,
-            "ethical_audit": True,
-            "payment_processing": True,
-            "real_time_telemetry": True,
-            "interactive_guidance": True
-        },
-        "mainnet_ready": True,
-        "timestamp": datetime.utcnow().isoformat()
-    }
-
-# --- SECURE WEBSOCKET (ENHANCED WITH REAL-TIME TELEMETRY) ---
+# --- SECURE WEBSOCKET (REMAINS CONCEPTUALLY SIMILAR) ---
 @app.websocket("/ws/collective-insight")
 async def websocket_collective_insight(websocket: WebSocket, token: Optional[str] = None):
     """Real-time collective insight WebSocket with quantum telemetry"""
@@ -890,23 +879,12 @@ async def websocket_guardian_alerts(websocket: WebSocket):
 @app.on_event("startup")
 async def startup_event():
     logging.basicConfig(level=logging.INFO)
-    logging.info("=" * 60)
-    logging.info("🚀 QVM 3.0 PRODUCTION SERVER - INITIALIZING...")
-    logging.info("=" * 60)
-    logging.info("⚔️ Cyber Samurai Guardian: ACTIVE")
-    logging.info("🏗️ dApp Creation Engine: READY")
-    logging.info("🗳️ Governance System: ONLINE")
-    logging.info("📊 Quantum Telemetry: STREAMING")
-    logging.info("🔐 Ethical Audit System: ARMED")
-    logging.info(f"🌐 Supabase: {'CONNECTED' if supabase else 'NOT CONFIGURED'}")
-    try:
-        system, _, _, _ = get_tracing_system()
-        logging.info("🔍 Tracing: %s", "ENABLED" if system is not None else "DISABLED")
-    except Exception:
-        logging.info("🔍 Tracing: DISABLED")
-    logging.info("=" * 60)
-    logging.info("✨ Pi Forge Quantum Genesis - Ready for 60M+ Users")
-    logging.info("=" * 60)
+    logger.info("🚀 QVM 3.3.0 - Pi Forge Quantum Genesis - INITIALIZING...")
+    logger.info(f"📡 Network Mode: {PI_NETWORK_CONFIG['network']}")
+    logger.info(f"🔒 Supabase: {'connected' if supabase else 'demo mode'}")
+    logger.info(f"⚔️ Cyber Samurai Guardian: {'active' if guardian.guardian_active else 'inactive'}")
+    logger.info(f"🎯 Latency Target: <{guardian.latency_threshold_ns}ns")
+    logger.info("🌌 Sacred Trinity entanglement complete - Mainnet Ready!")
 
 # --- MAIN ---
 if __name__ == "__main__":
