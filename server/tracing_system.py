@@ -14,6 +14,11 @@ Provides distributed tracing across:
 import os
 import logging
 from typing import Dict, Any
+from functools import wraps
+
+# Initialize logger first to avoid reference errors
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 ### Set up for OpenTelemetry tracing ###
 try:
@@ -59,9 +64,6 @@ try:
 except ImportError:
     ai_inference_available = False
     logger.warning("Azure AI Inference SDK not available")
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 class QuantumTracingSystem:
     """Enhanced Sacred Trinity OpenTelemetry Tracing System with Agent Framework support"""
@@ -215,202 +217,277 @@ def gradio_tracer():
 def trace_fastapi_operation(operation: str):
     """Decorator for tracing FastAPI operations"""
     def decorator(func):
+        @wraps(func)
         async def wrapper(*args, **kwargs):
-            with tracing_system.create_quantum_span(
-                fastapi_tracer, operation, "fastapi",
-                **{"function": func.__name__}
-            ) as span:
-                try:
-                    result = await func(*args, **kwargs)
-                    span.set_attribute("quantum.success", True)
-                    return result
-                except Exception as e:
-                    span.set_attribute("quantum.success", False)
-                    span.set_attribute("quantum.error", str(e))
-                    raise
+            system, tracer, _, _ = get_tracing_system()
+            if system and tracer:
+                with system.create_quantum_span(
+                    tracer, operation, "fastapi",
+                    **{"function": func.__name__}
+                ) as span:
+                    try:
+                        result = await func(*args, **kwargs)
+                        span.set_attribute("quantum.success", True)
+                        return result
+                    except Exception as e:
+                        span.set_attribute("quantum.success", False)
+                        span.set_attribute("quantum.error", str(e))
+                        raise
+            else:
+                return await func(*args, **kwargs)
         return wrapper
     return decorator
 
 def trace_flask_operation(operation: str):
     """Decorator for tracing Flask operations"""
     def decorator(func):
+        @wraps(func)
         def wrapper(*args, **kwargs):
-            with tracing_system.create_quantum_span(
-                flask_tracer, operation, "flask",
-                **{"function": func.__name__}
-            ) as span:
-                try:
-                    result = func(*args, **kwargs)
-                    span.set_attribute("quantum.success", True)
-                    return result
-                except Exception as e:
-                    span.set_attribute("quantum.success", False)
-                    span.set_attribute("quantum.error", str(e))
-                    raise
+            system, _, tracer, _ = get_tracing_system()
+            if system and tracer:
+                with system.create_quantum_span(
+                    tracer, operation, "flask",
+                    **{"function": func.__name__}
+                ) as span:
+                    try:
+                        result = func(*args, **kwargs)
+                        span.set_attribute("quantum.success", True)
+                        return result
+                    except Exception as e:
+                        span.set_attribute("quantum.success", False)
+                        span.set_attribute("quantum.error", str(e))
+                        raise
+            else:
+                return func(*args, **kwargs)
         return wrapper
     return decorator
 
 def trace_gradio_operation(operation: str):
     """Decorator for tracing Gradio operations"""
     def decorator(func):
+        @wraps(func)
         def wrapper(*args, **kwargs):
-            with tracing_system.create_quantum_span(
-                gradio_tracer, operation, "gradio",
-                **{"function": func.__name__}
-            ) as span:
-                try:
-                    result = func(*args, **kwargs)
-                    span.set_attribute("quantum.success", True)
-                    return result
-                except Exception as e:
-                    span.set_attribute("quantum.success", False)
-                    span.set_attribute("quantum.error", str(e))
-                    raise
+            system, _, _, tracer = get_tracing_system()
+            if system and tracer:
+                with system.create_quantum_span(
+                    tracer, operation, "gradio",
+                    **{"function": func.__name__}
+                ) as span:
+                    try:
+                        result = func(*args, **kwargs)
+                        span.set_attribute("quantum.success", True)
+                        return result
+                    except Exception as e:
+                        span.set_attribute("quantum.success", False)
+                        span.set_attribute("quantum.error", str(e))
+                        raise
+            else:
+                return func(*args, **kwargs)
         return wrapper
     return decorator
 
 # Quantum-specific span creation helpers
 def trace_authentication(user_id: str = None):
     """Trace authentication operations"""
-    return tracing_system.create_quantum_span(
-        fastapi_tracer, "authentication", "fastapi",
-        user_id=user_id or "anonymous"
-    )
+    system, tracer, _, _ = get_tracing_system()
+    if system and tracer:
+        return system.create_quantum_span(
+            tracer, "authentication", "fastapi",
+            user_id=user_id or "anonymous"
+        )
+    from contextlib import nullcontext
+    return nullcontext()
 
 def trace_payment_processing(payment_id: str, amount: float):
     """Trace payment processing operations"""
-    return tracing_system.create_quantum_span(
-        fastapi_tracer, "payment_processing", "fastapi",
-        payment_id=payment_id,
-        payment_amount=amount
-    )
+    system, tracer, _, _ = get_tracing_system()
+    if system and tracer:
+        return system.create_quantum_span(
+            tracer, "payment_processing", "fastapi",
+            payment_id=payment_id,
+            payment_amount=amount
+        )
+    from contextlib import nullcontext
+    return nullcontext()
 
 def trace_resonance_visualization(tx_hash: str, phase: str = None):
     """Trace resonance visualization operations"""
-    return tracing_system.create_quantum_span(
-        flask_tracer, "resonance_visualization", "flask",
-        transaction_hash=tx_hash,
-        visualization_phase=phase or "full_cascade"
-    )
+    system, _, tracer, _ = get_tracing_system()
+    if system and tracer:
+        return system.create_quantum_span(
+            tracer, "resonance_visualization", "flask",
+            transaction_hash=tx_hash,
+            visualization_phase=phase or "full_cascade"
+        )
+    from contextlib import nullcontext
+    return nullcontext()
 
 def trace_ethical_audit(audit_id: str, risk_score: float = None):
     """Trace ethical audit operations"""
-    return tracing_system.create_quantum_span(
-        gradio_tracer, "ethical_audit", "gradio",
-        audit_id=audit_id,
-        risk_score=risk_score
-    )
+    system, _, _, tracer = get_tracing_system()
+    if system and tracer:
+        return system.create_quantum_span(
+            tracer, "ethical_audit", "gradio",
+            audit_id=audit_id,
+            risk_score=risk_score
+        )
+    from contextlib import nullcontext
+    return nullcontext()
 
 def trace_websocket_broadcast(event_type: str, user_count: int = 0):
     """Trace WebSocket broadcast operations"""
-    return tracing_system.create_quantum_span(
-        fastapi_tracer, "websocket_broadcast", "fastapi",
-        quantum_phase="harmony",
-        event_type=event_type,
-        connected_users=user_count
-    )
+    system, tracer, _, _ = get_tracing_system()
+    if system and tracer:
+        return system.create_quantum_span(
+            tracer, "websocket_broadcast", "fastapi",
+            quantum_phase="harmony",
+            event_type=event_type,
+            connected_users=user_count
+        )
+    from contextlib import nullcontext
+    return nullcontext()
 
 def trace_consciousness_stream(connection_id: str, user_id: str = None):
     """Trace WebSocket consciousness streaming"""
-    return tracing_system.create_quantum_span(
-        fastapi_tracer, "consciousness_stream", "fastapi",
-        quantum_phase="transcendence",
-        connection_id=connection_id,
-        user_id=user_id or "anonymous",
-        consciousness_streaming=True
-    )
+    system, tracer, _, _ = get_tracing_system()
+    if system and tracer:
+        return system.create_quantum_span(
+            tracer, "consciousness_stream", "fastapi",
+            quantum_phase="transcendence",
+            connection_id=connection_id,
+            user_id=user_id or "anonymous",
+            consciousness_streaming=True
+        )
+    from contextlib import nullcontext
+    return nullcontext()
 
 def trace_supabase_operation(operation: str, table: str = None):
     """Trace Supabase database operations"""
-    return tracing_system.create_quantum_span(
-        fastapi_tracer, "supabase_operation", "fastapi",
-        quantum_phase="foundation",
-        database_operation=operation,
-        database_table=table or "unknown",
-        ethical_data_flow=True
-    )
+    system, tracer, _, _ = get_tracing_system()
+    if system and tracer:
+        return system.create_quantum_span(
+            tracer, "supabase_operation", "fastapi",
+            quantum_phase="foundation",
+            database_operation=operation,
+            database_table=table or "unknown",
+            ethical_data_flow=True
+        )
+    from contextlib import nullcontext
+    return nullcontext()
 
 def trace_payment_visualization_flow(payment_id: str, tx_hash: str = None):
     """Trace the sacred payment → visualization → ethics flow"""
-    return tracing_system.create_quantum_span(
-        fastapi_tracer, "payment_visualization_flow", "sacred_trinity_integration",
-        quantum_phase="transcendence",
-        payment_id=payment_id,
-        transaction_hash=tx_hash or "unknown",
-        cross_component_flow=True,
-        sacred_trinity_pipeline=True
-    )
+    system, tracer, _, _ = get_tracing_system()
+    if system and tracer:
+        return system.create_quantum_span(
+            tracer, "payment_visualization_flow", "sacred_trinity_integration",
+            quantum_phase="transcendence",
+            payment_id=payment_id,
+            transaction_hash=tx_hash or "unknown",
+            cross_component_flow=True,
+            sacred_trinity_pipeline=True
+        )
+    from contextlib import nullcontext
+    return nullcontext()
 
 def trace_svg_cascade_generation(tx_hash: str, phase_count: int = 4):
     """Trace 4-phase SVG cascade generation"""
-    return tracing_system.create_quantum_span(
-        flask_tracer, "svg_cascade_generation", "flask",
-        quantum_phase="growth",
-        transaction_hash=tx_hash,
-        cascade_phases=phase_count,
-        procedural_art=True
-    )
+    system, _, tracer, _ = get_tracing_system()
+    if system and tracer:
+        return system.create_quantum_span(
+            tracer, "svg_cascade_generation", "flask",
+            quantum_phase="growth",
+            transaction_hash=tx_hash,
+            cascade_phases=phase_count,
+            procedural_art=True
+        )
+    from contextlib import nullcontext
+    return nullcontext()
 
 def trace_quantum_dashboard_data(archetype: str = None):
     """Trace quantum dashboard data processing"""
-    return tracing_system.create_quantum_span(
-        flask_tracer, "quantum_dashboard_data", "flask", 
-        quantum_phase="growth",
-        archetype_distribution=archetype or "all",
-        collective_wisdom=True
-    )
+    system, _, tracer, _ = get_tracing_system()
+    if system and tracer:
+        return system.create_quantum_span(
+            tracer, "quantum_dashboard_data", "flask", 
+            quantum_phase="growth",
+            archetype_distribution=archetype or "all",
+            collective_wisdom=True
+        )
+    from contextlib import nullcontext
+    return nullcontext()
 
 def trace_veto_triad_synthesis(verity_score: float = None, qualia_score: float = None):
     """Trace Veto Triad synthesis calculation"""
-    return tracing_system.create_quantum_span(
-        gradio_tracer, "veto_triad_synthesis", "gradio",
-        quantum_phase="harmony",
-        verity_score=verity_score or 0,
-        qualia_score=qualia_score or 0,
-        ethical_synthesis=True
-    )
+    system, _, _, tracer = get_tracing_system()
+    if system and tracer:
+        return system.create_quantum_span(
+            tracer, "veto_triad_synthesis", "gradio",
+            quantum_phase="harmony",
+            verity_score=verity_score or 0,
+            qualia_score=qualia_score or 0,
+            ethical_synthesis=True
+        )
+    from contextlib import nullcontext
+    return nullcontext()
 
 def trace_canticle_processing(canticle_type: str, coherence_score: float = None):
     """Trace canticle interface processing"""
-    return tracing_system.create_quantum_span(
-        gradio_tracer, "canticle_processing", "gradio",
-        quantum_phase="harmony", 
-        canticle_type=canticle_type,
-        coherence_score=coherence_score or 0,
-        sovereign_wisdom=True
-    )
+    system, _, _, tracer = get_tracing_system()
+    if system and tracer:
+        return system.create_quantum_span(
+            tracer, "canticle_processing", "gradio",
+            quantum_phase="harmony", 
+            canticle_type=canticle_type,
+            coherence_score=coherence_score or 0,
+            sovereign_wisdom=True
+        )
+    from contextlib import nullcontext
+    return nullcontext()
 
 def trace_cross_trinity_synchronization():
     """Trace cross-Sacred Trinity component synchronization"""
-    return tracing_system.create_quantum_span(
-        fastapi_tracer, "cross_trinity_sync", "sacred_trinity_integration",
-        quantum_phase="transcendence",
-        fastapi_status="active",
-        flask_status="active", 
-        gradio_status="active",
-        quantum_entanglement=True
-    )
+    system, tracer, _, _ = get_tracing_system()
+    if system and tracer:
+        return system.create_quantum_span(
+            tracer, "cross_trinity_sync", "sacred_trinity_integration",
+            quantum_phase="transcendence",
+            fastapi_status="active",
+            flask_status="active", 
+            gradio_status="active",
+            quantum_entanglement=True
+        )
+    from contextlib import nullcontext
+    return nullcontext()
 
 def trace_agent_framework_operation(operation: str, agent_type: str = "sacred_trinity"):
     """Trace Agent Framework operations across Sacred Trinity"""
-    return tracing_system.create_quantum_span(
-        fastapi_tracer, f"agent_framework_{operation}", "agent_framework",
-        quantum_phase="transcendence",
-        agent_type=agent_type,
-        agent_framework_enabled=agent_framework_available,
-        sacred_trinity_integration=True
-    )
+    system, tracer, _, _ = get_tracing_system()
+    if system and tracer:
+        return system.create_quantum_span(
+            tracer, f"agent_framework_{operation}", "agent_framework",
+            quantum_phase="transcendence",
+            agent_type=agent_type,
+            agent_framework_enabled=agent_framework_available,
+            sacred_trinity_integration=True
+        )
+    from contextlib import nullcontext
+    return nullcontext()
 
 def trace_ai_model_interaction(model_name: str, operation_type: str = "inference"):
     """Trace AI model interactions with enhanced content recording"""
-    return tracing_system.create_quantum_span(
-        fastapi_tracer, f"ai_model_{operation_type}", "ai_model",
-        quantum_phase="harmony",
-        model_name=model_name,
-        operation_type=operation_type,
-        content_recording_enabled=True,
-        sensitive_data_capture=agent_framework_available
-    )
+    system, tracer, _, _ = get_tracing_system()
+    if system and tracer:
+        return system.create_quantum_span(
+            tracer, f"ai_model_{operation_type}", "ai_model",
+            quantum_phase="harmony",
+            model_name=model_name,
+            operation_type=operation_type,
+            content_recording_enabled=True,
+            sensitive_data_capture=agent_framework_available
+        )
+    from contextlib import nullcontext
+    return nullcontext()
 
 # Context manager helpers for Sacred Trinity flows
 from contextlib import contextmanager
@@ -418,31 +495,44 @@ from contextlib import contextmanager
 @contextmanager
 def trace_sacred_trinity_flow(flow_name: str, metadata: Dict[str, Any] = None):
     """Context manager for Sacred Trinity cross-component flows"""
-    with tracing_system.create_quantum_span(
-        fastapi_tracer, flow_name, "sacred_trinity_integration",
-        quantum_phase="transcendence",
-        cross_component_flow=True,
-        **(metadata or {})
-    ) as span:
-        try:
-            yield span
-        except Exception as e:
-            span.set_attribute("quantum.error", str(e))
-            span.set_attribute("quantum.success", False)
-            raise
-        else:
-            span.set_attribute("quantum.success", True)
+    system, tracer, _, _ = get_tracing_system()
+    if system and tracer:
+        with system.create_quantum_span(
+            tracer, flow_name, "sacred_trinity_integration",
+            quantum_phase="transcendence",
+            cross_component_flow=True,
+            **(metadata or {})
+        ) as span:
+            try:
+                yield span
+            except Exception as e:
+                span.set_attribute("quantum.error", str(e))
+                span.set_attribute("quantum.success", False)
+                raise
+            else:
+                span.set_attribute("quantum.success", True)
+    else:
+        # No-op context manager when tracing is disabled
+        class DummySpan:
+            def set_attribute(self, *args): pass
+        yield DummySpan()
 
 @contextmanager 
 def trace_quantum_phase_transition(from_phase: str, to_phase: str, component: str):
     """Trace quantum phase transitions in Sacred Trinity"""
-    with tracing_system.create_quantum_span(
-        fastapi_tracer, "quantum_phase_transition", component,
-        quantum_phase=to_phase,
-        phase_transition=f"{from_phase}→{to_phase}",
-        consciousness_evolution=True
-    ) as span:
-        yield span
+    system, tracer, _, _ = get_tracing_system()
+    if system and tracer:
+        with system.create_quantum_span(
+            tracer, "quantum_phase_transition", component,
+            quantum_phase=to_phase,
+            phase_transition=f"{from_phase}→{to_phase}",
+            consciousness_evolution=True
+        ) as span:
+            yield span
+    else:
+        class DummySpan:
+            def set_attribute(self, *args): pass
+        yield DummySpan()
 
 logger.info("🌌 Quantum Resonance Lattice Tracing System Ready")
 logger.info("🎯 Sacred Trinity observability enabled across all components") 
