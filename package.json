@@ -1,6 +1,9 @@
 {
   "name": "pi-forge-quantum-genesis",
   "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "mkdir -p public && cp -r frontend/. public/"
   "description": "Pi Forge Quantum Genesis - Multi-application deployment",
   "private": true,
   "scripts": {
