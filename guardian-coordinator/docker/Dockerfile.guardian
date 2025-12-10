@@ -1,0 +1,35 @@
+# Hephaestus Guardian Coordinator - Dockerfile
+# Python 3.11 base image for compatibility with Pi Forge Quantum Genesis
+
+FROM python:3.11-slim
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first for better caching
+COPY requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY src/ ./src/
+COPY scripts/ ./scripts/
+
+# Create non-root user for security
+RUN useradd -m -u 1000 guardian && \
+    chown -R guardian:guardian /app
+
+USER guardian
+
+# Expose API port
+EXPOSE 8001
+
+# Default command (can be overridden in docker-compose)
+CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8001"]
