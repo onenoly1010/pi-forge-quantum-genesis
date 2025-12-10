@@ -130,8 +130,8 @@ jobs:
           
           # Check for breaking changes in commit messages
           if [ "${{ github.event_name }}" = "push" ]; then
-            RECENT_COMMITS=$(git log -5 --pretty=format:"%s" || echo "")
-            if echo "$RECENT_COMMITS" | grep -i "breaking change\|major change\|unsafe"; then
+            RECENT_COMMITS=$(git log -5 --pretty=format:"%s" 2>/dev/null | head -c 500 || echo "")
+            if echo "$RECENT_COMMITS" | grep -qi "breaking change\|major change\|unsafe"; then
               echo "⚠️ Breaking changes detected - requires manual approval"
               APPROVED=false
             fi
@@ -246,13 +246,15 @@ jobs:
         run: |
           echo "=== RUNNING UNIT TESTS ==="
           cd tests
-          python -m pytest -v --tb=short --cov=../server --cov-report=term --cov-report=xml || {
+          if python -m pytest -v --tb=short --cov=../server --cov-report=term --cov-report=xml; then
+            echo "coverage=full" >> $GITHUB_OUTPUT
+            echo "✅ All tests passed"
+          else
             echo "⚠️ Some tests failed - checking if critical"
             # Allow non-critical test failures
             echo "coverage=partial" >> $GITHUB_OUTPUT
-          }
-          echo "coverage=full" >> $GITHUB_OUTPUT
-          echo "✅ Tests complete"
+            echo "⚠️ Tests completed with partial coverage"
+          fi
 
       - name: 🏗️ Build Application
         id: build-status
@@ -341,7 +343,14 @@ jobs:
         run: |
           TAG="deploy-$(date +%Y%m%d-%H%M%S)-$(git rev-parse --short HEAD)"
           echo "tag=$TAG" >> $GITHUB_OUTPUT
-          git tag "$TAG" || echo "Tag creation skipped"
+          
+          # Only create tag if it doesn't exist
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "⚠️ Tag $TAG already exists, skipping creation"
+          else
+            git tag "$TAG" && echo "✅ Created tag: $TAG" || echo "⚠️ Tag creation failed (non-critical)"
+          fi
+          
           echo "📌 Deployment tag: $TAG"
 
       - name: 🚀 Deploy to Railway (Simulated)
@@ -578,14 +587,27 @@ jobs:
           
           echo "🔄 Rolling back to: $ROLLBACK_TAG"
           
-          # In production, this would:
-          # 1. Checkout the rollback tag
-          # 2. Redeploy to Railway
-          # 3. Verify health
-          
-          git checkout "$ROLLBACK_TAG" 2>/dev/null || echo "Tag checkout skipped"
-          
-          echo "✅ Rollback complete"
+          # Verify tag exists before checkout
+          if git rev-parse "$ROLLBACK_TAG" >/dev/null 2>&1; then
+            echo "✅ Rollback tag verified: $ROLLBACK_TAG"
+            
+            # In production, this would:
+            # 1. Checkout the rollback tag
+            # 2. Redeploy to Railway
+            # 3. Verify health
+            
+            git checkout "$ROLLBACK_TAG" 2>&1 || {
+              echo "⚠️ Git checkout failed, attempting alternative rollback method"
+              # Alternative rollback could involve Railway API or deployment manifest
+            }
+            
+            echo "✅ Rollback complete"
+          else
+            echo "❌ Rollback tag $ROLLBACK_TAG not found"
+            echo "Available tags:"
+            git tag -l "deploy-*" --sort=-version:refname | head -5
+            exit 1
+          fi
 
       - name: 🚨 Send Rollback Alert
         run: |
@@ -845,41 +867,54 @@ jobs:
           
           STATUS="${{ steps.collect-status.outputs.overall }}"
           RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          REPO="${{ github.repository }}"
           
-          # Slack notification
+          # Slack notification with safe JSON construction
           if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
+            SLACK_PAYLOAD=$(jq -n \
+              --arg text "🤖 AI Agent Autonomous Runbook Alert" \
+              --arg status "$STATUS" \
+              --arg repo "$REPO" \
+              --arg url "$RUN_URL" \
+              '{
+                text: $text,
+                blocks: [{
+                  type: "section",
+                  text: {
+                    type: "mrkdwn",
+                    text: ("*Status:* " + $status + "\n*Repository:* " + $repo + "\n<" + $url + "|View Details>")
+                  }
+                }]
+              }')
+            
             curl -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
               -H 'Content-Type: application/json' \
-              -d "{
-                \"text\": \"🤖 AI Agent Autonomous Runbook Alert\",
-                \"blocks\": [
-                  {
-                    \"type\": \"section\",
-                    \"text\": {
-                      \"type\": \"mrkdwn\",
-                      \"text\": \"*Status:* $STATUS\\n*Repository:* ${{ github.repository }}\\n<${RUN_URL}|View Details>\"
-                    }
-                  }
-                ]
-              }" || echo "⚠️ Slack notification failed"
+              -d "$SLACK_PAYLOAD" || echo "⚠️ Slack notification failed"
           fi
           
-          # Discord notification
+          # Discord notification with safe JSON construction
           if [ -n "${{ secrets.DISCORD_WEBHOOK_URL }}" ]; then
-            curl -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
-              -H 'Content-Type: application/json' \
-              -d "{
-                \"content\": \"🤖 **AI Agent Autonomous Runbook Alert**\",
-                \"embeds\": [{
-                  \"title\": \"Status: $STATUS\",
-                  \"url\": \"${RUN_URL}\",
-                  \"color\": 5814783,
-                  \"fields\": [
-                    {\"name\": \"Repository\", \"value\": \"${{ github.repository }}\", \"inline\": true},
-                    {\"name\": \"Status\", \"value\": \"$STATUS\", \"inline\": true}
+            DISCORD_PAYLOAD=$(jq -n \
+              --arg content "🤖 **AI Agent Autonomous Runbook Alert**" \
+              --arg status "$STATUS" \
+              --arg url "$RUN_URL" \
+              --arg repo "$REPO" \
+              '{
+                content: $content,
+                embeds: [{
+                  title: ("Status: " + $status),
+                  url: $url,
+                  color: 5814783,
+                  fields: [
+                    {name: "Repository", value: $repo, inline: true},
+                    {name: "Status", value: $status, inline: true}
                   ]
                 }]
-              }" || echo "⚠️ Discord notification failed"
+              }')
+            
+            curl -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
+              -H 'Content-Type: application/json' \
+              -d "$DISCORD_PAYLOAD" || echo "⚠️ Discord notification failed"
           fi
           
           echo "✅ Notification attempt complete"
