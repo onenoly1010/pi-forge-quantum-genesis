@@ -148,3 +148,14 @@ artifacts/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Bootstrap agent artifacts
+bootstrap/bootstrap-*.log
+bootstrap/bootstrap-report-*.md
+bootstrap/deployment-checklist.md
+bootstrap/*.pid
+bootstrap/service-pids.json
+bootstrap/health_check.py
+
+# Service logs
+logs/

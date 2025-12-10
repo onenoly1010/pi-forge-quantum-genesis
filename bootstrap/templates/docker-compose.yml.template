@@ -1,0 +1,124 @@
+# Docker Compose Configuration Template
+#
+# This template shows how to run all three Quantum Pi Forge services
+# with Docker Compose for development or production.
+#
+# Usage:
+#   cp bootstrap/templates/docker-compose.yml.template docker-compose.yml
+#   # Edit docker-compose.yml with your configuration
+#   docker-compose up -d
+
+version: '3.8'
+
+services:
+  # FastAPI Quantum Conduit (Port 8000)
+  fastapi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: quantum-fastapi
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - PORT=8000
+      - ENVIRONMENT=production
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - quantum-network
+
+  # Flask Glyph Weaver (Port 5000)
+  flask:
+    build:
+      context: .
+      dockerfile: Dockerfile.flask
+      target: production
+    container_name: quantum-flask
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    environment:
+      - FLASK_PORT=5000
+      - ENVIRONMENT=production
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - quantum-network
+
+  # Gradio Truth Mirror (Port 7860)
+  gradio:
+    build:
+      context: .
+      dockerfile: Dockerfile.gradio
+      target: production
+    container_name: quantum-gradio
+    ports:
+      - "7860:7860"
+    env_file:
+      - .env
+    environment:
+      - GRADIO_PORT=7860
+      - ENVIRONMENT=production
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7860/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - quantum-network
+
+  # Optional: PostgreSQL database (if not using Supabase)
+  # postgres:
+  #   image: postgres:15-alpine
+  #   container_name: quantum-postgres
+  #   environment:
+  #     - POSTGRES_DB=quantum_lattice
+  #     - POSTGRES_USER=developer
+  #     - POSTGRES_PASSWORD=password
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - postgres-data:/var/lib/postgresql/data
+  #   networks:
+  #     - quantum-network
+
+  # Optional: Redis cache
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: quantum-redis
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis-data:/data
+  #   networks:
+  #     - quantum-network
+
+networks:
+  quantum-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  redis-data:
