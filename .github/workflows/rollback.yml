@@ -42,6 +42,7 @@ jobs:
   validate-rollback:
     name: Validate Rollback Request
     runs-on: ubuntu-latest
+    permissions: {}  # No permissions needed for validation
     
     steps:
       - name: Validate confirmation
@@ -101,6 +102,8 @@ jobs:
   execute-rollback:
     name: Execute Rollback
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     needs: validate-rollback
     environment:
       name: testnet-rollback
@@ -260,6 +263,8 @@ jobs:
   post-rollback-validation:
     name: Post-Rollback Validation
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     needs: execute-rollback
     
     steps:

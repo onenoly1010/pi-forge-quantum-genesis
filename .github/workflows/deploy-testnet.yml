@@ -35,6 +35,8 @@ jobs:
   safety-gate:
     name: Safety Gate & Pre-flight Checks
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       deployment_allowed: ${{ steps.safety-check.outputs.allowed }}
     
@@ -105,6 +107,8 @@ jobs:
   tests:
     name: Run Tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     needs: safety-gate
     
     steps:
@@ -234,6 +238,8 @@ jobs:
   deploy:
     name: Deploy to Railway
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     needs: [safety-gate, tests, build-images]
     environment:
       name: testnet
@@ -367,6 +373,8 @@ jobs:
   smoke-tests:
     name: Post-Deployment Smoke Tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     needs: deploy
     
     steps:
