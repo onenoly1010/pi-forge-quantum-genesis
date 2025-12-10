@@ -9,6 +9,7 @@ import asyncio
 import json
 import logging
 import os
+from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Dict, List, Optional
 
@@ -42,13 +43,6 @@ if NFT_MINT_VALUE != "0":
     raise RuntimeError("Testnet requires NFT_MINT_VALUE=0")
 
 logger.info("✅ Safety checks passed: testnet mode, kill switch off, zero-value enforced")
-
-# FastAPI app
-app = FastAPI(
-    title="Guardian Coordinator API",
-    description="Quantum validation and ethical entropy filtering for testnet",
-    version="1.0.0"
-)
 
 
 class PulseValidationRequest(BaseModel):
@@ -190,19 +184,31 @@ class GuardianCoordinator:
 coordinator = GuardianCoordinator()
 
 
-@app.on_event("startup")
-async def startup_event():
-    """Initialize connections on startup"""
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Lifespan context manager for startup and shutdown events.
+    Replaces deprecated @app.on_event decorators.
+    """
+    # Startup
     logger.info("🛡️ Guardian Coordinator starting up...")
     await coordinator.connect_redis()
     logger.info("✅ Guardian Coordinator ready")
-
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Clean up connections on shutdown"""
+    
+    yield
+    
+    # Shutdown
     logger.info("Guardian Coordinator shutting down...")
     await coordinator.disconnect_redis()
+
+
+# FastAPI app with lifespan
+app = FastAPI(
+    title="Guardian Coordinator API",
+    description="Quantum validation and ethical entropy filtering for testnet",
+    version="1.0.0",
+    lifespan=lifespan
+)
 
 
 @app.get("/health")

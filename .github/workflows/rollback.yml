@@ -142,9 +142,12 @@ jobs:
             echo "Rolling back $service..."
             
             # Railway CLI rollback command
-            # Note: Syntax may vary based on Railway CLI version
+            # NOTE: Verify the exact syntax with Railway CLI documentation
+            # The command below uses '--to' flag which may need adjustment
+            # Alternative: railway deployment rollback <deployment-id> --service <service>
             railway rollback --service "$service" --to "${{ github.event.inputs.deployment_id }}" || {
               echo "❌ Rollback failed for $service"
+              echo "Please verify Railway CLI syntax: railway --help"
               exit 1
             }
             
