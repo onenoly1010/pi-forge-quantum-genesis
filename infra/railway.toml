@@ -1,0 +1,31 @@
+[build]
+builder = "dockerfile"
+
+[[services]]
+name = "guardian-coordinator"
+type = "web"
+startCommand = "uvicorn guardian_coordinator.main:app --host 0.0.0.0 --port 8000"
+healthcheckPath = "/health"
+healthcheckTimeout = 60
+env = { APP_ENVIRONMENT = "testnet" }
+
+[[services]]
+name = "fastapi-server"
+type = "web"
+startCommand = "uvicorn main:app --host 0.0.0.0 --port 8000"
+healthcheckPath = "/"
+env = { APP_ENVIRONMENT = "testnet" }
+
+[[services]]
+name = "flask-dashboard"
+type = "web"
+startCommand = "python app.py"
+healthcheckPath = "/"
+env = { APP_ENVIRONMENT = "testnet" }
+
+[[services]]
+name = "gradio-interface"
+type = "web"
+startCommand = "python app.py"
+healthcheckPath = "/"
+env = { APP_ENVIRONMENT = "testnet" }
