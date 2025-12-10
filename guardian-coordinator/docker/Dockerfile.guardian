@@ -1,0 +1,39 @@
+# Multi-stage Docker build for Guardian Coordinator
+FROM python:3.11-slim as base
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONPATH=/app
+
+WORKDIR /app
+
+# Production stage
+FROM base as production
+
+# Copy requirements and install
+COPY guardian-coordinator/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY guardian-coordinator/guardian_api.py .
+
+# Create non-root user
+RUN useradd --create-home --shell /bin/bash guardian \
+    && chown -R guardian:guardian /app
+USER guardian
+
+# Health check for Railway
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:${PORT:-8080}/health || exit 1
+
+# Set default port
+ENV PORT=8080
+
+# Production command
+CMD python guardian_api.py

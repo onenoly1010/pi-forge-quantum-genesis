@@ -1,0 +1,157 @@
+# ============================================================================
+# RAILWAY TESTNET DEPLOYMENT MANIFEST
+# Pi Forge Quantum Genesis - Isolated Testnet Environment
+# ============================================================================
+#
+# ⚠️ SECURITY NOTICE: This manifest is for TESTNET ONLY deployments
+# All Pi Network interactions are zero-value and testnet-scoped
+#
+# BEFORE DEPLOYING:
+# 1. Create a Railway project via Railway UI (https://railway.app)
+# 2. Set environment variables in Railway project settings (see infra/SECRETS.md)
+# 3. Replace placeholders below with your Railway project ID
+# 4. Deploy using Railway CLI: railway up
+#
+# ============================================================================
+
+[build]
+builder = "DOCKERFILE"
+
+[deploy]
+numReplicas = 1
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
+
+# ============================================================================
+# SERVICE 1: Guardian Coordinator (Port 8080)
+# Ethical entropy filtering and validation consensus
+# ============================================================================
+[[services]]
+name = "guardian-coordinator"
+
+[services.source]
+repo = "onenoly1010/pi-forge-quantum-genesis"
+branch = "main"
+
+[services.build]
+builder = "DOCKERFILE"
+dockerfilePath = "guardian-coordinator/docker/Dockerfile.guardian"
+buildCommand = ""
+
+[services.deploy]
+startCommand = "python guardian_api.py"
+healthcheckPath = "/health"
+healthcheckTimeout = 10
+restartPolicyType = "ON_FAILURE"
+
+# Environment variables (set in Railway UI - NO SECRETS HERE)
+# Required: APP_ENVIRONMENT, GUARDIAN_KILL_SWITCH, NFT_MINT_VALUE, REDIS_URL
+
+[[services.ports]]
+port = 8080
+protocol = "http"
+
+# ============================================================================
+# SERVICE 2: FastAPI Server (Port 8000)
+# Primary production API with Supabase auth & WebSocket
+# ============================================================================
+[[services]]
+name = "fastapi-server"
+
+[services.source]
+repo = "onenoly1010/pi-forge-quantum-genesis"
+branch = "main"
+
+[services.build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+buildCommand = ""
+
+[services.deploy]
+startCommand = "python -m uvicorn server.main:app --host 0.0.0.0 --port $PORT"
+healthcheckPath = "/health"
+healthcheckTimeout = 10
+restartPolicyType = "ON_FAILURE"
+
+# Environment variables (set in Railway UI - NO SECRETS HERE)
+# Required: SUPABASE_URL, SUPABASE_KEY, JWT_SECRET, APP_ENVIRONMENT
+
+[[services.ports]]
+port = 8000
+protocol = "http"
+
+# ============================================================================
+# SERVICE 3: Flask Dashboard (Port 5000)
+# Quantum resonance visualization and template serving
+# ============================================================================
+[[services]]
+name = "flask-dashboard"
+
+[services.source]
+repo = "onenoly1010/pi-forge-quantum-genesis"
+branch = "main"
+
+[services.build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile.flask"
+buildCommand = ""
+
+[services.deploy]
+startCommand = "python server/app.py"
+healthcheckPath = "/health"
+healthcheckTimeout = 10
+restartPolicyType = "ON_FAILURE"
+
+# Environment variables (set in Railway UI - NO SECRETS HERE)
+# Required: FLASK_ENV, APP_ENVIRONMENT
+
+[[services.ports]]
+port = 5000
+protocol = "http"
+
+# ============================================================================
+# SERVICE 4: Gradio Interface (Port 7860)
+# Ethical AI audit tool and interactive interface
+# ============================================================================
+[[services]]
+name = "gradio-interface"
+
+[services.source]
+repo = "onenoly1010/pi-forge-quantum-genesis"
+branch = "main"
+
+[services.build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile.gradio"
+buildCommand = ""
+
+[services.deploy]
+startCommand = "python server/canticle_interface.py"
+healthcheckPath = "/"
+healthcheckTimeout = 10
+restartPolicyType = "ON_FAILURE"
+
+# Environment variables (set in Railway UI - NO SECRETS HERE)
+# Required: GRADIO_SERVER_NAME, GRADIO_SERVER_PORT, APP_ENVIRONMENT
+
+[[services.ports]]
+port = 7860
+protocol = "http"
+
+# ============================================================================
+# DEPLOYMENT NOTES
+# ============================================================================
+# 
+# 1. Create Railway project: railway init
+# 2. Add environment variables via Railway UI for each service
+# 3. Critical testnet environment variables (ALL services):
+#    - APP_ENVIRONMENT=testnet (MANDATORY)
+#    - GUARDIAN_KILL_SWITCH=off
+#    - NFT_MINT_VALUE=0
+# 
+# 4. Deploy: railway up
+# 5. Monitor: railway logs --service <service-name>
+# 6. Rollback: railway deployment rollback <deployment-id>
+#
+# NEVER set FORCE_DEPLOY_TO_MAINNET without 5/5 guardian approvals
+# ============================================================================
