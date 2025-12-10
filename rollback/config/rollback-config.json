@@ -1,0 +1,107 @@
+{
+  "version": "1.0.0",
+  "description": "Rollback system configuration for Quantum Resonance Lattice",
+  "updated": "2025-12-10",
+  
+  "rollback_settings": {
+    "default_level": "fast",
+    "confirmation_required": true,
+    "backup_before_rollback": true,
+    "max_backup_retention_days": 30,
+    "auto_verify_after_rollback": true
+  },
+  
+  "timeouts": {
+    "service_restart_seconds": 30,
+    "health_check_timeout_seconds": 60,
+    "database_rollback_timeout_seconds": 300
+  },
+  
+  "notifications": {
+    "enabled": false,
+    "webhooks": [],
+    "email_recipients": []
+  },
+  
+  "service_dependencies": {
+    "fastapi": {
+      "port": 8000,
+      "depends_on": ["supabase"],
+      "critical": true,
+      "health_endpoint": "/",
+      "restart_delay_seconds": 5
+    },
+    "flask": {
+      "port": 5000,
+      "depends_on": [],
+      "critical": false,
+      "health_endpoint": "/health",
+      "restart_delay_seconds": 3
+    },
+    "gradio": {
+      "port": 7860,
+      "depends_on": [],
+      "critical": false,
+      "health_endpoint": "/",
+      "restart_delay_seconds": 3
+    }
+  },
+  
+  "external_services": {
+    "supabase": {
+      "name": "Supabase Database",
+      "required_env_vars": ["SUPABASE_URL", "SUPABASE_KEY"],
+      "critical": true
+    },
+    "pi_network": {
+      "name": "Pi Network Mainnet",
+      "required_env_vars": ["PI_NETWORK_APP_ID", "PI_NETWORK_API_KEY"],
+      "critical": false
+    }
+  },
+  
+  "rollback_procedures": {
+    "fast": {
+      "description": "Quick code rollback without database changes",
+      "estimated_duration_minutes": 10,
+      "steps": [
+        "backup_current_state",
+        "git_reset_hard",
+        "clear_cache",
+        "restart_services",
+        "verify_health"
+      ]
+    },
+    "full": {
+      "description": "Complete rollback including database migrations",
+      "estimated_duration_minutes": 30,
+      "steps": [
+        "backup_current_state",
+        "rollback_database",
+        "git_reset_hard",
+        "restore_env_config",
+        "clear_cache",
+        "restart_services",
+        "verify_health",
+        "verify_database"
+      ]
+    },
+    "manual": {
+      "description": "Guided manual rollback with human checkpoints",
+      "estimated_duration_minutes": 60,
+      "steps": [
+        "backup_current_state",
+        "prompt_code_rollback",
+        "prompt_database_rollback",
+        "prompt_service_verification",
+        "generate_incident_report"
+      ]
+    }
+  },
+  
+  "monitoring": {
+    "log_retention_days": 90,
+    "log_level": "INFO",
+    "log_directory": "rollback/logs"
+  }
+}

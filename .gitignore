@@ -148,3 +148,9 @@ artifacts/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Rollback system - exclude runtime data but keep structure
+rollback/logs/*
+!rollback/logs/.gitkeep
+rollback/backups/*
+!rollback/backups/.gitkeep
