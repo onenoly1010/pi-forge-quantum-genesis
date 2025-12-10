@@ -1,0 +1,115 @@
+version: '3.8'
+
+services:
+  guardian-coordinator:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENVIRONMENT=testnet
+      - NFT_MINT_VALUE=0
+      - SUPABASE_URL=${TESTNET_SUPABASE_URL}
+      - SUPABASE_KEY=${TESTNET_SUPABASE_KEY}
+      - JWT_SECRET=${TESTNET_JWT_SECRET}
+      - GUARDIAN_KILL_SWITCH=${GUARDIAN_KILL_SWITCH:-off}
+    command: uvicorn guardian_coordinator.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ../server:/app/server
+    depends_on:
+      - db
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  fastapi-server:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8000"
+    environment:
+      - APP_ENVIRONMENT=testnet
+      - NFT_MINT_VALUE=0
+      - SUPABASE_URL=${TESTNET_SUPABASE_URL}
+      - SUPABASE_KEY=${TESTNET_SUPABASE_KEY}
+      - JWT_SECRET=${TESTNET_JWT_SECRET}
+      - GUARDIAN_KILL_SWITCH=${GUARDIAN_KILL_SWITCH:-off}
+    command: uvicorn server.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ../server:/app/server
+    depends_on:
+      - db
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  flask-dashboard:
+    build:
+      context: ..
+      dockerfile: Dockerfile.flask
+    ports:
+      - "5000:5000"
+    environment:
+      - APP_ENVIRONMENT=testnet
+      - NFT_MINT_VALUE=0
+      - SUPABASE_URL=${TESTNET_SUPABASE_URL}
+      - SUPABASE_KEY=${TESTNET_SUPABASE_KEY}
+    command: python server/app.py
+    volumes:
+      - ../server:/app/server
+    depends_on:
+      - fastapi-server
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  gradio-interface:
+    build:
+      context: ..
+      dockerfile: Dockerfile.gradio
+    ports:
+      - "7860:7860"
+    environment:
+      - APP_ENVIRONMENT=testnet
+      - NFT_MINT_VALUE=0
+      - SUPABASE_URL=${TESTNET_SUPABASE_URL}
+      - SUPABASE_KEY=${TESTNET_SUPABASE_KEY}
+    command: python server/canticle_interface.py
+    volumes:
+      - ../server:/app/server
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7860/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  db:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=testnet_user
+      - POSTGRES_PASSWORD=testnet_password
+      - POSTGRES_DB=pi_forge_testnet
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U testnet_user -d pi_forge_testnet"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:

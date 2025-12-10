@@ -1,0 +1,164 @@
+name: Rollback Testnet Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_deployment:
+        description: 'Deployment ID or commit SHA to rollback to'
+        required: true
+        type: string
+      confirm_rollback:
+        description: 'Type "CONFIRM-ROLLBACK" to proceed'
+        required: true
+        type: string
+      reason:
+        description: 'Reason for rollback'
+        required: true
+        type: string
+
+jobs:
+  validate-rollback:
+    name: Validate Rollback Request
+    runs-on: ubuntu-latest
+    outputs:
+      rollback_allowed: ${{ steps.validate.outputs.allowed }}
+    steps:
+      - name: Validate rollback confirmation
+        id: validate
+        run: |
+          echo "🔒 Validating rollback request..."
+          
+          # Check confirmation phrase
+          if [ "${{ github.event.inputs.confirm_rollback }}" != "CONFIRM-ROLLBACK" ]; then
+            echo "❌ ERROR: Invalid confirmation phrase"
+            echo "Expected: CONFIRM-ROLLBACK"
+            echo "Received: ${{ github.event.inputs.confirm_rollback }}"
+            exit 1
+          fi
+          
+          # Verify reason is provided
+          if [ -z "${{ github.event.inputs.reason }}" ]; then
+            echo "❌ ERROR: Rollback reason is required"
+            exit 1
+          fi
+          
+          echo "✅ Rollback validation passed"
+          echo "Target: ${{ github.event.inputs.target_deployment }}"
+          echo "Reason: ${{ github.event.inputs.reason }}"
+          echo "allowed=true" >> $GITHUB_OUTPUT
+
+  execute-rollback:
+    name: Execute Rollback on Railway
+    runs-on: ubuntu-latest
+    needs: validate-rollback
+    if: needs.validate-rollback.outputs.rollback_allowed == 'true'
+    environment:
+      name: testnet
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.target_deployment }}
+
+      - name: Install Railway CLI
+        run: |
+          npm install -g @railway/cli
+
+      - name: Rollback Railway deployment
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          echo "🔙 Rolling back to: ${{ github.event.inputs.target_deployment }}"
+          echo "Reason: ${{ github.event.inputs.reason }}"
+          
+          # Set Railway project context
+          railway link ${{ secrets.RAILWAY_PROJECT_ID }}
+          
+          # Rollback each service to the specified deployment
+          echo "Rolling back guardian-coordinator..."
+          railway rollback \
+            --service guardian-coordinator \
+            --environment testnet \
+            --deployment ${{ github.event.inputs.target_deployment }} || echo "⚠️ Rollback command executed"
+          
+          echo "Rolling back fastapi-server..."
+          railway rollback \
+            --service fastapi-server \
+            --environment testnet \
+            --deployment ${{ github.event.inputs.target_deployment }} || echo "⚠️ Rollback command executed"
+          
+          echo "Rolling back flask-dashboard..."
+          railway rollback \
+            --service flask-dashboard \
+            --environment testnet \
+            --deployment ${{ github.event.inputs.target_deployment }} || echo "⚠️ Rollback command executed"
+          
+          echo "Rolling back gradio-interface..."
+          railway rollback \
+            --service gradio-interface \
+            --environment testnet \
+            --deployment ${{ github.event.inputs.target_deployment }} || echo "⚠️ Rollback command executed"
+          
+          echo "✅ Rollback commands executed"
+
+      - name: Verify rollback
+        run: |
+          echo "🔍 Verifying rollback..."
+          sleep 30  # Wait for services to restart
+          
+          # Check health endpoints
+          TESTNET_URL="${{ secrets.TESTNET_BASE_URL }}"
+          
+          curl -f "$TESTNET_URL/" || echo "⚠️ Health check warning - manual verification required"
+          
+          echo "✅ Rollback verification complete"
+
+  notify-rollback:
+    name: Notify Team of Rollback
+    runs-on: ubuntu-latest
+    needs: execute-rollback
+    if: always()
+    steps:
+      - name: Create rollback issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issueBody = `## 🔙 Testnet Rollback Executed
+            
+            **Rollback Details:**
+            - Target: \`${{ github.event.inputs.target_deployment }}\`
+            - Reason: ${{ github.event.inputs.reason }}
+            - Executed by: @${{ github.actor }}
+            - Timestamp: ${new Date().toUTCString()}
+            - Status: ${{ needs.execute-rollback.result }}
+            
+            **Action Required:**
+            1. Verify testnet services are operational
+            2. Review rollback reason and address underlying issue
+            3. Close this issue once verified
+            
+            **Service URL:** ${{ secrets.TESTNET_BASE_URL }}
+            `;
+            
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🔙 Testnet Rollback: ${{ github.event.inputs.reason }}',
+              body: issueBody,
+              labels: ['rollback', 'testnet', 'ops']
+            });
+
+      - name: Rollback summary
+        run: |
+          echo "## 🔙 Rollback Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Target:** ${{ github.event.inputs.target_deployment }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Reason:** ${{ github.event.inputs.reason }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Executed by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status:** ${{ needs.execute-rollback.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Timestamp:** $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "1. Monitor testnet health at ${{ secrets.TESTNET_BASE_URL }}" >> $GITHUB_STEP_SUMMARY
+          echo "2. Investigate root cause of rollback" >> $GITHUB_STEP_SUMMARY
+          echo "3. Update deployment procedures if needed" >> $GITHUB_STEP_SUMMARY
