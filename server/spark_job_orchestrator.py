@@ -6,6 +6,7 @@ Manages and schedules Spark analytics jobs within the Sacred Trinity architectur
 import logging
 import os
 import time
+import random
 from typing import Dict, List, Any, Optional, Callable
 from datetime import datetime, timedelta
 from enum import Enum
@@ -288,7 +289,6 @@ class SparkJobOrchestrator:
     
     def _generate_sample_quantum_data(self, count: int) -> List[Dict[str, Any]]:
         """Generate sample quantum resonance data"""
-        import random
         phases = ["foundation", "growth", "harmony", "transcendence"]
         
         data = []
@@ -307,8 +307,6 @@ class SparkJobOrchestrator:
     
     def _generate_sample_payment_data(self, count: int) -> List[Dict[str, Any]]:
         """Generate sample payment data"""
-        import random
-        
         data = []
         for i in range(count):
             data.append({
@@ -322,8 +320,6 @@ class SparkJobOrchestrator:
     
     def _generate_sample_audit_data(self, count: int) -> List[Dict[str, Any]]:
         """Generate sample ethical audit data"""
-        import random
-        
         data = []
         for i in range(count):
             data.append({
