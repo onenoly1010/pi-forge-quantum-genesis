@@ -204,9 +204,10 @@ jobs:
           echo "=== CREATING MOCK DEPLOYMENT TAGS ==="
 
           # Create mock deployment tags for testing
-          TIMESTAMP1=$(date -d '1 hour ago' +%Y%m%d-%H%M%S 2>/dev/null || date -v-1H +%Y%m%d-%H%M%S)
-          TIMESTAMP2=$(date -d '2 hours ago' +%Y%m%d-%H%M%S 2>/dev/null || date -v-2H +%Y%m%d-%H%M%S)
-          TIMESTAMP3=$(date -d '3 hours ago' +%Y%m%d-%H%M%S 2>/dev/null || date -v-3H +%Y%m%d-%H%M%S)
+          # Use Python for portable timestamp generation
+          TIMESTAMP1=$(python3 -c "from datetime import datetime, timedelta; print((datetime.now() - timedelta(hours=1)).strftime('%Y%m%d-%H%M%S'))")
+          TIMESTAMP2=$(python3 -c "from datetime import datetime, timedelta; print((datetime.now() - timedelta(hours=2)).strftime('%Y%m%d-%H%M%S'))")
+          TIMESTAMP3=$(python3 -c "from datetime import datetime, timedelta; print((datetime.now() - timedelta(hours=3)).strftime('%Y%m%d-%H%M%S'))")
 
           git tag "deploy-${TIMESTAMP1}-abc1234"
           git tag "deploy-${TIMESTAMP2}-def5678"
@@ -280,12 +281,15 @@ jobs:
         run: |
           echo "=== TESTING ROLLBACK REPORT GENERATION ==="
 
+          # Get current timestamp for the report
+          CURRENT_TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+
           # Simulate rollback report creation (as in actual workflow)
-          cat > test-rollback-report.md << 'EOF'
+          cat > test-rollback-report.md <<'REPORT_EOF'
           # 🔄 Rollback Report
 
           **Run ID**: test-123
-          **Timestamp**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          **Timestamp**: TIMESTAMP_PLACEHOLDER
           **Rollback Target**: deploy-test-abc1234
 
           ## Reason
@@ -308,7 +312,10 @@ jobs:
 
           ---
           *Automated Rollback by AI Agent*
-          EOF
+          REPORT_EOF
+
+          # Replace placeholder with actual timestamp
+          sed -i "s/TIMESTAMP_PLACEHOLDER/${CURRENT_TIMESTAMP}/" test-rollback-report.md
 
           # Verify report was created
           if [ ! -f "test-rollback-report.md" ]; then

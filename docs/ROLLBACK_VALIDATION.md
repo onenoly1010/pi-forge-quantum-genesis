@@ -178,19 +178,44 @@ deploy-YYYYMMDD-HHMMSS-<commit-hash>
 
 ## Rollback Target Selection Logic
 
-The workflow uses this logic to select a rollback target:
+The workflow uses this logic to select a rollback target (this is GitHub Actions syntax from the workflow file):
+
+```yaml
+# In .github/workflows/ai-agent-handoff-runbook.yml
+- name: Find Last Successful Deployment
+  run: |
+    # If manual rollback with version specified
+    if [ -n "${{ github.event.inputs.rollback_version }}" ]; then
+      ROLLBACK_TAG="${{ github.event.inputs.rollback_version }}"
+    else
+      # Find last successful deployment tag (second newest)
+      ROLLBACK_TAG=$(git tag -l "deploy-*" --sort=-version:refname | head -2 | tail -1)
+      if [ -z "$ROLLBACK_TAG" ]; then
+        ROLLBACK_TAG="main"  # Fallback to main branch
+      fi
+    fi
+```
+
+**Standalone Shell Script Equivalent:**
 
 ```bash
-# If manual rollback with version specified
-if [ -n "${{ github.event.inputs.rollback_version }}" ]; then
-  ROLLBACK_TAG="${{ github.event.inputs.rollback_version }}"
+#!/bin/bash
+# For use outside GitHub Actions
+
+# Manual rollback version (can be set as environment variable)
+MANUAL_ROLLBACK_VERSION="${ROLLBACK_VERSION:-}"
+
+if [ -n "$MANUAL_ROLLBACK_VERSION" ]; then
+  ROLLBACK_TAG="$MANUAL_ROLLBACK_VERSION"
 else
   # Find last successful deployment tag (second newest)
   ROLLBACK_TAG=$(git tag -l "deploy-*" --sort=-version:refname | head -2 | tail -1)
   if [ -z "$ROLLBACK_TAG" ]; then
-    ROLLBACK_TAG="main"  # Fallback to main branch
+    ROLLBACK_TAG="main"
   fi
 fi
+
+echo "Rollback target: $ROLLBACK_TAG"
 ```
 
 ## Troubleshooting

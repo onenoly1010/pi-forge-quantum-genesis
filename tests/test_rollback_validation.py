@@ -127,40 +127,32 @@ class TestRollbackWorkflowValidation:
     def test_workflow_has_rollback_action(self):
         """Test that workflow file contains rollback action."""
         import os
-        
-        workflow_path = os.path.join(
-            os.path.dirname(__file__), 
-            '..', 
-            '.github', 
-            'workflows', 
-            'ai-agent-handoff-runbook.yml'
-        )
-        
+        from pathlib import Path
+
+        # Use pathlib for robust path resolution
+        test_dir = Path(__file__).parent
+        workflow_path = test_dir.parent / '.github' / 'workflows' / 'ai-agent-handoff-runbook.yml'
+
         # Check if workflow file exists
-        assert os.path.exists(workflow_path), "AI Agent Handoff workflow file should exist"
-        
-        with open(workflow_path, 'r') as f:
-            content = f.read()
-        
+        assert workflow_path.exists(), f"AI Agent Handoff workflow file should exist at {workflow_path}"
+
+        content = workflow_path.read_text()
+
         # Verify key rollback components exist
         assert 'rollback' in content.lower(), "Workflow should contain rollback functionality"
         assert 'rollback_version' in content, "Workflow should have rollback_version input"
-    
+
     def test_workflow_has_rollback_job(self):
         """Test that workflow contains a rollback job definition."""
         import os
-        
-        workflow_path = os.path.join(
-            os.path.dirname(__file__), 
-            '..', 
-            '.github', 
-            'workflows', 
-            'ai-agent-handoff-runbook.yml'
-        )
-        
-        with open(workflow_path, 'r') as f:
-            content = f.read()
-        
+        from pathlib import Path
+
+        # Use pathlib for robust path resolution
+        test_dir = Path(__file__).parent
+        workflow_path = test_dir.parent / '.github' / 'workflows' / 'ai-agent-handoff-runbook.yml'
+
+        content = workflow_path.read_text()
+
         # Check for rollback job
         assert re.search(r'^\s*rollback:', content, re.MULTILINE), \
             "Workflow should have a rollback job"
