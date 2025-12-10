@@ -1,0 +1,215 @@
+# ============================================================================
+# DOCKER COMPOSE - TESTNET LOCAL STAGING
+# Pi Forge Quantum Genesis - Complete Multi-App Stack
+# ============================================================================
+#
+# PURPOSE: Local testnet environment mirroring Railway deployment
+# USAGE: docker-compose -f infra/docker-compose.testnet.yml up
+#
+# PREREQUISITES:
+# 1. Copy .env.testnet.example to .env.testnet
+# 2. Fill in required testnet credentials
+# 3. Ensure APP_ENVIRONMENT=testnet in .env.testnet
+#
+# ============================================================================
+
+version: '3.8'
+
+services:
+  # =========================================================================
+  # Guardian Coordinator - Validation Sentinel (Port 8080)
+  # =========================================================================
+  guardian-coordinator:
+    build:
+      context: ..
+      dockerfile: guardian-coordinator/docker/Dockerfile.guardian
+    container_name: testnet-guardian-coordinator
+    ports:
+      - "8080:8080"
+    environment:
+      - APP_ENVIRONMENT=testnet
+      - GUARDIAN_KILL_SWITCH=off
+      - NFT_MINT_VALUE=0
+      - GUARDIAN_ID=guardian-local-001
+      - QUORUM_THRESHOLD=0.70
+      - ETHICAL_ENTROPY_MAX=0.05
+      - REDIS_URL=redis://redis:6379
+      - LOG_LEVEL=INFO
+      - PORT=8080
+    env_file:
+      - ../.env.testnet
+    networks:
+      - testnet-network
+    depends_on:
+      - redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  # =========================================================================
+  # FastAPI Server - Primary API (Port 8000)
+  # =========================================================================
+  fastapi-server:
+    build:
+      context: ..
+      target: development
+      dockerfile: Dockerfile
+    container_name: testnet-fastapi-server
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../server:/app/server:ro
+      - ../frontend:/app/frontend:ro
+      - /app/server/__pycache__
+    environment:
+      - APP_ENVIRONMENT=testnet
+      - PYTHONPATH=/app
+      - PORT=8000
+      - PI_NETWORK_MODE=testnet
+      - PI_SANDBOX_MODE=true
+      - NFT_MINT_VALUE=0
+      - GUARDIAN_KILL_SWITCH=off
+    env_file:
+      - ../.env.testnet
+    networks:
+      - testnet-network
+    depends_on:
+      - redis
+      - guardian-coordinator
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  # =========================================================================
+  # Flask Dashboard - Visualization (Port 5000)
+  # =========================================================================
+  flask-dashboard:
+    build:
+      context: ..
+      dockerfile: Dockerfile.flask
+    container_name: testnet-flask-dashboard
+    ports:
+      - "5000:5000"
+    volumes:
+      - ../server:/app/server:ro
+      - ../frontend:/app/frontend:ro
+      - /app/server/__pycache__
+    environment:
+      - APP_ENVIRONMENT=testnet
+      - PYTHONPATH=/app
+      - FLASK_ENV=development
+      - PORT=5000
+    env_file:
+      - ../.env.testnet
+    networks:
+      - testnet-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  # =========================================================================
+  # Gradio Interface - Ethical Audit (Port 7860)
+  # =========================================================================
+  gradio-interface:
+    build:
+      context: ..
+      dockerfile: Dockerfile.gradio
+    container_name: testnet-gradio-interface
+    ports:
+      - "7860:7860"
+    volumes:
+      - ../server:/app/server:ro
+      - ../frontend:/app/frontend:ro
+      - /app/server/__pycache__
+    environment:
+      - APP_ENVIRONMENT=testnet
+      - PYTHONPATH=/app
+      - GRADIO_SERVER_NAME=0.0.0.0
+      - GRADIO_SERVER_PORT=7860
+      - PORT=7860
+    env_file:
+      - ../.env.testnet
+    networks:
+      - testnet-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7860/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+
+  # =========================================================================
+  # Redis - Inter-service Communication
+  # =========================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: testnet-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - testnet-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # =========================================================================
+  # PostgreSQL - Optional Local Database (Alternative to Supabase)
+  # =========================================================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: testnet-postgres
+    environment:
+      POSTGRES_DB: testnet_quantum
+      POSTGRES_USER: testnet
+      POSTGRES_PASSWORD: testnet_password_123
+    ports:
+      - "5432:5432"
+    volumes:
+      - testnet_postgres_data:/var/lib/postgresql/data
+    networks:
+      - testnet-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U testnet"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  testnet_postgres_data:
+
+networks:
+  testnet-network:
+    driver: bridge
+
+# ============================================================================
+# TESTNET SAFETY ENFORCEMENT
+# ============================================================================
+# 
+# All services are configured with:
+# - APP_ENVIRONMENT=testnet (mandatory)
+# - NFT_MINT_VALUE=0 (zero-value enforcement)
+# - GUARDIAN_KILL_SWITCH=off (operational)
+# - PI_NETWORK_MODE=testnet (testnet API endpoints)
+# - PI_SANDBOX_MODE=true (sandbox payments)
+#
+# NEVER use this configuration for mainnet deployments
+# NEVER commit .env.testnet with actual credentials to git
+#
+# ============================================================================

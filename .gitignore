@@ -92,6 +92,9 @@ celerybeat-schedule
 
 # Environments
 .env
+.env.testnet
+.env.production
+.env.local
 .venv
 env/
 venv/
