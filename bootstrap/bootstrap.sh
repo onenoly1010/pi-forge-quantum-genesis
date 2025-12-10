@@ -275,6 +275,8 @@ setup_environment() {
     
     if [ -z "$JWT_SECRET" ] || [ "$JWT_SECRET" = "your-secure-random-string-here" ]; then
         log_warning "JWT_SECRET not configured in .env"
+    elif [ ${#JWT_SECRET} -lt 32 ]; then
+        log_warning "JWT_SECRET should be at least 32 characters for security"
     else
         log_success "JWT_SECRET is configured"
     fi
@@ -709,7 +711,7 @@ echo ""
 
 # Start FastAPI
 echo "🚀 Starting FastAPI (Port 8000)..."
-uvicorn server.main:app --host 0.0.0.0 --port 8000 > logs/fastapi.log 2>&1 &
+uvicorn server.main:app --host 127.0.0.1 --port 8000 > logs/fastapi.log 2>&1 &
 FASTAPI_PID=$!
 echo "   PID: $FASTAPI_PID"
 

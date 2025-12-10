@@ -30,6 +30,9 @@ services:
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      # Note: Ensure curl is installed in the Dockerfile if using this health check
+      # Alternative: Use Python-based health check if curl is not available
+      # test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
       interval: 30s
       timeout: 10s
       retries: 3

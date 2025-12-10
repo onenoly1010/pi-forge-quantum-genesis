@@ -560,7 +560,7 @@ Write-Host ""
 
 # Start FastAPI
 Write-Host "🚀 Starting FastAPI (Port 8000)..." -ForegroundColor Green
-`$fastApiProcess = Start-Process -FilePath "python" -ArgumentList "-m", "uvicorn", "server.main:app", "--host", "0.0.0.0", "--port", "8000" -PassThru -RedirectStandardOutput "logs\fastapi.log" -RedirectStandardError "logs\fastapi-error.log"
+`$fastApiProcess = Start-Process -FilePath "python" -ArgumentList "-m", "uvicorn", "server.main:app", "--host", "127.0.0.1", "--port", "8000" -PassThru -RedirectStandardOutput "logs\fastapi.log" -RedirectStandardError "logs\fastapi-error.log"
 Write-Host "   PID: `$(`$fastApiProcess.Id)" -ForegroundColor Gray
 
 Start-Sleep -Seconds 2
