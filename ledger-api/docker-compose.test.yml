@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  postgres-test:
+    image: postgres:15-alpine
+    container_name: ledger-postgres-test
+    environment:
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_password
+      POSTGRES_DB: test_db
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test_user -d test_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    tmpfs:
+      - /var/lib/postgresql/data
+
+  ledger-api-test:
+    build: .
+    container_name: ledger-api-test
+    environment:
+      DATABASE_URL: postgresql://test_user:test_password@postgres-test:5432/test_db
+      GUARDIAN_JWT_SECRET: test-secret-key-at-least-32-characters-long-for-testing
+      NFT_MINT_VALUE: 0
+      APP_ENVIRONMENT: testnet
+      AUTO_CREATE_TABLES: "true"
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+    command: pytest ledger_api/tests/ -v --tb=short

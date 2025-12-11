@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: ledger-postgres
+    environment:
+      POSTGRES_USER: ledger_user
+      POSTGRES_PASSWORD: ledger_password
+      POSTGRES_DB: ledger_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql/schema:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ledger_user -d ledger_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ledger-api:
+    build: .
+    container_name: ledger-api
+    environment:
+      DATABASE_URL: postgresql://ledger_user:ledger_password@postgres:5432/ledger_db
+      GUARDIAN_JWT_SECRET: ${GUARDIAN_JWT_SECRET:-dev-secret-key-at-least-32-characters-long}
+      NFT_MINT_VALUE: 0
+      APP_ENVIRONMENT: development
+      API_HOST: 0.0.0.0
+      API_PORT: 8001
+      LOG_LEVEL: INFO
+      AUTO_CREATE_TABLES: "false"
+      CORS_ORIGINS: http://localhost:3000,http://localhost:8000
+    ports:
+      - "8001:8001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./ledger_api:/app/ledger_api
+    command: uvicorn ledger_api.main:app --host 0.0.0.0 --port 8001 --reload
+
+volumes:
+  postgres_data:
