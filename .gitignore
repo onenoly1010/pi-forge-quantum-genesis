@@ -140,6 +140,8 @@ node_modules/
 # Build artifacts
 build/
 artifacts/
+public/
+dist/
 
 # IDE/Editor settings
 .vs/
