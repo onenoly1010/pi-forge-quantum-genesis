@@ -170,7 +170,14 @@ class SelfHealingSystem:
 
     def _check_disk_usage(self) -> DiagnosticResult:
         """Check disk usage"""
-        disk = psutil.disk_usage('/')
+        try:
+            # Use current working directory for cross-platform compatibility
+            import os
+            disk = psutil.disk_usage(os.getcwd())
+        except Exception:
+            # Fallback to root for Unix-like systems
+            disk = psutil.disk_usage('/')
+        
         percent = disk.percent
         threshold = 90.0
         

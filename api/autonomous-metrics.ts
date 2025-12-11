@@ -3,6 +3,14 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 /**
  * Autonomous Metrics Recording Service
  * Records AI-level critical reasoning metrics for autonomous handover capability
+ * 
+ * NOTE: This demo implementation uses in-memory storage.
+ * For production use, consider integrating with:
+ * - Vercel KV (Redis-based key-value store)
+ * - Vercel Postgres (SQL database)
+ * - External database services (MongoDB, PostgreSQL, etc.)
+ * 
+ * Current in-memory storage will be lost on serverless function cold starts.
  */
 
 interface MetricData {

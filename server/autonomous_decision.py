@@ -151,7 +151,7 @@ class AIDecisionMatrix:
             actions=actions,
             requires_guardian=requires_guardian,
             metadata={
-                "parameters": [p.dict() for p in context.parameters],
+                "parameters": [p.model_dump() for p in context.parameters],
                 "priority": context.priority.value,
                 "source": context.source
             }
@@ -181,7 +181,11 @@ class AIDecisionMatrix:
         for param in context.parameters:
             # Normalize parameter value to 0-1 range if threshold is provided
             if param.threshold is not None and isinstance(param.value, (int, float)):
-                normalized = min(1.0, float(param.value) / param.threshold)
+                # Avoid division by zero
+                if param.threshold != 0:
+                    normalized = min(1.0, float(param.value) / param.threshold)
+                else:
+                    normalized = 1.0 if param.value > 0 else 0.0
             elif isinstance(param.value, bool):
                 normalized = 1.0 if param.value else 0.0
             elif isinstance(param.value, (int, float)):

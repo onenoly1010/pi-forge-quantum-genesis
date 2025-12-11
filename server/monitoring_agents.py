@@ -100,10 +100,17 @@ class PerformanceMonitoringAgent(MonitoringAgent):
         """Collect performance metrics"""
         try:
             import psutil
+            import os
             
             cpu_percent = psutil.cpu_percent(interval=1)
             memory = psutil.virtual_memory()
-            disk = psutil.disk_usage('/')
+            
+            # Use current working directory for cross-platform compatibility
+            try:
+                disk = psutil.disk_usage(os.getcwd())
+            except Exception:
+                # Fallback to root for Unix-like systems
+                disk = psutil.disk_usage('/')
             
             value = {
                 "cpu_percent": cpu_percent,

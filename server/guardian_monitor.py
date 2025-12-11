@@ -64,6 +64,10 @@ class GuardianMonitor:
     """
     Guardian monitoring system for safety oversight and decision validation
     """
+    
+    # Configuration constants
+    DEFAULT_SAFETY_THRESHOLD = 0.8
+    DEFAULT_ETHICAL_THRESHOLD = 0.9
 
     def __init__(self):
         self.guardian_decisions: List[GuardianDecision] = []
@@ -185,7 +189,7 @@ class GuardianMonitor:
     def _check_safety_threshold(self, decision_data: Dict[str, Any]) -> Dict[str, Any]:
         """Check if decision meets safety thresholds"""
         confidence = decision_data.get("confidence", 0.0)
-        safety_threshold = 0.8
+        safety_threshold = self.DEFAULT_SAFETY_THRESHOLD
         
         passed = confidence >= safety_threshold
         

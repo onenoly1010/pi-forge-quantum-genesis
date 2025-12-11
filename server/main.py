@@ -324,6 +324,36 @@ class RateLimiter:
 # Initialize rate limiter (60 requests per minute per IP)
 rate_limiter = RateLimiter(requests_per_minute=60)
 
+# =============================================================================
+# UTILITY FUNCTIONS
+# =============================================================================
+
+def validate_enum(value: Optional[str], enum_class: type, param_name: str):
+    """
+    Helper function to validate and convert string to enum
+    
+    Args:
+        value: String value to convert
+        enum_class: Enum class to convert to
+        param_name: Parameter name for error messages
+        
+    Returns:
+        Enum value or None
+        
+    Raises:
+        HTTPException: If value is invalid
+    """
+    if value is None:
+        return None
+    
+    try:
+        return enum_class(value)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid {param_name}. Must be one of: {[e.value for e in enum_class]}"
+        )
+
 # Connection tracking for scalability metrics
 class ConnectionTracker:
     """Track active connections for load monitoring"""
@@ -822,15 +852,7 @@ async def get_decision_history(
     decision_matrix = get_decision_matrix()
     
     # Convert string to enum if provided
-    type_filter = None
-    if decision_type:
-        try:
-            type_filter = DecisionType(decision_type)
-        except ValueError:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid decision type. Must be one of: {[t.value for t in DecisionType]}"
-            )
+    type_filter = validate_enum(decision_type, DecisionType, "decision_type")
     
     history = decision_matrix.get_decision_history(type_filter, limit)
     
@@ -880,15 +902,7 @@ async def get_incident_reports(
     healing_system = get_healing_system()
     
     # Convert string to enum if provided
-    severity_filter = None
-    if severity:
-        try:
-            severity_filter = IncidentSeverity(severity)
-        except ValueError:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid severity. Must be one of: {[s.value for s in IncidentSeverity]}"
-            )
+    severity_filter = validate_enum(severity, IncidentSeverity, "severity")
     
     incidents = healing_system.get_incident_report(severity_filter, component, limit)
     
@@ -970,13 +984,8 @@ async def update_monitoring_level(
     reason: str
 ):
     """Update system monitoring level (requires guardian authentication)"""
-    try:
-        new_level = MonitoringLevel(level)
-    except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid monitoring level. Must be one of: {[l.value for l in MonitoringLevel]}"
-        )
+    # Convert string to enum
+    new_level = validate_enum(level, MonitoringLevel, "monitoring_level")
     
     monitor = get_guardian_monitor()
     monitor.update_monitoring_level(new_level, reason)
@@ -996,15 +1005,7 @@ async def get_validation_history(
     monitor = get_guardian_monitor()
     
     # Convert string to enum if provided
-    status_filter = None
-    if status:
-        try:
-            status_filter = ValidationStatus(status)
-        except ValueError:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid status. Must be one of: {[s.value for s in ValidationStatus]}"
-            )
+    status_filter = validate_enum(status, ValidationStatus, "status")
     
     history = monitor.get_validation_history(status_filter, limit)
     
