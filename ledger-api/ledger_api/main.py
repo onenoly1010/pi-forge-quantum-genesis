@@ -54,7 +54,7 @@ async def lifespan(app: FastAPI):
     
     # Create database tables if they don't exist
     # Note: In production, use Alembic migrations instead
-    if os.getenv("AUTO_CREATE_TABLES", "false").lower() == "true":
+    if os.getenv("AUTO_CREATE_TABLES", "false").lower() == "true" and not os.getenv("TESTING"):
         logger.warning("Auto-creating database tables (use Alembic migrations in production)")
         Base.metadata.create_all(bind=engine)
     

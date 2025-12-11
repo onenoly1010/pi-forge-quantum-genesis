@@ -76,6 +76,21 @@ class AllocationEngine:
             logger.info(f"Allocations already exist for transaction {parent_transaction_id}, returning existing")
             return [alloc.id for alloc in existing_allocations]
 
+        # IMPORTANT: First, credit the parent deposit to the target account
+        # This is the initial deposit that arrives
+        target_account = self.db.query(LogicalAccount).filter(
+            LogicalAccount.id == parent_tx.to_account_id
+        ).first()
+        
+        if not target_account:
+            raise ValueError(f"Target account {parent_tx.to_account_id} not found")
+        
+        # Add the deposit to the target account
+        target_account.current_balance += parent_tx.amount
+        self.db.flush()
+        
+        logger.info(f"Credited {parent_tx.amount} to {target_account.account_name}")
+
         # Get applicable allocation rule
         allocation_rule = self._get_applicable_rule(parent_tx.amount)
         
@@ -121,7 +136,7 @@ class AllocationEngine:
                 to_account_id=target_account.id,
                 parent_transaction_id=parent_transaction_id,
                 description=f"Auto-allocation: {percentage}% to {account_name}",
-                metadata=json.dumps({
+                tx_metadata=json.dumps({
                     "allocation_rule_id": allocation_rule.id,
                     "allocation_rule_name": allocation_rule.rule_name,
                     "percentage": str(percentage)

@@ -74,7 +74,7 @@ class LedgerTransaction(Base):
     
     # Metadata
     description = Column(Text)
-    metadata = Column(Text)  # JSON string for SQLite compatibility
+    tx_metadata = Column(Text)  # JSON string for SQLite compatibility (renamed to avoid SQLAlchemy conflict)
     
     # User context
     performed_by = Column(String(255))

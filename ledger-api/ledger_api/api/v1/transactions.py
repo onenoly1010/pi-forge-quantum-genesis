@@ -49,7 +49,7 @@ def create_transaction(
         external_tx_hash=transaction.external_tx_hash,
         pi_payment_id=transaction.pi_payment_id,
         description=transaction.description,
-        metadata=metadata_json,
+        tx_metadata=metadata_json,
         performed_by=transaction.performed_by
     )
 
@@ -99,9 +99,11 @@ def create_transaction(
         db.commit()
         db.refresh(db_transaction)
 
-        # Parse metadata back to dict for response
-        if db_transaction.metadata:
-            db_transaction.metadata = json.loads(db_transaction.metadata)
+        # Parse tx_metadata back to dict for response
+        if db_transaction.tx_metadata:
+            db_transaction.metadata = json.loads(db_transaction.tx_metadata)
+        else:
+            db_transaction.metadata = None
 
         return db_transaction
 
@@ -153,11 +155,13 @@ def list_transactions(
 
     # Parse metadata for each transaction
     for tx in transactions:
-        if tx.metadata:
+        if tx.tx_metadata:
             try:
-                tx.metadata = json.loads(tx.metadata)
+                tx.metadata = json.loads(tx.tx_metadata)
             except json.JSONDecodeError:
                 tx.metadata = {}
+        else:
+            tx.metadata = None
 
     return TransactionListResponse(
         transactions=transactions,
@@ -183,11 +187,13 @@ def get_transaction(
         raise HTTPException(status_code=404, detail="Transaction not found")
 
     # Parse metadata
-    if transaction.metadata:
+    if transaction.tx_metadata:
         try:
-            transaction.metadata = json.loads(transaction.metadata)
+            transaction.metadata = json.loads(transaction.tx_metadata)
         except json.JSONDecodeError:
             transaction.metadata = {}
+    else:
+        transaction.metadata = None
 
     return transaction
 
