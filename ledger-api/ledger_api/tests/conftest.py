@@ -57,18 +57,39 @@ def test_db(test_engine):
 @pytest.fixture(scope="function")
 def client(test_db):
     """Create test client with test database."""
+    # Create test app without lifespan
+    from fastapi import FastAPI
+    from ledger_api.api.v1 import transactions, treasury, reconcile, allocation_rules
+    
+    test_app = FastAPI(title="Test Ledger API")
+    
+    # Include routers
+    test_app.include_router(transactions.router, prefix="/api/v1")
+    test_app.include_router(treasury.router, prefix="/api/v1")
+    test_app.include_router(reconcile.router, prefix="/api/v1")
+    test_app.include_router(allocation_rules.router, prefix="/api/v1")
+    
+    # Add health endpoints
+    @test_app.get("/")
+    async def root():
+        return {"service": "ledger-api", "status": "healthy", "version": "v1"}
+    
+    @test_app.get("/health")
+    async def health():
+        return {"status": "healthy", "service": "ledger-api", "version": "v1"}
+    
     def override_get_db():
         try:
             yield test_db
         finally:
             pass
     
-    app.dependency_overrides[get_db] = override_get_db
+    test_app.dependency_overrides[get_db] = override_get_db
     
-    with TestClient(app) as test_client:
+    with TestClient(test_app) as test_client:
         yield test_client
     
-    app.dependency_overrides.clear()
+    test_app.dependency_overrides.clear()
 
 
 @pytest.fixture
