@@ -738,91 +738,89 @@ jobs:
               'rolled_back': 'ROLLED BACK'
             };
             
+            const deploymentInfo = overall === 'success' ? 
+              '\n- **URL**: ${{ needs.deployment.outputs.deployment_url || 'N/A' }}\n- **ID**: ${{ needs.deployment.outputs.deployment_id || 'N/A' }}\n- **Commit**: `${{ github.sha }}`\n' : '';
+            
             const body = `
-            # ${statusEmojis[overall]} ${statusMessages[overall]}
-            
-            **Last Updated**: ${timestamp}
-            **Run**: [#${{ github.run_id }}](${runUrl})
-            **Trigger**: ${{ github.event_name }}
-            **Branch**: ${{ github.ref_name }}
-            
-            ## Job Status Summary
-            
-            | Job | Status | Result |
-            |-----|--------|--------|
-            | 🛡️ Safety Gate | ${{ needs.safety-gate.result }} | ${{ needs.safety-gate.outputs.deployment_approved == 'true' && '✅ Approved' || '❌ Blocked' }} |
-            | 🔧 CI Pipeline | ${{ needs.ci-pipeline.result }} | ${{ needs.ci-pipeline.outputs.build_success == 'true' && '✅ Success' || '⚠️ Issues' }} |
-            | 🚀 Deployment | ${{ needs.deployment.result }} | ${{ needs.deployment.result == 'success' && '✅ Deployed' || needs.deployment.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |
-            | 📊 Monitoring | ${{ needs.monitoring.result }} | ${{ needs.monitoring.outputs.health_status || 'N/A' }} |
-            | 🔄 Rollback | ${{ needs.rollback.result }} | ${{ needs.rollback.result == 'success' && '✅ Executed' || needs.rollback.result == 'skipped' && '⏭️ Not Needed' || '❌ Failed' }} |
-            
-            ## System Health
-            
-            - **FastAPI Quantum Conduit** (Port 8000): ${{ needs.monitoring.outputs.health_status == 'healthy' && '✅' || '⚠️' }} ${needs.monitoring.outputs.health_status || 'Unknown'}
-            - **Flask Glyph Weaver** (Port 5000): ${{ needs.monitoring.outputs.health_status == 'healthy' && '✅' || '⚠️' }} ${needs.monitoring.outputs.health_status || 'Unknown'}
-            - **Gradio Truth Mirror** (Port 7860): ${{ needs.monitoring.outputs.health_status == 'healthy' && '✅' || '⚠️' }} ${needs.monitoring.outputs.health_status || 'Unknown'}
-            
-            ## Deployment Information
-            
-            ${overall === 'success' ? \`
-            - **URL**: ${{ needs.deployment.outputs.deployment_url || 'N/A' }}
-            - **ID**: ${{ needs.deployment.outputs.deployment_id || 'N/A' }}
-            - **Commit**: \`${{ github.sha }}\`
-            \` : ''}
-            
-            ## AI Agent Instructions
-            
-            ### For Monitoring
-            \`\`\`bash
-            # Check current deployment status
-            gh run view ${{ github.run_id }}
-            
-            # Download monitoring reports
-            gh run download ${{ github.run_id }} -n monitoring-report
-            \`\`\`
-            
-            ### For Rollback (if needed)
-            \`\`\`bash
-            # Trigger manual rollback
-            gh workflow run "ai-agent-handoff-runbook.yml" \\
-              -f action=rollback \\
-              -f rollback_version="<previous-deployment-tag>"
-            \`\`\`
-            
-            ### For Updates
-            \`\`\`bash
-            # Update specific component
-            gh workflow run "ai-agent-handoff-runbook.yml" \\
-              -f action=update-component \\
-              -f target_component=fastapi
-            \`\`\`
-            
-            ---
-            
-            ## Configuration
-            
-            This issue is automatically maintained by the AI Agent Autonomous Runbook.
-            
-            **Labels**: \`ai-agent\`, \`automated\`, \`runbook\`
-            **Auto-Update**: Every 6 hours or on deployment
-            
-            ### Emergency Procedures
-            
-            1. **Emergency Stop**: \`gh workflow run "ai-agent-handoff-runbook.yml" -f action=emergency-stop\`
-            2. **Force Rollback**: See rollback instructions above
-            3. **Manual Intervention**: Contact repository maintainer
-            
-            ### Monitoring Alerts
-            
-            Configure webhook notifications:
-            - Set \`SLACK_WEBHOOK_URL\` secret for Slack alerts
-            - Set \`DISCORD_WEBHOOK_URL\` secret for Discord alerts
-            
-            ---
-            
-            *Last automated update: ${timestamp}*
-            *Workflow: [AI Agent Handoff & Autonomous Runbook](${runUrl})*
-            `;
+# ${statusEmojis[overall]} ${statusMessages[overall]}
+
+**Last Updated**: ${timestamp}
+**Run**: [#${{ github.run_id }}](${runUrl})
+**Trigger**: ${{ github.event_name }}
+**Branch**: ${{ github.ref_name }}
+
+## Job Status Summary
+
+| Job | Status | Result |
+|-----|--------|--------|
+| 🛡️ Safety Gate | ${{ needs.safety-gate.result }} | ${{ needs.safety-gate.outputs.deployment_approved == 'true' && '✅ Approved' || '❌ Blocked' }} |
+| 🔧 CI Pipeline | ${{ needs.ci-pipeline.result }} | ${{ needs.ci-pipeline.outputs.build_success == 'true' && '✅ Success' || '⚠️ Issues' }} |
+| 🚀 Deployment | ${{ needs.deployment.result }} | ${{ needs.deployment.result == 'success' && '✅ Deployed' || needs.deployment.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |
+| 📊 Monitoring | ${{ needs.monitoring.result }} | ${{ needs.monitoring.outputs.health_status || 'N/A' }} |
+| 🔄 Rollback | ${{ needs.rollback.result }} | ${{ needs.rollback.result == 'success' && '✅ Executed' || needs.rollback.result == 'skipped' && '⏭️ Not Needed' || '❌ Failed' }} |
+
+## System Health
+
+- **FastAPI Quantum Conduit** (Port 8000): ${{ needs.monitoring.outputs.health_status == 'healthy' && '✅' || '⚠️' }} ${needs.monitoring.outputs.health_status || 'Unknown'}
+- **Flask Glyph Weaver** (Port 5000): ${{ needs.monitoring.outputs.health_status == 'healthy' && '✅' || '⚠️' }} ${needs.monitoring.outputs.health_status || 'Unknown'}
+- **Gradio Truth Mirror** (Port 7860): ${{ needs.monitoring.outputs.health_status == 'healthy' && '✅' || '⚠️' }} ${needs.monitoring.outputs.health_status || 'Unknown'}
+
+## Deployment Information
+${deploymentInfo}
+
+## AI Agent Instructions
+
+### For Monitoring
+\`\`\`bash
+# Check current deployment status
+gh run view ${{ github.run_id }}
+
+# Download monitoring reports
+gh run download ${{ github.run_id }} -n monitoring-report
+\`\`\`
+
+### For Rollback (if needed)
+\`\`\`bash
+# Trigger manual rollback
+gh workflow run "ai-agent-handoff-runbook.yml" \\
+  -f action=rollback \\
+  -f rollback_version="<previous-deployment-tag>"
+\`\`\`
+
+### For Updates
+\`\`\`bash
+# Update specific component
+gh workflow run "ai-agent-handoff-runbook.yml" \\
+  -f action=update-component \\
+  -f target_component=fastapi
+\`\`\`
+
+---
+
+## Configuration
+
+This issue is automatically maintained by the AI Agent Autonomous Runbook.
+
+**Labels**: \`ai-agent\`, \`automated\`, \`runbook\`
+**Auto-Update**: Every 6 hours or on deployment
+
+### Emergency Procedures
+
+1. **Emergency Stop**: \`gh workflow run "ai-agent-handoff-runbook.yml" -f action=emergency-stop\`
+2. **Force Rollback**: See rollback instructions above
+3. **Manual Intervention**: Contact repository maintainer
+
+### Monitoring Alerts
+
+Configure webhook notifications:
+- Set \`SLACK_WEBHOOK_URL\` secret for Slack alerts
+- Set \`DISCORD_WEBHOOK_URL\` secret for Discord alerts
+
+---
+
+*Last automated update: ${timestamp}*
+*Workflow: [AI Agent Handoff & Autonomous Runbook](${runUrl})*
+`;
             
             const issueNumber = '${{ steps.find-issue.outputs.issue_number }}';
             
@@ -836,11 +834,12 @@ jobs:
               });
               
               // Add comment
+              const commentBody = `### Status Update: ${statusEmojis[overall]} ${statusMessages[overall]}\n\n**Timestamp**: ${timestamp}\n[View Run](${runUrl})`;
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: parseInt(issueNumber),
-                body: \`### Status Update: ${statusEmojis[overall]} ${statusMessages[overall]}\\n\\n**Timestamp**: ${timestamp}\\n[View Run](${runUrl})\`
+                body: commentBody
               });
               
               console.log(\`Updated issue #\${issueNumber}\`);
