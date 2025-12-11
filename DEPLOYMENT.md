@@ -1,4 +1,46 @@
-# Deployment Notes (Railway)
+# Deployment Notes
+
+## Vercel Deployment
+
+This repository is configured for deployment on Vercel with the following setup:
+
+### Build Configuration
+
+- **Build Command**: `npm run build`
+- **Output Directory**: `public`
+- **Node.js Version**: 18.x or higher (supports up to 24.x)
+
+The build process:
+1. Runs TypeScript type-checking (`tsc --noEmit`)
+2. Copies static assets to the `public` directory
+3. Includes all HTML files, JavaScript files, and the `frontend` directory
+
+### Environment Variables
+
+Set these in your Vercel project settings:
+- `PI_APP_SECRET` - Required for Pi Network authentication
+- `GUARDIAN_SLACK_WEBHOOK_URL` - Optional for Slack alerts
+- `MAILGUN_DOMAIN` and `MAILGUN_API_KEY` - Optional for email alerts
+- `SENDGRID_API_KEY` and `SENDGRID_FROM` - Optional for SendGrid emails
+
+### Serverless Functions
+
+API endpoints in the `api/` directory are automatically deployed as Vercel serverless functions:
+- `/api/pi-identify` - Pi Network authentication endpoint
+
+### Local Testing
+
+To test the build locally:
+```bash
+npm install
+npm run build
+```
+
+The `public` directory will contain all deployable assets.
+
+---
+
+## Railway Deployment
 
 This repository includes a `railway.toml` to assist with Railway deployments. Quick notes:
 
