@@ -1,18 +1,18 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "lib": ["ES2020"],
-    "types": ["node"],
+    "outDir": "public",
+    "module": "commonjs",
+    "target": "esnext",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
     "resolveJsonModule": true,
-    "isolatedModules": true
+    "isolatedModules": true,
+    "lib": ["ES2020"],
+    "types": ["node"],
+    "moduleResolution": "node"
   },
-  "include": ["api/**/*.ts", "guardian-alerts.ts"],
+  "include": ["src/**/*", "api/**/*.ts", "guardian-alerts.ts"],
   "exclude": ["node_modules"]
 }

@@ -4,7 +4,8 @@
   "description": "Pi Forge Quantum Genesis - Multi-application repository with FastAPI, Flask, and Gradio",
   "main": "index.html",
   "scripts": {
-    "build": "tsc --noEmit",
+    "build": "tsc && npm run copy-static",
+    "copy-static": "cp index.html public/ && cp -r frontend public/ 2>/dev/null || true",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
