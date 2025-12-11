@@ -18,6 +18,7 @@ from pi_network import (
     PiPaymentError
 )
 from pi_network.payments import PaymentStatus
+from pi_network.ethical_guardian import ethical_guardian
 
 logger = logging.getLogger(__name__)
 
@@ -150,17 +151,40 @@ async def get_pi_network_health():
 
 
 @router.post("/authenticate", response_model=PiAuthResponse, summary="Authenticate Pi Network user")
-async def authenticate_pi_user(auth_request: PiAuthRequest):
+async def authenticate_pi_user(auth_request: PiAuthRequest, request: Request):
     """
     Authenticate user with Pi Network credentials
     
+    Includes ethical audit for authentication patterns
+    
     Args:
         auth_request: Authentication request with Pi Network credentials
+        request: FastAPI request object for IP extraction
         
     Returns:
         Authentication result with session information
     """
     try:
+        # Perform ethical audit of authentication
+        client_ip = request.client.host if request.client else None
+        auth_audit = ethical_guardian.audit_authentication(
+            user_id=auth_request.pi_uid,
+            ip_address=client_ip,
+            metadata={"username": auth_request.username}
+        )
+        
+        # Check compliance
+        if auth_audit.compliance_status.value == "rejected":
+            logger.warning(f"Authentication rejected by ethical guardian: {auth_audit.findings}")
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail={
+                    "error": "Authentication rejected by ethical compliance review",
+                    "audit": auth_audit.to_dict()
+                }
+            )
+        
+        # Proceed with authentication
         result = pi_client.authenticate_user(
             pi_uid=auth_request.pi_uid,
             username=auth_request.username,
@@ -168,10 +192,16 @@ async def authenticate_pi_user(auth_request: PiAuthRequest):
             session_data=auth_request.session_data
         )
         
-        logger.info(f"User authenticated: {auth_request.username} (UID: {auth_request.pi_uid})")
+        logger.info(
+            f"User authenticated with ethical audit: {auth_request.username} | "
+            f"Risk: {auth_audit.risk_level.value} | "
+            f"UID: {auth_request.pi_uid}"
+        )
         
         return PiAuthResponse(**result)
         
+    except HTTPException:
+        raise
     except PiAuthenticationError as e:
         logger.warning(f"Authentication failed: {e}")
         raise HTTPException(
@@ -261,7 +291,7 @@ async def logout_pi_user(session_id: str):
 @router.post("/payments/create", response_model=PiPaymentResponse, summary="Create Pi Network payment")
 async def create_pi_payment(payment_request: PiPaymentCreateRequest):
     """
-    Create new Pi Network payment
+    Create new Pi Network payment with ethical audit
     
     Args:
         payment_request: Payment creation request
@@ -270,6 +300,26 @@ async def create_pi_payment(payment_request: PiPaymentCreateRequest):
         Created payment information
     """
     try:
+        # Perform ethical audit BEFORE creating payment
+        audit_result = ethical_guardian.audit_payment(
+            payment_id=f"pre_audit_{int(time.time())}",
+            amount=payment_request.amount,
+            user_id=payment_request.user_id,
+            metadata=payment_request.metadata
+        )
+        
+        # Check compliance status
+        if audit_result.compliance_status.value == "rejected":
+            logger.warning(f"Payment rejected by ethical guardian: {audit_result.findings}")
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail={
+                    "error": "Payment rejected by ethical compliance review",
+                    "audit": audit_result.to_dict()
+                }
+            )
+        
+        # Create payment
         payment = pi_client.create_payment(
             amount=payment_request.amount,
             memo=payment_request.memo,
@@ -277,7 +327,22 @@ async def create_pi_payment(payment_request: PiPaymentCreateRequest):
             metadata=payment_request.metadata
         )
         
-        logger.info(f"Payment created: {payment.payment_id} for {payment.amount} Pi")
+        # Audit the created payment
+        final_audit = ethical_guardian.audit_payment(
+            payment_id=payment.payment_id,
+            amount=payment.amount,
+            user_id=payment.user_id,
+            metadata=payment.metadata
+        )
+        
+        # Add audit info to metadata
+        payment.metadata["ethical_audit"] = final_audit.to_dict()
+        
+        logger.info(
+            f"Payment created with ethical audit: {payment.payment_id} | "
+            f"Risk: {final_audit.risk_level.value} | "
+            f"Status: {final_audit.compliance_status.value}"
+        )
         
         return PiPaymentResponse(
             payment_id=payment.payment_id,
@@ -290,6 +355,8 @@ async def create_pi_payment(payment_request: PiPaymentCreateRequest):
             metadata=payment.metadata
         )
         
+    except HTTPException:
+        raise
     except PiPaymentError as e:
         logger.warning(f"Payment creation failed: {e}")
         raise HTTPException(
@@ -543,4 +610,101 @@ async def get_payment_statistics():
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to retrieve statistics: {str(e)}"
+        )
+
+
+# --- ETHICAL GUARDIAN ENDPOINTS ---
+
+@router.get("/ethics/audit-summary", summary="Get ethical audit summary")
+async def get_ethical_audit_summary(limit: int = 100):
+    """
+    Get summary of ethical audits
+    
+    Args:
+        limit: Maximum number of audits to include in summary
+        
+    Returns:
+        Audit summary with risk distribution and statistics
+    """
+    try:
+        summary = ethical_guardian.get_audit_summary(limit)
+        
+        return {
+            "success": True,
+            "summary": summary,
+            "timestamp": time.time()
+        }
+    except Exception as e:
+        logger.error(f"Get audit summary error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to retrieve audit summary: {str(e)}"
+        )
+
+
+@router.get("/ethics/high-risk-audits", summary="Get high-risk audit results")
+async def get_high_risk_audits(limit: int = 20):
+    """
+    Get recent high-risk ethical audit results
+    
+    Args:
+        limit: Maximum number of results
+        
+    Returns:
+        List of high-risk audit results requiring attention
+    """
+    try:
+        high_risk = ethical_guardian.get_high_risk_audits(limit)
+        
+        return {
+            "success": True,
+            "count": len(high_risk),
+            "audits": high_risk,
+            "timestamp": time.time()
+        }
+    except Exception as e:
+        logger.error(f"Get high-risk audits error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to retrieve high-risk audits: {str(e)}"
+        )
+
+
+@router.post("/ethics/audit-payment", summary="Manually audit a payment")
+async def manual_payment_audit(
+    payment_id: str,
+    amount: float,
+    user_id: str,
+    metadata: Optional[Dict[str, Any]] = None
+):
+    """
+    Manually trigger ethical audit for a payment
+    
+    Args:
+        payment_id: Payment identifier
+        amount: Payment amount
+        user_id: User making payment
+        metadata: Additional metadata
+        
+    Returns:
+        Audit result
+    """
+    try:
+        audit_result = ethical_guardian.audit_payment(
+            payment_id=payment_id,
+            amount=amount,
+            user_id=user_id,
+            metadata=metadata
+        )
+        
+        return {
+            "success": True,
+            "audit": audit_result.to_dict(),
+            "timestamp": time.time()
+        }
+    except Exception as e:
+        logger.error(f"Manual payment audit error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Manual audit failed: {str(e)}"
         )
