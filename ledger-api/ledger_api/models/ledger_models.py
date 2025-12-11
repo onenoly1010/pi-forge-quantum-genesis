@@ -26,7 +26,7 @@ class LogicalAccount(Base):
     current_balance = Column(Numeric(20, 8), nullable=False, default=0.0)
     allocation_percentage = Column(Numeric(5, 2), default=0.0)
     is_active = Column(Boolean, default=True)
-    metadata = Column(JSON, default={})
+    meta_data = Column(JSON, default={})
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
     updated_at = Column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
     
@@ -69,7 +69,7 @@ class LedgerTransaction(Base):
     status = Column(String(50), nullable=False, default="PENDING", index=True)
     purpose = Column(String(255))
     parent_transaction_id = Column(Integer, ForeignKey("ledger_transactions.id"), index=True)
-    metadata = Column(JSON, default={})
+    meta_data = Column(JSON, default={})
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow, index=True)
     updated_at = Column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
     completed_at = Column(DateTime(timezone=True))

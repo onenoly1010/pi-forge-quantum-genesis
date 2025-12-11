@@ -125,7 +125,7 @@ def apply_allocations(
                 purpose=f"Auto-allocation: {percentage}% to {account.account_name}",
                 parent_transaction_id=parent_transaction.id,
                 completed_at=datetime.utcnow(),
-                metadata={
+                meta_data={
                     "allocation_rule_id": rule.id,
                     "allocation_rule_name": rule.rule_name,
                     "allocation_percentage": float(percentage)

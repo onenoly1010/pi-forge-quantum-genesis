@@ -88,7 +88,7 @@ def seed_test_data(db):
             current_balance=0,
             allocation_percentage=40.0,
             is_active=True,
-            metadata={"description": "Reserve fund"}
+            meta_data={"description": "Reserve fund"}
         ),
         LogicalAccount(
             account_name="Development Fund",
@@ -96,7 +96,7 @@ def seed_test_data(db):
             current_balance=0,
             allocation_percentage=25.0,
             is_active=True,
-            metadata={"description": "Development funding"}
+            meta_data={"description": "Development funding"}
         ),
         LogicalAccount(
             account_name="Community Rewards",
@@ -104,7 +104,7 @@ def seed_test_data(db):
             current_balance=0,
             allocation_percentage=20.0,
             is_active=True,
-            metadata={"description": "Community rewards"}
+            meta_data={"description": "Community rewards"}
         ),
         LogicalAccount(
             account_name="Operational Fund",
@@ -112,7 +112,7 @@ def seed_test_data(db):
             current_balance=0,
             allocation_percentage=15.0,
             is_active=True,
-            metadata={"description": "Operations"}
+            meta_data={"description": "Operations"}
         )
     ]
     

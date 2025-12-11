@@ -16,7 +16,7 @@ class LogicalAccountResponse(BaseModel):
     current_balance: Decimal
     allocation_percentage: Decimal
     is_active: bool
-    metadata: Dict[str, Any]
+    meta_data: Dict[str, Any]
     created_at: datetime
     updated_at: datetime
     

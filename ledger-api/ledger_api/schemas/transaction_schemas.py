@@ -17,7 +17,7 @@ class TransactionCreate(BaseModel):
     amount: Decimal = Field(..., gt=0, description="Transaction amount")
     status: str = Field("PENDING", description="Transaction status")
     purpose: Optional[str] = Field(None, description="Transaction purpose")
-    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Additional metadata")
+    meta_data: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Additional metadata")
     
     @validator('transaction_type')
     def validate_transaction_type(cls, v):
@@ -58,7 +58,7 @@ class TransactionResponse(BaseModel):
     status: str
     purpose: Optional[str]
     parent_transaction_id: Optional[int]
-    metadata: Dict[str, Any]
+    meta_data: Dict[str, Any]
     created_at: datetime
     updated_at: datetime
     completed_at: Optional[datetime]

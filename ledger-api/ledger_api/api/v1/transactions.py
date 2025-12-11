@@ -71,7 +71,7 @@ async def create_transaction(
             amount=transaction.amount,
             status=transaction.status,
             purpose=transaction.purpose,
-            metadata=transaction.metadata,
+            meta_data=transaction.meta_data,
             created_at=datetime.utcnow()
         )
         
