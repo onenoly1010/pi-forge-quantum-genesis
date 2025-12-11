@@ -124,7 +124,6 @@ yarn-debug.log*
 yarn-error.log*
 .npm
 *.tgz
-package-lock.json
 yarn.lock
 
 # Press Agent logs
