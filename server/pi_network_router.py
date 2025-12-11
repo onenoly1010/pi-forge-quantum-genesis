@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 from typing import Optional, Dict, Any, List
 import logging
 import time
+import os
 from dataclasses import asdict
 
 from pi_network import (
@@ -27,6 +28,31 @@ router = APIRouter(prefix="/api/pi-network", tags=["Pi Network"])
 
 # Initialize Pi Network client
 pi_client = PiNetworkClient(PiNetworkConfig.from_env())
+
+# Security helper
+def sanitize_error_message(error: Exception, context: str = "Operation") -> str:
+    """
+    Sanitize error messages for production use
+    
+    In development/testnet: Return full error details for debugging
+    In production: Return generic error message to prevent information disclosure
+    
+    Args:
+        error: The exception that occurred
+        context: Context of the operation (e.g., "Authentication", "Payment creation")
+        
+    Returns:
+        Sanitized error message appropriate for the environment
+    """
+    is_production = os.environ.get("APP_ENVIRONMENT", "testnet") == "production"
+    
+    if is_production:
+        # Production: Return generic error message
+        return f"{context} failed. Please try again or contact support."
+    else:
+        # Development/Testnet: Return detailed error for debugging
+        return str(error)
+
 
 
 # --- REQUEST/RESPONSE MODELS ---
@@ -114,7 +140,7 @@ async def get_pi_network_status():
         logger.error(f"Failed to get Pi Network status: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retrieve status: {str(e)}"
+            detail=sanitize_error_message(e, "Status retrieval")
         )
 
 
@@ -146,7 +172,7 @@ async def get_pi_network_health():
         logger.error(f"Health check failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Health check failed: {str(e)}"
+            detail=sanitize_error_message(e, "Health check")
         )
 
 
@@ -212,7 +238,7 @@ async def authenticate_pi_user(auth_request: PiAuthRequest, request: Request):
         logger.error(f"Authentication error: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Authentication failed: {str(e)}"
+            detail=sanitize_error_message(e, "Authentication")
         )
 
 
@@ -248,7 +274,7 @@ async def verify_pi_session(verify_request: PiSessionVerifyRequest):
         logger.error(f"Session verification error: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Session verification failed: {str(e)}"
+            detail=sanitize_error_message(e, "Session verification")
         )
 
 
@@ -284,7 +310,7 @@ async def logout_pi_user(session_id: str):
         logger.error(f"Logout error: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Logout failed: {str(e)}"
+            detail=sanitize_error_message(e, "Logout")
         )
 
 
@@ -367,7 +393,7 @@ async def create_pi_payment(payment_request: PiPaymentCreateRequest):
         logger.error(f"Payment creation error: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Payment creation failed: {str(e)}"
+            detail=sanitize_error_message(e, "Payment creation")
         )
 
 
@@ -408,7 +434,7 @@ async def approve_pi_payment(approval_request: PiPaymentApprovalRequest):
         logger.error(f"Payment approval error: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Payment approval failed: {str(e)}"
+            detail=sanitize_error_message(e, "Payment approval")
         )
 
 
@@ -452,7 +478,7 @@ async def complete_pi_payment(completion_request: PiPaymentCompletionRequest):
         logger.error(f"Payment completion error: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Payment completion failed: {str(e)}"
+            detail=sanitize_error_message(e, "Payment completion")
         )
 
 
@@ -483,7 +509,7 @@ async def verify_pi_payment(verification_request: PiPaymentVerificationRequest):
         logger.error(f"Payment verification error: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Payment verification failed: {str(e)}"
+            detail=sanitize_error_message(e, "Payment verification")
         )
 
 
@@ -524,7 +550,7 @@ async def get_pi_payment(payment_id: str):
         logger.error(f"Get payment error: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retrieve payment: {str(e)}"
+            detail=sanitize_error_message(e, "Payment retrieval")
         )
 
 
@@ -584,7 +610,7 @@ async def get_user_pi_payments(
         logger.error(f"Get user payments error: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retrieve user payments: {str(e)}"
+            detail=sanitize_error_message(e, "User payments retrieval")
         )
 
 
@@ -609,7 +635,7 @@ async def get_payment_statistics():
         logger.error(f"Get statistics error: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retrieve statistics: {str(e)}"
+            detail=sanitize_error_message(e, "Statistics retrieval")
         )
 
 
@@ -638,7 +664,7 @@ async def get_ethical_audit_summary(limit: int = 100):
         logger.error(f"Get audit summary error: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retrieve audit summary: {str(e)}"
+            detail=sanitize_error_message(e, "Audit summary retrieval")
         )
 
 
@@ -666,7 +692,7 @@ async def get_high_risk_audits(limit: int = 20):
         logger.error(f"Get high-risk audits error: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retrieve high-risk audits: {str(e)}"
+            detail=sanitize_error_message(e, "High-risk audits retrieval")
         )
 
 
@@ -706,5 +732,5 @@ async def manual_payment_audit(
         logger.error(f"Manual payment audit error: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Manual audit failed: {str(e)}"
+            detail=sanitize_error_message(e, "Manual audit")
         )
