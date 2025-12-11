@@ -2,8 +2,6 @@
 # Smoke test script for Ledger API
 # Tests basic connectivity and critical endpoints
 
-set -e
-
 # Configuration
 API_URL="${API_URL:-http://localhost:8000}"
 TIMEOUT=5
