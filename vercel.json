@@ -3,6 +3,8 @@
   "public": true,
   "cleanUrls": true,
   "trailingSlash": false,
+  "outputDirectory": "public",
+  "buildCommand": "npm run build",
   "rewrites": [
     { "source": "/api/(.*)", "destination": "https://quantumpiforge.com/api/$1" },
     { "source": "/health",      "destination": "https://quantumpiforge.com/health" },

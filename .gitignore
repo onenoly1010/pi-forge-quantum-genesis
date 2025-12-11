@@ -124,7 +124,6 @@ yarn-debug.log*
 yarn-error.log*
 .npm
 *.tgz
-package-lock.json
 yarn.lock
 
 # Press Agent logs
@@ -140,6 +139,8 @@ node_modules/
 # Build artifacts
 build/
 artifacts/
+public/
+dist/
 
 # IDE/Editor settings
 .vs/
