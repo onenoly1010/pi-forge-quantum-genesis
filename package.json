@@ -5,7 +5,7 @@
   "main": "index.html",
   "scripts": {
     "build": "tsc && npm run copy-static",
-    "copy-static": "cp index.html public/ && cp -r frontend public/ 2>/dev/null || true",
+    "copy-static": "mkdir -p public && cp index.html public/ && cp -r frontend public/",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
