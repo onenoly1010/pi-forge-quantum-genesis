@@ -70,7 +70,7 @@ function build() {
 
   // Clean and create public directory
   if (fs.existsSync(publicDir)) {
-    fs.rmSync(publicDir, { recursive: true, force: true });
+    fs.rmSync(publicDir, { recursive: true });
   }
   fs.mkdirSync(publicDir, { recursive: true });
   console.log('✓ Created public directory\n');
