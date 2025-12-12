@@ -3,8 +3,7 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-# Dockerfile handles the start command
-# No startCommand needed here
+startCommand = "uvicorn server.main:app --host 0.0.0.0 --port $PORT"
 
 [[services]]
 name = "web"
