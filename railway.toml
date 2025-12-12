@@ -1,8 +1,10 @@
 [build]
-builder = "nixpacks"
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
 
 [deploy]
-startCommand = "cd server && uvicorn main:app --host 0.0.0.0 --port $PORT"
+# Dockerfile handles the start command
+# No startCommand needed here
 
 [[services]]
 name = "web"
