@@ -16,8 +16,10 @@ import logging
 import asyncio
 import hashlib
 import random
+import hmac
 from datetime import datetime
 from supabase import create_client, Client
+import httpx
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -148,14 +150,56 @@ PI_NETWORK_CONFIG = {
     "api_key": os.environ.get("PI_NETWORK_API_KEY", ""),
     "app_id": os.environ.get("PI_NETWORK_APP_ID", ""),
     "api_endpoint": os.environ.get("PI_NETWORK_API_ENDPOINT", "https://api.minepi.com"),
-    "sandbox_mode": os.environ.get("PI_SANDBOX_MODE", "false").lower() == "true"
+    "sandbox_mode": os.environ.get("PI_SANDBOX_MODE", "false").lower() == "true",
+    "wallet_private_key": os.environ.get("PI_NETWORK_WALLET_PRIVATE_KEY", ""),
+    "webhook_secret": os.environ.get("PI_NETWORK_WEBHOOK_SECRET", "")
 }
+
+# Validate critical Pi Network configuration on startup
+def validate_pi_network_config():
+    """Validate Pi Network configuration for mainnet deployment"""
+    if PI_NETWORK_CONFIG["network"] == "mainnet":
+        if not PI_NETWORK_CONFIG["api_key"]:
+            logger.error("❌ PI_NETWORK_API_KEY not set - payments will fail in mainnet mode")
+            raise ValueError("PI_NETWORK_API_KEY is required for mainnet deployment")
+        if not PI_NETWORK_CONFIG["app_id"]:
+            logger.error("❌ PI_NETWORK_APP_ID not set - payments will fail in mainnet mode")
+            raise ValueError("PI_NETWORK_APP_ID is required for mainnet deployment")
+        if not PI_NETWORK_CONFIG["webhook_secret"]:
+            logger.warning("⚠️ PI_NETWORK_WEBHOOK_SECRET not set - webhook verification disabled")
+        logger.info(f"✅ Pi Network Mainnet Mode: API configured={bool(PI_NETWORK_CONFIG['api_key'])}")
+    else:
+        logger.info(f"🧪 Pi Network Testnet/Sandbox Mode")
 
 # --- PYDANTIC MODELS FOR REQUEST/RESPONSE ---
 class PaymentVerification(BaseModel):
     payment_id: str = Field(..., description="Pi Network payment identifier")
     amount: float = Field(..., gt=0, description="Payment amount in Pi")
     metadata: Optional[Dict[str, Any]] = Field(default=None, description="Additional payment metadata")
+
+class PaymentApprovalRequest(BaseModel):
+    payment_id: str = Field(..., description="Pi Network payment ID from SDK")
+    amount: float = Field(..., gt=0, description="Payment amount to approve")
+    user_id: str = Field(..., description="User ID from authentication")
+    metadata: Optional[Dict[str, Any]] = Field(default=None)
+
+class PaymentCompletionRequest(BaseModel):
+    payment_id: str = Field(..., description="Pi Network payment ID")
+    txid: str = Field(..., description="Blockchain transaction ID")
+
+class IncompletePaymentRequest(BaseModel):
+    payment_id: str = Field(..., description="Incomplete payment ID")
+    amount: float = Field(..., gt=0)
+    user_uid: str = Field(..., description="User UID")
+
+class PiWebhookPayload(BaseModel):
+    """Pi Network webhook payload model"""
+    payment_id: str
+    status: str  # completed, cancelled, failed
+    txid: Optional[str] = None
+    amount: float
+    user_uid: str
+    created_at: str
     tx_hash: Optional[str] = Field(default=None, description="Transaction hash for mainnet verification")
 
 class EthicalAuditRequest(BaseModel):
@@ -177,6 +221,63 @@ class SmartContractAudit(BaseModel):
     audit_depth: str = Field(default="standard", pattern="^(basic|standard|comprehensive)$")
 
 # --- CYBER SAMURAI GUARDIAN STATE ---
+# --- PI NETWORK API INTEGRATION HELPERS ---
+async def call_pi_network_api(endpoint: str, method: str = "GET", data: Optional[Dict] = None) -> Dict[str, Any]:
+    """Make authenticated API calls to Pi Network"""
+    url = f"{PI_NETWORK_CONFIG['api_endpoint']}/{endpoint}"
+    headers = {"Authorization": f"Key {PI_NETWORK_CONFIG['api_key']}"}
+    
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        try:
+            if method == "GET":
+                response = await client.get(url, headers=headers)
+            elif method == "POST":
+                response = await client.post(url, headers=headers, json=data)
+            else:
+                raise ValueError(f"Unsupported HTTP method: {method}")
+            
+            response.raise_for_status()
+            return response.json()
+        except httpx.HTTPStatusError as e:
+            logger.error(f"Pi Network API error: {e.response.status_code} - {e.response.text}")
+            raise HTTPException(
+                status_code=e.response.status_code,
+                detail=f"Pi Network API error: {e.response.text}"
+            )
+        except Exception as e:
+            logger.error(f"Pi Network API call failed: {e}")
+            raise HTTPException(status_code=500, detail=f"Pi Network API unavailable: {str(e)}")
+
+async def approve_payment_with_pi_network(payment_id: str) -> Dict[str, Any]:
+    """Approve payment with Pi Network API"""
+    return await call_pi_network_api(f"v2/payments/{payment_id}/approve", method="POST")
+
+async def complete_payment_with_pi_network(payment_id: str, txid: str) -> Dict[str, Any]:
+    """Complete payment with Pi Network API"""
+    return await call_pi_network_api(
+        f"v2/payments/{payment_id}/complete",
+        method="POST",
+        data={"txid": txid}
+    )
+
+async def get_payment_from_pi_network(payment_id: str) -> Dict[str, Any]:
+    """Get payment details from Pi Network API"""
+    return await call_pi_network_api(f"v2/payments/{payment_id}", method="GET")
+
+def verify_webhook_signature(payload: bytes, signature: str) -> bool:
+    """Verify Pi Network webhook signature using HMAC"""
+    if not PI_NETWORK_CONFIG["webhook_secret"]:
+        logger.warning("⚠️ Webhook signature verification skipped - no secret configured")
+        return True  # Allow in development, but warn
+    
+    expected_signature = hmac.new(
+        PI_NETWORK_CONFIG["webhook_secret"].encode(),
+        payload,
+        hashlib.sha256
+    ).hexdigest()
+    
+    return hmac.compare_digest(signature, expected_signature)
+
 class CyberSamuraiGuardian:
     """Guardian monitoring system for quantum resonance and system health
     
@@ -553,9 +654,233 @@ async def pi_network_status():
         "timestamp": time.time()
     }
 
+@app.post("/api/payments/approve")
+async def approve_payment(payment: PaymentApprovalRequest, current_user = Depends(get_current_user)):
+    """
+    Approve Pi Network payment (called by frontend after SDK's onReadyForServerApproval)
+    This endpoint validates the payment and tells Pi Network to proceed with blockchain transaction
+    """
+    start_time = time.perf_counter_ns()
+    
+    try:
+        logger.info(f"💳 Approving payment: {payment.payment_id} for {payment.amount} Pi")
+        
+        # Get payment details from Pi Network to verify
+        pi_payment = await get_payment_from_pi_network(payment.payment_id)
+        
+        # Validate payment amount matches what we expect
+        if abs(float(pi_payment.get("amount", 0)) - payment.amount) > 0.0001:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Payment amount mismatch: expected {payment.amount}, got {pi_payment.get('amount')}"
+            )
+        
+        # Validate payment is in correct state
+        if pi_payment.get("status") != "pending":
+            raise HTTPException(
+                status_code=400,
+                detail=f"Payment not in pending state: {pi_payment.get('status')}"
+            )
+        
+        # Call Pi Network API to approve payment
+        approval_result = await approve_payment_with_pi_network(payment.payment_id)
+        
+        # Store pending payment in database
+        if supabase:
+            try:
+                supabase.table("payments").insert({
+                    "payment_id": payment.payment_id,
+                    "user_id": current_user.id,
+                    "amount": payment.amount,
+                    "status": "approved",
+                    "metadata": payment.metadata or {},
+                    "approved_at": datetime.utcnow().isoformat()
+                }).execute()
+            except Exception as db_error:
+                logger.error(f"Failed to store payment in database: {db_error}")
+        
+        processing_time_ns = time.perf_counter_ns() - start_time
+        
+        logger.info(f"✅ Payment approved: {payment.payment_id}")
+        return {
+            "approved": True,
+            "payment_id": payment.payment_id,
+            "status": "approved",
+            "message": "Payment approved - proceed to blockchain",
+            "processing_time_ns": processing_time_ns,
+            "timestamp": time.time()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Payment approval failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Payment approval failed: {str(e)}")
+
+@app.post("/api/payments/complete")
+async def complete_payment(payment: PaymentCompletionRequest):
+    """
+    Complete Pi Network payment (called by frontend after blockchain confirmation)
+    This endpoint verifies the blockchain transaction and finalizes the payment
+    """
+    start_time = time.perf_counter_ns()
+    
+    try:
+        logger.info(f"🎉 Completing payment: {payment.payment_id} with txid: {payment.txid}")
+        
+        # Complete payment with Pi Network API
+        completion_result = await complete_payment_with_pi_network(payment.payment_id, payment.txid)
+        
+        # Determine resonance state based on payment amount
+        pi_payment = await get_payment_from_pi_network(payment.payment_id)
+        amount = float(pi_payment.get("amount", 0))
+        
+        if amount >= 1.0:
+            resonance_state = "transcendence"
+        elif amount >= 0.5:
+            resonance_state = "harmony"
+        elif amount >= 0.1:
+            resonance_state = "growth"
+        else:
+            resonance_state = "foundation"
+        
+        # Update payment in database
+        if supabase:
+            try:
+                supabase.table("payments").update({
+                    "status": "completed",
+                    "txid": payment.txid,
+                    "resonance_state": resonance_state,
+                    "completed_at": datetime.utcnow().isoformat()
+                }).eq("payment_id", payment.payment_id).execute()
+            except Exception as db_error:
+                logger.error(f"Failed to update payment in database: {db_error}")
+        
+        processing_time_ns = time.perf_counter_ns() - start_time
+        
+        logger.info(f"✅ Payment completed: {payment.payment_id}")
+        return {
+            "success": True,
+            "payment_id": payment.payment_id,
+            "txid": payment.txid,
+            "status": "completed",
+            "resonance_state": resonance_state,
+            "amount": amount,
+            "message": "Payment completed successfully",
+            "processing_time_ns": processing_time_ns,
+            "timestamp": time.time()
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Payment completion failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Payment completion failed: {str(e)}")
+
+@app.post("/api/payments/incomplete")
+async def handle_incomplete_payment(payment: IncompletePaymentRequest):
+    """
+    Handle incomplete payment found during user authentication
+    Pi SDK calls this when a payment was interrupted (user closed app, etc.)
+    """
+    try:
+        logger.info(f"🔄 Handling incomplete payment: {payment.payment_id}")
+        
+        # Get payment status from Pi Network
+        pi_payment = await get_payment_from_pi_network(payment.payment_id)
+        
+        if pi_payment.get("status") == "completed":
+            # Payment was actually completed, update our records
+            if supabase:
+                supabase.table("payments").upsert({
+                    "payment_id": payment.payment_id,
+                    "user_id": payment.user_uid,
+                    "amount": payment.amount,
+                    "status": "completed",
+                    "txid": pi_payment.get("transaction", {}).get("txid"),
+                    "completed_at": datetime.utcnow().isoformat()
+                }).execute()
+            
+            return {"status": "completed", "message": "Payment was completed"}
+        else:
+            # Payment incomplete, return current status
+            return {
+                "status": pi_payment.get("status"),
+                "message": f"Payment is {pi_payment.get('status')}"
+            }
+            
+    except Exception as e:
+        logger.error(f"Error handling incomplete payment: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/pi-webhooks/payment")
+async def pi_payment_webhook(request: Request):
+    """
+    Webhook endpoint for Pi Network payment status updates
+    Handles: payment.approved, payment.completed, payment.cancelled
+    """
+    try:
+        # Get raw body for signature verification
+        body = await request.body()
+        signature = request.headers.get("X-Pi-Signature", "")
+        
+        # Verify webhook signature
+        if not verify_webhook_signature(body, signature):
+            logger.error("❌ Invalid webhook signature")
+            raise HTTPException(status_code=401, detail="Invalid webhook signature")
+        
+        # Parse webhook payload
+        payload = await request.json()
+        webhook_data = PiWebhookPayload(**payload)
+        
+        logger.info(f"📨 Webhook received: {webhook_data.status} for payment {webhook_data.payment_id}")
+        
+        # Update payment status in database
+        if supabase:
+            update_data = {
+                "status": webhook_data.status,
+                "updated_at": datetime.utcnow().isoformat()
+            }
+            
+            if webhook_data.txid:
+                update_data["txid"] = webhook_data.txid
+                
+            if webhook_data.status == "completed":
+                update_data["completed_at"] = datetime.utcnow().isoformat()
+            
+            try:
+                supabase.table("payments").update(update_data).eq(
+                    "payment_id", webhook_data.payment_id
+                ).execute()
+                logger.info(f"✅ Database updated for payment {webhook_data.payment_id}")
+            except Exception as db_error:
+                logger.error(f"Failed to update payment via webhook: {db_error}")
+        
+        # Broadcast payment status to connected WebSocket clients
+        status_message = {
+            "type": "payment_status_update",
+            "payment_id": webhook_data.payment_id,
+            "status": webhook_data.status,
+            "txid": webhook_data.txid,
+            "timestamp": time.time()
+        }
+        
+        for ws in connected_users.values():
+            try:
+                await ws.send_json(status_message)
+            except:
+                pass  # Ignore disconnected clients
+        
+        return {"status": "received", "payment_id": webhook_data.payment_id}
+        
+    except Exception as e:
+        logger.error(f"❌ Webhook processing failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/api/verify-payment")
 async def verify_payment(payment: PaymentVerification, current_user = Depends(get_current_user)):
-    """Verify and process a Pi Network payment on mainnet"""
+    """
+    Legacy endpoint - Verify and process a Pi Network payment on mainnet
+    Note: Use /api/payments/approve and /api/payments/complete for new integrations
+    """
     start_time = time.perf_counter_ns()
     
     try:
@@ -563,7 +888,8 @@ async def verify_payment(payment: PaymentVerification, current_user = Depends(ge
         verification_data = f"{payment.payment_id}{payment.amount}{time.time()}"
         verification_hash = hashlib.sha256(verification_data.encode()).hexdigest()
         
-        # Simulate mainnet verification (in production, call Pi Network API)
+        # Get payment from Pi Network
+        pi_payment = await get_payment_from_pi_network(payment.payment_id)
         resonance_state = "transcendence" if payment.amount >= 0.1 else "harmony"
         
         # Calculate processing latency
@@ -573,7 +899,7 @@ async def verify_payment(payment: PaymentVerification, current_user = Depends(ge
             "status": "verified",
             "payment_id": payment.payment_id,
             "amount": payment.amount,
-            "tx_hash": payment.tx_hash or verification_hash[:16],
+            "tx_hash": pi_payment.get("transaction", {}).get("txid", verification_hash[:16]),
             "verification_hash": verification_hash,
             "resonance_state": resonance_state,
             "network": PI_NETWORK_CONFIG["network"],
@@ -1201,6 +1527,15 @@ async def websocket_guardian_alerts(websocket: WebSocket):
 async def startup_event():
     logging.basicConfig(level=logging.INFO)
     logger.info("🚀 QVM 3.3.0 - Pi Forge Quantum Genesis - INITIALIZING...")
+    
+    # Validate Pi Network configuration
+    try:
+        validate_pi_network_config()
+    except ValueError as e:
+        logger.error(f"❌ Pi Network configuration validation failed: {e}")
+        if PI_NETWORK_CONFIG["network"] == "mainnet":
+            raise  # Fail fast in mainnet mode
+    
     logger.info(f"📡 Network Mode: {PI_NETWORK_CONFIG['network']}")
     logger.info(f"🔒 Supabase: {'connected' if supabase else 'demo mode'}")
     logger.info(f"⚔️ Cyber Samurai Guardian: {'active' if guardian.guardian_active else 'inactive'}")
