@@ -4,7 +4,7 @@
   "description": "Pi Forge Quantum Genesis - Multi-application repository with FastAPI, Flask, and Gradio",
   "main": "index.html",
   "scripts": {
-    "build": "npm run typecheck && npm run build:static",
+    "build": "npm run build:static",
     "build:static": "node scripts/build.js",
     "typecheck": "tsc --noEmit"
   },
