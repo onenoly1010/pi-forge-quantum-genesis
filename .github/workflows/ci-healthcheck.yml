@@ -9,6 +9,8 @@ on:
 jobs:
   healthcheck:
     runs-on: ubuntu-latest
+    env:
+      ENABLE_TELEMETRY: false  # Disable OpenTelemetry in CI environment
     steps:
       - name: Checkout
         uses: actions/checkout@v4
