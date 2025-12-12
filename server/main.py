@@ -504,6 +504,10 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
+# Import and include Pi Network router
+from pi_network_router import router as pi_network_router
+app.include_router(pi_network_router)
+
 # Add CORS middleware for cross-origin requests
 # In production, CORS_ORIGINS env var should be set to specific domains
 cors_origins = os.environ.get("CORS_ORIGINS", "http://localhost:3000,http://localhost:5000,http://localhost:7860")
@@ -1541,6 +1545,31 @@ async def startup_event():
     logger.info(f"⚔️ Cyber Samurai Guardian: {'active' if guardian.guardian_active else 'inactive'}")
     logger.info(f"🎯 Latency Target: <{guardian.latency_threshold_ns}ns")
     logger.info("🌌 Sacred Trinity entanglement complete - Mainnet Ready!")
+    
+    # Start Pi Network background tasks
+    try:
+        from pi_network_router import pi_client
+        await pi_client.start_background_tasks()
+        logger.info("✅ Pi Network background tasks started")
+    except Exception as e:
+        logger.warning(f"⚠️ Failed to start Pi Network background tasks: {e}")
+
+
+# --- SHUTDOWN EVENT ---
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Cleanup on application shutdown"""
+    logger.info("🛑 Shutting down Pi Forge Quantum Genesis...")
+    
+    # Stop Pi Network background tasks
+    try:
+        from pi_network_router import pi_client
+        await pi_client.stop_background_tasks()
+        logger.info("✅ Pi Network background tasks stopped")
+    except Exception as e:
+        logger.warning(f"⚠️ Error stopping Pi Network background tasks: {e}")
+    
+    logger.info("👋 Shutdown complete")
 
 # --- MAIN ---
 if __name__ == "__main__":
