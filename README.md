@@ -26,7 +26,21 @@ Expected Output:
 ✨ Guardian cycle complete. System coherence maintained.
 ⸻
 Module Summary
-ModuleFunctioncyber_samarai.pyCore guardian module enforcing ≤5 ns latency across Pi Forge layers.guardian_init.pyLaunches the guardian cycle and loads the manifest.cyber_samarai_manifest.jsonConfiguration file for guardian parameters and system links.cyber_samarai_press_page.mdMedia-ready lore and overview page.⸻
+ModuleFunctioncyber_samarai.pyCore guardian module enforcing ≤5 ns latency across Pi Forge layers.guardian_init.pyLaunches the guardian cycle and loads the manifest.cyber_samarai_manifest.jsonConfiguration file for guardian parameters and system links.cyber_samarai_press_page.mdMedia-ready lore and overview page.server/quantum_spark_processor.pyApache Spark analytics engine for quantum resonance analysis.server/spark_job_orchestrator.pyOrchestrates scheduled Spark analytics jobs.scripts/run_spark_jobs.pyCommand-line interface for managing Spark analytics.⸻
+New: Apache Spark Integration
+🌌 Spark Quantum Analytics Engine
+The system now includes Apache Spark for distributed quantum data analytics:
+- Quantum resonance pattern analysis
+- Payment transaction analytics  
+- Ethical coherence matrix computation
+- Sacred Trinity comprehensive reporting
+
+Quick Start:
+python scripts/run_spark_jobs.py --test    # Run analytics test
+python scripts/run_spark_jobs.py --list    # List available jobs
+
+See docs/SPARK_QUANTUM_ANALYTICS.md for complete documentation.
+⸻
 Notes
 – Compatible with Hugging Face Spaces and Netlify deploys.
 – Designed to sync with Pi Network wallet integration.

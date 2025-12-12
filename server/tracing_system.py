@@ -534,6 +534,61 @@ def trace_quantum_phase_transition(from_phase: str, to_phase: str, component: st
             def set_attribute(self, *args): pass
         yield DummySpan()
 
+# Spark Analytics Engine tracing functions
+def trace_spark_operation(operation: str):
+    """Decorator for tracing Spark analytics operations"""
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            system, tracer, _, _ = get_tracing_system()
+            if system and tracer:
+                with system.create_quantum_span(
+                    tracer, operation, "spark_analytics_engine",
+                    quantum_phase="harmony",
+                    **{"function": func.__name__}
+                ) as span:
+                    try:
+                        result = func(*args, **kwargs)
+                        span.set_attribute("quantum.success", True)
+                        return result
+                    except Exception as e:
+                        span.set_attribute("quantum.success", False)
+                        span.set_attribute("quantum.error", str(e))
+                        raise
+            else:
+                return func(*args, **kwargs)
+        return wrapper
+    return decorator
+
+def trace_spark_job_execution(job_id: str, job_name: str):
+    """Trace Spark job execution"""
+    system, tracer, _, _ = get_tracing_system()
+    if system and tracer:
+        return system.create_quantum_span(
+            tracer, "spark_job_execution", "spark_analytics_engine",
+            quantum_phase="harmony",
+            job_id=job_id,
+            job_name=job_name,
+            spark_analytics=True
+        )
+    from contextlib import nullcontext
+    return nullcontext()
+
+def trace_spark_quantum_analytics(data_count: int, analytics_type: str = "resonance"):
+    """Trace Spark quantum analytics processing"""
+    system, tracer, _, _ = get_tracing_system()
+    if system and tracer:
+        return system.create_quantum_span(
+            tracer, "spark_quantum_analytics", "spark_analytics_engine",
+            quantum_phase="transcendence",
+            data_records=data_count,
+            analytics_type=analytics_type,
+            spark_processing=True,
+            sacred_trinity_analytics=True
+        )
+    from contextlib import nullcontext
+    return nullcontext()
+
 logger.info("🌌 Quantum Resonance Lattice Tracing System Ready")
 logger.info("🎯 Sacred Trinity observability enabled across all components") 
 logger.info("📊 Use VSCode Command: ai-mlstudio.tracing.open to view traces")
