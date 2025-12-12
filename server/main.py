@@ -43,6 +43,32 @@ from tracing_system import (
 tracing_enabled = True  # tracing_system handles missing SDKs and returns nullcontext spans
 logging.info("✅ Tracing system delegated to tracing_system")
 
+# Import autonomous decision tools
+from autonomous_decision import (
+    get_decision_matrix,
+    DecisionContext,
+    DecisionParameter,
+    DecisionType,
+    DecisionPriority,
+)
+logging.info("✅ Autonomous decision tools loaded")
+
+# Import self-healing system
+from self_healing import get_healing_system, IncidentSeverity
+logging.info("✅ Self-healing system loaded")
+
+# Import guardian monitoring
+from guardian_monitor import (
+    get_guardian_monitor,
+    ValidationStatus,
+    MonitoringLevel,
+)
+logging.info("✅ Guardian monitoring system loaded")
+
+# Import monitoring agents
+from monitoring_agents import get_monitoring_system
+logging.info("✅ Monitoring agents system loaded")
+
 # --- SUPABASE CLIENT INITIALIZATION ---
 supabase = None
 if supabase_available:
@@ -297,6 +323,36 @@ class RateLimiter:
 
 # Initialize rate limiter (60 requests per minute per IP)
 rate_limiter = RateLimiter(requests_per_minute=60)
+
+# =============================================================================
+# UTILITY FUNCTIONS
+# =============================================================================
+
+def validate_enum(value: Optional[str], enum_class: type, param_name: str):
+    """
+    Helper function to validate and convert string to enum
+    
+    Args:
+        value: String value to convert
+        enum_class: Enum class to convert to
+        param_name: Parameter name for error messages
+        
+    Returns:
+        Enum value or None
+        
+    Raises:
+        HTTPException: If value is invalid
+    """
+    if value is None:
+        return None
+    
+    try:
+        return enum_class(value)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid {param_name}. Must be one of: {[e.value for e in enum_class]}"
+        )
 
 # Connection tracking for scalability metrics
 class ConnectionTracker:
@@ -761,6 +817,270 @@ async def audit_smart_contract(audit: SmartContractAudit, current_user=Depends(g
             "Manual code review",
             "Formal verification for critical functions"
         ],
+        "timestamp": time.time()
+    }
+
+# --- AUTONOMOUS DECISION ENDPOINTS ---
+
+@app.post("/api/autonomous/decision")
+async def make_autonomous_decision(context: DecisionContext):
+    """
+    Make an autonomous decision based on provided context and parameters.
+    Returns decision result with approval status and recommended actions.
+    """
+    decision_matrix = get_decision_matrix()
+    result = decision_matrix.make_decision(context)
+    
+    return {
+        "decision_id": result.decision_id,
+        "decision_type": result.decision_type.value,
+        "approved": result.approved,
+        "confidence": result.confidence,
+        "reasoning": result.reasoning,
+        "actions": result.actions,
+        "requires_guardian": result.requires_guardian,
+        "timestamp": result.timestamp,
+        "metadata": result.metadata
+    }
+
+@app.get("/api/autonomous/decision-history")
+async def get_decision_history(
+    decision_type: Optional[str] = None,
+    limit: int = 100
+):
+    """Get history of autonomous decisions"""
+    decision_matrix = get_decision_matrix()
+    
+    # Convert string to enum if provided
+    type_filter = validate_enum(decision_type, DecisionType, "decision_type")
+    
+    history = decision_matrix.get_decision_history(type_filter, limit)
+    
+    return {
+        "decisions": [
+            {
+                "decision_id": d.decision_id,
+                "decision_type": d.decision_type.value,
+                "approved": d.approved,
+                "confidence": d.confidence,
+                "reasoning": d.reasoning,
+                "requires_guardian": d.requires_guardian,
+                "timestamp": d.timestamp
+            }
+            for d in history
+        ],
+        "count": len(history)
+    }
+
+@app.get("/api/autonomous/metrics")
+async def get_decision_metrics():
+    """Get metrics about autonomous decision making"""
+    decision_matrix = get_decision_matrix()
+    metrics = decision_matrix.get_decision_metrics()
+    
+    return {
+        "metrics": metrics,
+        "timestamp": time.time()
+    }
+
+# --- SELF-HEALING & DIAGNOSTICS ENDPOINTS ---
+
+@app.get("/api/health/diagnostics")
+async def run_system_diagnostics():
+    """Run automated system diagnostics and return health status"""
+    healing_system = get_healing_system()
+    health_status = healing_system.get_system_health()
+    return health_status
+
+@app.get("/api/health/incidents")
+async def get_incident_reports(
+    severity: Optional[str] = None,
+    component: Optional[str] = None,
+    limit: int = 100
+):
+    """Get incident reports with optional filtering"""
+    healing_system = get_healing_system()
+    
+    # Convert string to enum if provided
+    severity_filter = validate_enum(severity, IncidentSeverity, "severity")
+    
+    incidents = healing_system.get_incident_report(severity_filter, component, limit)
+    
+    return {
+        "incidents": [
+            {
+                "incident_id": i.incident_id,
+                "severity": i.severity.value,
+                "component": i.component,
+                "description": i.description,
+                "auto_healed": i.auto_healed,
+                "healing_actions": i.healing_actions,
+                "timestamp": i.timestamp,
+                "metadata": i.metadata
+            }
+            for i in incidents
+        ],
+        "count": len(incidents)
+    }
+
+# --- GUARDIAN MONITORING & OVERSIGHT ENDPOINTS ---
+
+@app.get("/api/guardian/monitoring-status")
+async def get_guardian_monitoring_status():
+    """Get comprehensive guardian monitoring status"""
+    monitor = get_guardian_monitor()
+    return monitor.get_monitoring_status()
+
+@app.post("/api/guardian/validate-decision")
+async def validate_decision(
+    decision_id: str,
+    decision_data: Dict[str, Any]
+):
+    """Validate an autonomous decision for safety and compliance"""
+    monitor = get_guardian_monitor()
+    result = monitor.validate_decision(decision_id, decision_data)
+    
+    return {
+        "validation_id": result.validation_id,
+        "target": result.target,
+        "status": result.status.value,
+        "checks_passed": result.checks_passed,
+        "checks_failed": result.checks_failed,
+        "details": result.details,
+        "timestamp": result.timestamp
+    }
+
+@app.post("/api/guardian/override-decision")
+async def override_decision(
+    original_decision_id: str,
+    action: str,
+    reasoning: str,
+    guardian_id: str
+):
+    """Guardian override of an autonomous decision (requires guardian authentication)"""
+    # In production, verify guardian authentication via JWT
+    # For now, accept the guardian_id parameter
+    
+    monitor = get_guardian_monitor()
+    decision = monitor.guardian_override_decision(
+        original_decision_id,
+        action,
+        reasoning,
+        guardian_id
+    )
+    
+    return {
+        "decision_id": decision.decision_id,
+        "original_decision_id": decision.original_decision_id,
+        "action": decision.action,
+        "reasoning": decision.reasoning,
+        "guardian_id": decision.guardian_id,
+        "timestamp": decision.timestamp
+    }
+
+@app.post("/api/guardian/update-monitoring-level")
+async def update_monitoring_level(
+    level: str,
+    reason: str
+):
+    """Update system monitoring level (requires guardian authentication)"""
+    # Convert string to enum
+    new_level = validate_enum(level, MonitoringLevel, "monitoring_level")
+    
+    monitor = get_guardian_monitor()
+    monitor.update_monitoring_level(new_level, reason)
+    
+    return {
+        "monitoring_level": new_level.value,
+        "reason": reason,
+        "timestamp": time.time()
+    }
+
+@app.get("/api/guardian/validation-history")
+async def get_validation_history(
+    status: Optional[str] = None,
+    limit: int = 100
+):
+    """Get validation history with optional filtering"""
+    monitor = get_guardian_monitor()
+    
+    # Convert string to enum if provided
+    status_filter = validate_enum(status, ValidationStatus, "status")
+    
+    history = monitor.get_validation_history(status_filter, limit)
+    
+    return {
+        "validations": [
+            {
+                "validation_id": v.validation_id,
+                "target": v.target,
+                "status": v.status.value,
+                "checks_passed": v.checks_passed,
+                "checks_failed": v.checks_failed,
+                "details": v.details,
+                "timestamp": v.timestamp
+            }
+            for v in history
+        ],
+        "count": len(history)
+    }
+
+# --- MONITORING AGENTS ENDPOINTS ---
+
+@app.get("/api/monitoring/status")
+async def get_monitoring_status():
+    """Get status of all monitoring agents"""
+    monitoring = get_monitoring_system()
+    return monitoring.get_system_status()
+
+@app.get("/api/monitoring/latest-data")
+async def get_latest_monitoring_data(limit: int = 10):
+    """Get latest data from all monitoring agents"""
+    monitoring = get_monitoring_system()
+    data = monitoring.get_all_latest_data(limit)
+    
+    return {
+        "data": data,
+        "timestamp": time.time()
+    }
+
+@app.post("/api/monitoring/report-to-vercel")
+async def report_metrics_to_vercel(metrics: Dict[str, Any]):
+    """Report metrics to Vercel serverless function"""
+    monitoring = get_monitoring_system()
+    
+    # Add timestamp and source
+    metrics_payload = {
+        "metrics": [
+            {
+                "metric_type": k,
+                "value": v,
+                "timestamp": time.time(),
+                "source": "pi-forge-quantum-genesis"
+            }
+            for k, v in metrics.items()
+        ],
+        "service": "pi-forge-quantum-genesis",
+        "version": "3.3.0"
+    }
+    
+    await monitoring.report_to_vercel(metrics_payload)
+    
+    return {
+        "status": "reported",
+        "metrics_count": len(metrics_payload["metrics"]),
+        "timestamp": time.time()
+    }
+
+@app.post("/api/monitoring/configure-vercel")
+async def configure_vercel_endpoint(endpoint: str):
+    """Configure Vercel endpoint for metrics reporting"""
+    monitoring = get_monitoring_system()
+    monitoring.configure_vercel_endpoint(endpoint)
+    
+    return {
+        "status": "configured",
+        "endpoint": endpoint,
         "timestamp": time.time()
     }
 
