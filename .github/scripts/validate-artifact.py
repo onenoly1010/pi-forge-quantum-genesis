@@ -156,14 +156,29 @@ def validate_frontmatter(frontmatter: Dict) -> List[Dict]:
     # Validate timestamps
     for date_field in ['created_at', 'updated_at']:
         if date_field in frontmatter:
+            date_value = frontmatter[date_field]
             try:
-                datetime.fromisoformat(frontmatter[date_field].replace('Z', '+00:00'))
+                # Handle both datetime objects and strings
+                if isinstance(date_value, datetime):
+                    # Already a datetime object, that's valid
+                    pass
+                elif isinstance(date_value, str):
+                    # Parse string to validate format
+                    datetime.fromisoformat(date_value.replace('Z', '+00:00'))
+                else:
+                    issues.append({
+                        'type': 'invalid_timestamp',
+                        'severity': 'warning',
+                        'field': date_field,
+                        'value': str(date_value),
+                        'message': f'Invalid timestamp type in {date_field}'
+                    })
             except (ValueError, AttributeError):
                 issues.append({
                     'type': 'invalid_timestamp',
                     'severity': 'warning',
                     'field': date_field,
-                    'value': frontmatter[date_field],
+                    'value': str(date_value),
                     'message': f'Invalid timestamp format in {date_field}'
                 })
     
@@ -177,8 +192,20 @@ def validate_schema(frontmatter: Dict) -> List[Dict]:
     if not JSONSCHEMA_AVAILABLE:
         return issues
     
+    # Convert datetime objects to strings for schema validation
+    def convert_for_schema(value):
+        if isinstance(value, datetime):
+            return value.isoformat()
+        elif isinstance(value, list):
+            return [convert_for_schema(v) for v in value]
+        elif isinstance(value, dict):
+            return {k: convert_for_schema(v) for k, v in value.items()}
+        return value
+    
+    converted_frontmatter = {k: convert_for_schema(v) for k, v in frontmatter.items()}
+    
     try:
-        jsonschema.validate(frontmatter, ARTIFACT_SCHEMA)
+        jsonschema.validate(converted_frontmatter, ARTIFACT_SCHEMA)
     except jsonschema.ValidationError as e:
         issues.append({
             'type': 'schema_validation_error',

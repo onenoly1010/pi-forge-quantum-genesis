@@ -33,20 +33,33 @@ def load_artifact(file_path: Path) -> Dict:
                 # Calculate word count
                 word_count = len(body.split())
                 
+                # Convert datetime objects to strings for JSON serialization
+                def serialize_value(value):
+                    if isinstance(value, datetime):
+                        return value.isoformat()
+                    elif isinstance(value, list):
+                        return [serialize_value(v) for v in value]
+                    elif isinstance(value, dict):
+                        return {k: serialize_value(v) for k, v in value.items()}
+                    return value
+                
+                # Convert frontmatter values
+                serialized_frontmatter = {k: serialize_value(v) for k, v in frontmatter.items()}
+                
                 return {
                     'path': str(file_path.relative_to(file_path.parent.parent)),
                     'filename': file_path.name,
                     'id': frontmatter.get('id', 'unknown'),
                     'title': frontmatter.get('title', 'Untitled'),
                     'type': frontmatter.get('type', 'unknown'),
-                    'created_at': frontmatter.get('created_at', ''),
-                    'updated_at': frontmatter.get('updated_at', ''),
+                    'created_at': str(frontmatter.get('created_at', '')),
+                    'updated_at': str(frontmatter.get('updated_at', '')),
                     'author': frontmatter.get('author', 'unknown'),
                     'parent': frontmatter.get('parent'),
                     'trace_id': frontmatter.get('trace_id'),
                     'status': frontmatter.get('status', 'draft'),
                     'word_count': word_count,
-                    'frontmatter': frontmatter,
+                    'frontmatter': serialized_frontmatter,
                     'body_preview': body[:200] + '...' if len(body) > 200 else body
                 }
     except Exception as e:
