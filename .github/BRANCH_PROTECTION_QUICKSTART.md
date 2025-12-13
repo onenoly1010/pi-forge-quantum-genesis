@@ -10,7 +10,7 @@ Choose one of the following methods based on your preference and available tools
 
 #### For Linux/macOS:
 ```bash
-cd /home/runner/work/pi-forge-quantum-genesis/pi-forge-quantum-genesis
+cd /path/to/pi-forge-quantum-genesis
 ./.github/scripts/setup-branch-protection.sh
 ```
 
@@ -37,7 +37,7 @@ cd C:\path\to\pi-forge-quantum-genesis
 gh auth login
 
 # Apply protection rules
-cd /home/runner/work/pi-forge-quantum-genesis/pi-forge-quantum-genesis
+cd /path/to/pi-forge-quantum-genesis
 cat > /tmp/protection.json << 'EOF'
 {
   "required_status_checks": {

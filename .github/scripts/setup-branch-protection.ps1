@@ -10,7 +10,22 @@
 
 $ErrorActionPreference = "Stop"
 
-$REPO = "onenoly1010/pi-forge-quantum-genesis"
+# Auto-detect repository from git remote
+$REPO_URL = git config --get remote.origin.url 2>$null
+if ($REPO_URL) {
+    # Extract owner/repo from URL (handles both HTTPS and SSH)
+    if ($REPO_URL -match '[:/]([^/]+/[^/]+?)(\.git)?$') {
+        $REPO = $matches[1]
+    } else {
+        $REPO = "onenoly1010/pi-forge-quantum-genesis"
+        Write-Host "⚠️  Could not auto-detect repository, using default: $REPO" -ForegroundColor Yellow
+    }
+} else {
+    # Fallback to hardcoded value
+    $REPO = "onenoly1010/pi-forge-quantum-genesis"
+    Write-Host "⚠️  Could not auto-detect repository, using default: $REPO" -ForegroundColor Yellow
+}
+
 $BRANCH = "main"
 $SCRIPT_DIR = Split-Path -Parent $MyInvocation.MyCommand.Path
 $CONFIG_FILE = Join-Path $SCRIPT_DIR "..\branch-protection-config.json"

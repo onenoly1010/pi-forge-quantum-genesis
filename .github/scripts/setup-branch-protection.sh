@@ -11,7 +11,17 @@
 
 set -e
 
-REPO="onenoly1010/pi-forge-quantum-genesis"
+# Auto-detect repository from git remote
+REPO_URL=$(git config --get remote.origin.url 2>/dev/null || echo "")
+if [ -n "$REPO_URL" ]; then
+    # Extract owner/repo from URL (handles both HTTPS and SSH)
+    REPO=$(echo "$REPO_URL" | sed -E 's#.*[:/]([^/]+/[^/]+?)(\.git)?$#\1#')
+else
+    # Fallback to hardcoded value
+    REPO="onenoly1010/pi-forge-quantum-genesis"
+    echo "⚠️  Could not auto-detect repository, using default: $REPO"
+fi
+
 BRANCH="main"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_FILE="$SCRIPT_DIR/../branch-protection-config.json"

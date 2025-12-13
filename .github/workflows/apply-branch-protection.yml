@@ -15,11 +15,11 @@ on:
       dry_run:
         description: 'Dry run (show what would be applied without making changes)'
         required: true
-        default: 'true'
+        default: 'false'
         type: choice
         options:
-          - 'true'
           - 'false'
+          - 'true'
       branch:
         description: 'Branch to protect'
         required: true
@@ -107,14 +107,22 @@ jobs:
           echo ""
           echo "To apply these rules, re-run this workflow with dry_run=false"
       
+      - name: Check token availability
+        if: github.event.inputs.dry_run == 'false'
+        run: |
+          if [ -z "${{ secrets.ADMIN_TOKEN }}" ]; then
+            echo "⚠️  WARNING: ADMIN_TOKEN secret not configured"
+            echo "Attempting to use GITHUB_TOKEN, which may have insufficient permissions"
+            echo "If this fails, please configure an ADMIN_TOKEN secret with repo scope"
+          else
+            echo "✅ Using ADMIN_TOKEN for branch protection configuration"
+          fi
+      
       - name: Apply branch protection rules (Live)
         if: github.event.inputs.dry_run == 'false'
         run: |
           echo "🚀 Applying branch protection rules to branch '${{ github.event.inputs.branch }}'..."
           echo ""
-          
-          # Use ADMIN_TOKEN if available, otherwise use GITHUB_TOKEN
-          # Note: GITHUB_TOKEN may not have sufficient permissions to modify branch protection
           
           gh api \
             --method PUT \
@@ -126,7 +134,7 @@ jobs:
           echo ""
           echo "✅ Branch protection rules applied successfully!"
         env:
-          # Try ADMIN_TOKEN first, fallback to GITHUB_TOKEN
+          # Use ADMIN_TOKEN if available, otherwise use GITHUB_TOKEN
           GH_TOKEN: ${{ secrets.ADMIN_TOKEN || secrets.GITHUB_TOKEN }}
       
       - name: Verify protection rules
