@@ -74,12 +74,13 @@
     }
   },
   "github_api_endpoint": {
-    "url": "https://api.github.com/repos/onenoly1010/pi-forge-quantum-genesis/branches/main/protection",
+    "url": "https://api.github.com/repos/{OWNER}/{REPO}/branches/main/protection",
     "method": "PUT",
-    "authentication": "GitHub Token with repo scope required"
+    "authentication": "GitHub Token with repo scope required",
+    "note": "Replace {OWNER}/{REPO} with your repository path (e.g., onenoly1010/pi-forge-quantum-genesis)"
   },
   "manual_configuration_steps": [
-    "1. Navigate to: https://github.com/onenoly1010/pi-forge-quantum-genesis/settings/branches",
+    "1. Navigate to: https://github.com/{OWNER}/{REPO}/settings/branches (replace with your repository)",
     "2. Click 'Add branch protection rule' or edit existing rule for 'main'",
     "3. Branch name pattern: main",
     "4. Enable: Require a pull request before merging",
