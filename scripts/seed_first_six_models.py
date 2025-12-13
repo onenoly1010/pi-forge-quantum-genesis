@@ -3,6 +3,11 @@
 Seed First Six MR-NFT Models
 Deploys the initial ethical AI validation models to Pi Network
 
+⚠️ IMPORTANT: This script currently operates in FRAMEWORK MODE
+The Pi Network SDK integration (IPFS upload and smart contract deployment)
+is not yet implemented. Use --dry-run for testing and demonstration.
+Actual deployment requires completing the TODO sections in the code.
+
 This script is part of the OINIO succession ceremony and handles
 deployment of the six foundational MR-NFT models to Pi Network.
 
@@ -177,9 +182,10 @@ class ModelDeployer:
             print(f"   [DRY RUN] Would upload to IPFS: {ipfs_hash}")
             return ipfs_hash
         
-        # TODO: Implement actual IPFS upload
-        # This would use an IPFS client library to upload the metadata
-        # For now, returning a placeholder
+        # TODO: Implement actual IPFS upload before production use
+        # This would use an IPFS client library (e.g., ipfshttpclient) to upload the metadata
+        # Expected implementation timeline: Before succession ceremony execution
+        # For now, returning a placeholder for testing and framework demonstration
         print("   📤 Uploading to IPFS...")
         
         # Example implementation (commented out - requires ipfshttpclient):
@@ -230,8 +236,10 @@ class ModelDeployer:
                 "timestamp": int(time.time())
             }
         
-        # TODO: Implement actual Pi Network deployment
+        # TODO: Implement actual Pi Network deployment before production use
         # This would use Pi Network SDK to deploy the contract
+        # Expected implementation timeline: Before succession ceremony execution
+        # The framework below shows the intended implementation pattern
         print("   📝 Deploying smart contract...")
         
         # Example implementation (commented out - requires pi-network SDK):
@@ -555,10 +563,10 @@ For full documentation, see: docs/DEPLOYMENT_CHECKLIST.md
     if not args.dry_run and not args.execute and not args.execute_all:
         parser.error("Must specify --dry-run, --execute, or --execute-all")
     
-    if args.execute_all and not args.model is None:
+    if args.execute_all and args.model is not None:
         parser.error("Cannot use --execute-all with --model (choose one)")
     
-    if args.execute and not args.model:
+    if args.execute and args.model is None:
         parser.error("--execute requires --model to specify which model to deploy")
     
     # Safety check for mainnet

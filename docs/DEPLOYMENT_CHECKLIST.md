@@ -181,6 +181,24 @@ For each of the six models:
 Total Deployment Cost: 820,000 PI
 ```
 
+**⚠️ Script Status Note:**
+
+The `seed_first_six_models.py` script is currently in FRAMEWORK MODE. The Pi Network SDK integration (IPFS upload and smart contract deployment) requires completion before production use. The script provides:
+
+- ✅ Complete model definitions
+- ✅ Deployment pipeline architecture  
+- ✅ CLI interface and dry-run testing
+- ⚠️ IPFS upload (placeholder - needs implementation)
+- ⚠️ Smart contract deployment (placeholder - needs implementation)
+
+Before executing the succession ceremony, ensure:
+1. Pi Network SDK is integrated
+2. IPFS client library is added
+3. Smart contract deployment is tested on testnet
+4. All TODOs in the script are completed
+
+Use `--dry-run` mode for testing the framework until production implementation is complete.
+
 #### ✅ 4. Communication Preparation
 
 **Social Media Templates:**

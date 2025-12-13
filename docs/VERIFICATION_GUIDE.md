@@ -91,11 +91,11 @@ Notes: [Your observations]
 #### Access the Explorer
 
 **URL**: [Pi Network Explorer - Official Link]
-- Mainnet: https://explorer.pi.network (example URL)
-- Testnet: https://testnet.explorer.pi.network
+- Mainnet: https://explorer.pi.network ⚠️ (PLACEHOLDER - verify actual URL before use)
+- Testnet: https://testnet.explorer.pi.network ⚠️ (PLACEHOLDER - verify actual URL before use)
 
 **Alternative Explorers**:
-- [List of verified third-party explorers]
+- ⚠️ PLACEHOLDER - [List of verified third-party explorers to be added]
 
 #### Verify OINIO Wallet
 

@@ -29,12 +29,14 @@ This document serves as the **permanent, canonical registry** of the OINIO ident
 
 **GPG Key Fingerprint:**
 ```
+⚠️ PLACEHOLDER - TO BE COMPLETED BEFORE SUCCESSION CEREMONY
 [To be added: Full GPG key fingerprint]
 Format: XXXX XXXX XXXX XXXX XXXX  XXXX XXXX XXXX XXXX XXXX
 ```
 
 **Key Commitment:**
 ```
+⚠️ PLACEHOLDER - TO BE COMPLETED BEFORE SUCCESSION CEREMONY
 SHA-256 Hash of Public Key:
 [To be added after key generation]
 ```
