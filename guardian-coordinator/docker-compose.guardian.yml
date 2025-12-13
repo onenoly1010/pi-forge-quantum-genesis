@@ -1,0 +1,116 @@
+version: '3.8'
+
+services:
+  # PostgreSQL database for guardian data
+  guardian-db:
+    image: postgres:15-alpine
+    container_name: guardian-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-guardian_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-guardian_password_change_me}
+      POSTGRES_DB: ${POSTGRES_DB:-guardian_db}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - guardian-db-data:/var/lib/postgresql/data
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-guardian_admin}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - guardian-network
+
+  # FastAPI backend service
+  guardian-api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.guardian
+    container_name: guardian-api
+    environment:
+      # Database
+      DATABASE_URL: postgresql://${POSTGRES_USER:-guardian_admin}:${POSTGRES_PASSWORD:-guardian_password_change_me}@guardian-db:5432/${POSTGRES_DB:-guardian_db}
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_KEY: ${SUPABASE_KEY}
+      
+      # Security
+      GUARDIAN_JWT_SECRET: ${GUARDIAN_JWT_SECRET}
+      
+      # Quorum settings
+      GUARDIAN_QUORUM_REQUIRED: ${GUARDIAN_QUORUM_REQUIRED:-3}
+      GUARDIAN_TOTAL_COUNT: ${GUARDIAN_TOTAL_COUNT:-5}
+      
+      # API config
+      API_HOST: ${API_HOST:-0.0.0.0}
+      API_PORT: ${API_PORT:-8001}
+      
+      # Pi Network
+      PI_TESTNET_API_KEY: ${PI_TESTNET_API_KEY}
+      PI_NETWORK_MODE: ${PI_NETWORK_MODE:-testnet}
+      
+      # General
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      DEBUG: ${DEBUG:-true}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    ports:
+      - "${API_PORT:-8001}:8001"
+    depends_on:
+      guardian-db:
+        condition: service_healthy
+    volumes:
+      - ./src:/app/src
+      - ./scripts:/app/scripts
+    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8001 --reload
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - guardian-network
+    restart: unless-stopped
+
+  # Discord bot service
+  guardian-bot:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.guardian
+    container_name: guardian-bot
+    environment:
+      # Discord
+      DISCORD_BOT_TOKEN: ${DISCORD_BOT_TOKEN}
+      DISCORD_GUARDIAN_CHANNEL_ID: ${DISCORD_GUARDIAN_CHANNEL_ID}
+      DISCORD_GUILD_ID: ${DISCORD_GUILD_ID}
+      
+      # API connection
+      API_HOST: guardian-api
+      API_PORT: 8001
+      
+      # Database (for direct queries if needed)
+      DATABASE_URL: postgresql://${POSTGRES_USER:-guardian_admin}:${POSTGRES_PASSWORD:-guardian_password_change_me}@guardian-db:5432/${POSTGRES_DB:-guardian_db}
+      
+      # Security
+      GUARDIAN_JWT_SECRET: ${GUARDIAN_JWT_SECRET}
+      
+      # General
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    depends_on:
+      guardian-api:
+        condition: service_healthy
+    volumes:
+      - ./src:/app/src
+    command: python src/bot/discord_bot.py
+    networks:
+      - guardian-network
+    restart: unless-stopped
+
+volumes:
+  guardian-db-data:
+    driver: local
+
+networks:
+  guardian-network:
+    driver: bridge
