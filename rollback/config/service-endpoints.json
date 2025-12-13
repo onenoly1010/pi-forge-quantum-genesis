@@ -1,0 +1,90 @@
+{
+  "version": "1.0.0",
+  "description": "Service health check endpoints for rollback verification",
+  "environment": "production",
+  
+  "services": {
+    "fastapi": {
+      "name": "FastAPI Quantum Conduit",
+      "port": 8000,
+      "protocol": "http",
+      "endpoints": {
+        "health": {
+          "path": "/",
+          "method": "GET",
+          "expected_status": 200,
+          "expected_response_contains": "healthy",
+          "timeout_seconds": 5
+        },
+        "health_detailed": {
+          "path": "/health",
+          "method": "GET",
+          "expected_status": 200,
+          "timeout_seconds": 5
+        }
+      },
+      "critical": true
+    },
+    
+    "flask": {
+      "name": "Flask Glyph Weaver",
+      "port": 5000,
+      "protocol": "http",
+      "endpoints": {
+        "health": {
+          "path": "/health",
+          "method": "GET",
+          "expected_status": 200,
+          "timeout_seconds": 5
+        }
+      },
+      "critical": false
+    },
+    
+    "gradio": {
+      "name": "Gradio Truth Mirror",
+      "port": 7860,
+      "protocol": "http",
+      "endpoints": {
+        "root": {
+          "path": "/",
+          "method": "GET",
+          "expected_status": 200,
+          "timeout_seconds": 10
+        }
+      },
+      "critical": false
+    }
+  },
+  
+  "external_services": {
+    "supabase": {
+      "name": "Supabase Database",
+      "check_method": "environment_variable",
+      "required_vars": ["SUPABASE_URL", "SUPABASE_KEY"],
+      "critical": true
+    },
+    
+    "pi_network": {
+      "name": "Pi Network API",
+      "check_method": "environment_variable",
+      "required_vars": ["PI_NETWORK_APP_ID", "PI_NETWORK_API_KEY"],
+      "critical": false,
+      "notes": "Required for payment processing"
+    }
+  },
+  
+  "verification_sequence": [
+    "fastapi",
+    "flask",
+    "gradio",
+    "supabase",
+    "pi_network"
+  ],
+  
+  "railway_endpoints": {
+    "note": "In Railway deployment, use public URL instead of localhost",
+    "example": "https://your-app.railway.app",
+    "health_check_path": "/"
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "version": "1.0.0",
+  "description": "Registry of verified stable commits for rollback targets",
+  "last_updated": "2025-12-10T17:39:00Z",
+  
+  "commits": [
+    {
+      "hash": "0bf9c64",
+      "date": "2025-12-10",
+      "description": "Mainnet automation gate implementation",
+      "verified": true,
+      "services_tested": ["fastapi", "flask", "gradio"],
+      "database_migrations": [],
+      "notes": "Fully tested mainnet integration with automation gates"
+    }
+  ],
+  
+  "verification_criteria": {
+    "required_tests": [
+      "service_health_checks",
+      "authentication_flow",
+      "payment_processing",
+      "websocket_streaming"
+    ],
+    "manual_verification_required": true,
+    "minimum_uptime_hours": 24
+  },
+  
+  "usage_notes": [
+    "This file tracks commits that have been verified as stable",
+    "Each commit should be tested for at least 24 hours in production",
+    "Manual verification ensures all critical features work correctly",
+    "Update this file after successful deployments",
+    "Rollback scripts use the first (most recent) commit by default"
+  ],
+  
+  "update_procedure": {
+    "steps": [
+      "1. Deploy new version to production",
+      "2. Monitor for 24-48 hours",
+      "3. Verify all services healthy",
+      "4. Test critical user flows",
+      "5. Add commit to this list with details",
+      "6. Commit and push this file"
+    ]
+  }
+}
