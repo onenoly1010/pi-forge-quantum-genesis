@@ -263,4 +263,36 @@ contract OINIOModelRegistryTest is Test {
         string memory uri = registry.tokenURI(modelId);
         assertEq(uri, "ipfs://test");
     }
+
+    function testTransferModelRemovesFromPreviousOwnerList() public {
+        // Creator1 registers two models
+        vm.startPrank(creator1);
+        uint256 modelId1 = registry.registerModel("Model 1", "ipfs://1", STAKE_AMOUNT);
+        uint256 modelId2 = registry.registerModel("Model 2", "ipfs://2", STAKE_AMOUNT);
+        vm.stopPrank();
+
+        // Verify creator1 has 2 models
+        uint256[] memory creator1ModelsBefore = registry.getModelsByCreator(creator1);
+        assertEq(creator1ModelsBefore.length, 2);
+
+        // Transfer one model to creator2
+        vm.prank(creator1);
+        registry.transferModel(creator2, modelId1);
+
+        // Verify creator1 now has only 1 model
+        uint256[] memory creator1ModelsAfter = registry.getModelsByCreator(creator1);
+        assertEq(creator1ModelsAfter.length, 1);
+        assertEq(creator1ModelsAfter[0], modelId2);
+
+        // Verify creator2 has the transferred model
+        uint256[] memory creator2Models = registry.getModelsByCreator(creator2);
+        bool found = false;
+        for (uint256 i = 0; i < creator2Models.length; i++) {
+            if (creator2Models[i] == modelId1) {
+                found = true;
+                break;
+            }
+        }
+        assertTrue(found);
+    }
 }

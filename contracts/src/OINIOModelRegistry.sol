@@ -186,6 +186,9 @@ contract OINIOModelRegistry is ERC721, ERC721URIStorage, Ownable, ReentrancyGuar
 
         address from = msg.sender;
         
+        // Remove from previous owner's model list
+        _removeModelFromCreator(from, modelId);
+        
         // Add to new owner's model list
         _modelsByCreator[to].push(modelId);
 
@@ -193,6 +196,23 @@ contract OINIOModelRegistry is ERC721, ERC721URIStorage, Ownable, ReentrancyGuar
         safeTransferFrom(from, to, modelId);
 
         emit ModelTransferred(modelId, from, to);
+    }
+
+    /**
+     * @dev Internal function to remove a model ID from a creator's list
+     * @param creator Address of the creator
+     * @param modelId ID of the model to remove
+     */
+    function _removeModelFromCreator(address creator, uint256 modelId) private {
+        uint256[] storage models = _modelsByCreator[creator];
+        for (uint256 i = 0; i < models.length; i++) {
+            if (models[i] == modelId) {
+                // Move the last element to this position and pop
+                models[i] = models[models.length - 1];
+                models.pop();
+                break;
+            }
+        }
     }
 
     /**
