@@ -393,10 +393,19 @@ def main():
         print(f"\nResults saved to: {output_path}")
     
     # Output for GitHub Actions
-    print(f"\n::set-output name=success::{str(result['success']).lower()}")
-    print(f"::set-output name=conflicts::{result['total_conflicts']}")
-    print(f"::set-output name=errors::{result['errors']}")
-    print(f"::set-output name=warnings::{result['warnings']}")
+    github_output = os.environ.get('GITHUB_OUTPUT')
+    if github_output:
+        with open(github_output, 'a') as f:
+            f.write(f"success={str(result['success']).lower()}\n")
+            f.write(f"conflicts={result['total_conflicts']}\n")
+            f.write(f"errors={result['errors']}\n")
+            f.write(f"warnings={result['warnings']}\n")
+    else:
+        # Fallback for local testing
+        print(f"\nsuccess={str(result['success']).lower()}")
+        print(f"conflicts={result['total_conflicts']}")
+        print(f"errors={result['errors']}")
+        print(f"warnings={result['warnings']}")
     
     print("::endgroup::")
     

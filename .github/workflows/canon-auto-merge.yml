@@ -90,15 +90,22 @@ jobs:
           FIRST_FILE=$(echo "$CANON_FILES" | jq -r '.[0]')
           
           if [ -f "$FIRST_FILE" ]; then
-            # Extract artifact type from frontmatter
-            TYPE=$(grep -A 1 "^type:" "$FIRST_FILE" | tail -1 | sed 's/type: *//' | tr -d ' ')
-            echo "artifact_type=$TYPE" >> $GITHUB_OUTPUT
-            echo "artifact_path=$FIRST_FILE" >> $GITHUB_OUTPUT
-            echo "✅ Classified as Canon PR (type: $TYPE)"
+            # Extract artifact type from frontmatter (between --- markers)
+            TYPE=$(awk '/^---$/,/^---$/ {if ($1 == "type:") print $2}' "$FIRST_FILE" | head -1 | tr -d '[:space:]')
+            
+            if [ -n "$TYPE" ]; then
+              echo "artifact_type=$TYPE" >> $GITHUB_OUTPUT
+              echo "artifact_path=$FIRST_FILE" >> $GITHUB_OUTPUT
+              echo "✅ Classified as Canon PR (type: $TYPE)"
+            else
+              echo "artifact_type=unknown" >> $GITHUB_OUTPUT
+              echo "artifact_path=$FIRST_FILE" >> $GITHUB_OUTPUT
+              echo "⚠️ Could not determine artifact type from $FIRST_FILE"
+            fi
           else
             echo "artifact_type=unknown" >> $GITHUB_OUTPUT
             echo "artifact_path=" >> $GITHUB_OUTPUT
-            echo "⚠️ Could not determine artifact type"
+            echo "⚠️ Could not find artifact file: $FIRST_FILE"
           fi
 
       - name: Comment on PR
@@ -258,7 +265,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
@@ -290,7 +297,7 @@ jobs:
 
       - name: Upload conflict results
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: conflict-results
           path: /tmp/conflict-results.json
@@ -437,13 +444,15 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
+            const pr_number = context.payload.pull_request?.number || context.payload.inputs?.pr_number;
+            
             await github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'canon-post-merge.yml',
               ref: 'main',
               inputs: {
-                merged_pr: '${{ github.event.pull_request.number }}',
+                merged_pr: pr_number.toString(),
                 artifact_type: '${{ needs.gate1-classification.outputs.artifact_type }}'
               }
             });
