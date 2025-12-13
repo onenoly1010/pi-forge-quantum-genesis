@@ -150,3 +150,13 @@ dist/
 .DS_Store
 Thumbs.db
 deployment_log.json
+
+# Solidity / Foundry
+contracts/cache/
+contracts/out/
+contracts/broadcast/
+contracts/.env
+contracts/lib/
+*.sol.d
+*.abi
+*.bin
