@@ -19,7 +19,7 @@ Complete 9-section operational guide covering:
 - Guardian team roles and responsibilities
 - Decision types with confidence thresholds
 - Escalation procedures for all priority levels
-- Decision templates for all 5 decision types (deployment, scaling, rollback, healing, monitoring)
+- Decision templates for 5 decision types (deployment, scaling, rollback, healing, monitoring)
 - Emergency protocols (emergency stop, rollback, service degradation)
 - Monitoring guidelines and safety metrics
 - Common operational scenarios
