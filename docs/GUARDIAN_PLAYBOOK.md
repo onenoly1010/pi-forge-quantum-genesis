@@ -348,12 +348,14 @@ curl -X POST https://[url]/api/guardian/approve-healing \
 
 **Option B: Rollback**
 ```bash
-# Use fast rollback (5-10 minutes)
-cd rollback/scripts
-./emergency-rollback.sh --fast
+# Trigger rollback via workflow or manual process
+# See docs/ROLLBACK_VALIDATION.md for procedures
 
-# Or full rollback (15-30 minutes)
-./emergency-rollback.sh --full --target-commit <commit-hash>
+# Quick rollback to last known good state
+gh workflow run rollback.yml --ref main
+
+# Or manual git-based rollback (coordinate with team)
+git revert <bad-commit-hash>
 ```
 
 **Option C: Manual Fix**
@@ -741,7 +743,7 @@ Use template: `.github/ISSUE_TEMPLATE/incident-report.md`
 - [Quick Reference](./GUARDIAN_QUICK_REFERENCE.md) - Fast decision-making guide
 - [Architecture](./ARCHITECTURE.md) - System design
 - [Autonomous Handover](./AUTONOMOUS_HANDOVER.md) - AI decision system details
-- [Rollback Procedures](../rollback/README.md) - Emergency rollback guide
+- [Rollback Procedures](./ROLLBACK_VALIDATION.md) - Emergency rollback guide
 
 ### GitHub Resources
 

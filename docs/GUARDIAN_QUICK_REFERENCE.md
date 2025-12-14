@@ -38,7 +38,8 @@ curl -X POST https://[url]/api/guardian/emergency-stop \
 
 ### Emergency Rollback
 ```bash
-cd rollback/scripts && ./emergency-rollback.sh --fast
+# Trigger via GitHub Actions
+gh workflow run rollback.yml --ref main
 ```
 
 ---
