@@ -87,6 +87,25 @@ uvicorn server.main:app --reload
 
 See the [Pi Network Integration Guide](docs/PI_NETWORK_INTEGRATION.md) and [Quick Reference](docs/PI_NETWORK_QUICK_REFERENCE.md) for complete documentation.
 ⸻
+## 🔒 Branch Protection
+
+The `main` branch is protected with comprehensive rules to ensure code quality and prevent accidental changes:
+
+- **Pull Request Reviews**: Minimum 1 approval required, code owner reviews mandatory
+- **Status Checks**: All CI/CD checks must pass before merging
+- **Linear History**: Merge commits prevented, enforces clean history
+- **Security**: Force pushes and branch deletion blocked
+- **Administrator Enforcement**: Protection rules apply to all users
+
+### Quick Setup
+
+```bash
+# Using the automated script
+./.github/scripts/setup-branch-protection.sh
+```
+
+For complete documentation, see [Branch Protection Guide](.github/BRANCH_PROTECTION.md).
+⸻
 Notes
 – Compatible with Hugging Face Spaces and Netlify deploys.
 – Fully integrated with Pi Network for authentication and payments.
