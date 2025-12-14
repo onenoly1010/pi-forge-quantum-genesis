@@ -71,6 +71,7 @@ env:
   MONITORING_ISSUE_TITLE: '🤖 AI Agent Autonomous Runbook Status'
   DEPLOYMENT_ENVIRONMENT: 'production'
   SAFETY_GATE_ENABLED: true
+  ENABLE_TELEMETRY: false  # Disable OpenTelemetry in CI environment
   
 # ═══════════════════════════════════════════════════════════════════════════
 # JOB 1: SAFETY GATE & PRE-FLIGHT CHECKS

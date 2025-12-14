@@ -495,6 +495,9 @@ class ConnectionTracker:
 
 connection_tracker = ConnectionTracker(max_connections=10000)
 
+# Track application startup time for metrics
+startup_time = time.time()
+
 # --- FASTAPI APPLICATION ---
 app = FastAPI(
     title="QVM 3.0 Supabase Resonance Bridge", 
@@ -587,6 +590,30 @@ async def health_check():
             "agent_framework": tracing_enabled,
             "cross_trinity_flows": True
         }
+    }
+
+@app.get("/api/metrics")
+async def metrics_endpoint():
+    """Prometheus-compatible metrics endpoint"""
+    connection_metrics = connection_tracker.get_metrics()
+    guardian_status = guardian.get_status()
+    
+    return {
+        "service": "pi-forge-quantum-genesis",
+        "version": "3.3.0",
+        "uptime_seconds": time.time() - startup_time,
+        "connections": connection_metrics,
+        "guardian": {
+            "latency_ns": guardian_status["latency"]["latency_ns"],
+            "harmonic_stability": guardian_status["latency"]["harmonic_stability"],
+            "quantum_coherence": guardian_status["quantum_coherence"],
+            "total_alerts": guardian_status["total_alerts"]
+        },
+        "payments_processed": len(payment_records),
+        "websocket_connections": connection_metrics["active_websocket_connections"],
+        "requests_total": connection_metrics["total_requests"],
+        "requests_per_second": connection_metrics["requests_per_second"],
+        "timestamp": time.time()
     }
 
 @app.get("/ceremonial")

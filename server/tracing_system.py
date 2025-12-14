@@ -71,7 +71,12 @@ class QuantumTracingSystem:
     def __init__(self, service_name: str = "quantum-resonance-lattice"):
         self.service_name = service_name
         self.agent_framework_enabled = agent_framework_available
-        self.setup_tracing()
+        self.telemetry_enabled = os.environ.get("ENABLE_TELEMETRY", "true").lower() == "true"
+        
+        if self.telemetry_enabled:
+            self.setup_tracing()
+        else:
+            logger.info("⚠️ OpenTelemetry disabled via ENABLE_TELEMETRY environment variable")
         
     def setup_tracing(self):
         """Initialize OpenTelemetry tracing for Sacred Trinity"""

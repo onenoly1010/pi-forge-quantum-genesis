@@ -37,13 +37,46 @@ curl http://localhost:8000/api/metrics
 ## 📡 Telemetry Ceremony
 **Purpose:** Control OpenTelemetry collector in local vs CI environments.
 
+### Local Development with Full Observability Stack
+
 ```bash
-# Run with telemetry enabled
+# Start OpenTelemetry Collector, Prometheus, and Grafana
+docker-compose up -d
+
+# Verify services are running
+docker-compose ps
+
+# View logs
+docker-compose logs -f otel-collector
+
+# Stop all services
+docker-compose down
+```
+
+**Access Points:**
+- Prometheus: http://localhost:9090
+- Grafana: http://localhost:3000 (admin/admin)
+- OTLP HTTP Receiver: http://localhost:4318
+- OTLP gRPC Receiver: http://localhost:4317
+
+### Run Application with Telemetry Control
+
+```bash
+# Run with telemetry enabled (connects to docker-compose stack)
 ENABLE_TELEMETRY=true python server/main.py
 
-# Run with telemetry disabled
+# Run with telemetry disabled (for CI or offline testing)
+ENABLE_TELEMETRY=false python server/main.py
+
+# Run tests with telemetry disabled (prevents connection errors)
 ENABLE_TELEMETRY=false pytest
 ```
+
+### Configuration Files
+
+- `docker-compose.yml` - Full observability stack configuration
+- `otel-collector-config.yaml` - OpenTelemetry Collector configuration
+- `prometheus.yml` - Prometheus scrape configuration
 
 ---
 
