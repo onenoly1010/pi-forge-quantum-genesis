@@ -71,6 +71,10 @@ logging.info("✅ Guardian monitoring system loaded")
 from monitoring_agents import get_monitoring_system
 logging.info("✅ Monitoring agents system loaded")
 
+# Import guardian approval system
+from guardian_approvals import get_approval_system
+logging.info("✅ Guardian approval system loaded")
+
 # --- SUPABASE CLIENT INITIALIZATION ---
 supabase = None
 if supabase_available:
@@ -1381,6 +1385,121 @@ async def get_validation_history(
         ],
         "count": len(history)
     }
+
+# --- GUARDIAN APPROVAL ENDPOINTS ---
+
+@app.post("/api/guardian/record-approval")
+async def record_guardian_approval(
+    decision_id: str,
+    decision_type: str,
+    guardian_id: str,
+    action: str,
+    reasoning: str,
+    priority: str = "high",
+    confidence: float = 0.0,
+    metadata: Optional[Dict[str, Any]] = None
+):
+    """
+    Record a guardian approval for a deployment decision
+    
+    Args:
+        decision_id: Original decision ID (e.g., deployment_1734134400000)
+        decision_type: Type of decision (deployment, scaling, rollback, etc.)
+        guardian_id: ID of the guardian (e.g., user email or username)
+        action: approve, reject, or modify
+        reasoning: Reasoning for the action
+        priority: Priority level (critical, high, medium, low)
+        confidence: Original decision confidence score
+        metadata: Additional metadata about the decision
+    """
+    approval_system = get_approval_system()
+    
+    approval = approval_system.record_approval(
+        decision_id=decision_id,
+        decision_type=decision_type,
+        guardian_id=guardian_id,
+        action=action,
+        reasoning=reasoning,
+        priority=priority,
+        confidence=confidence,
+        metadata=metadata
+    )
+    
+    return {
+        "approval_id": approval.approval_id,
+        "decision_id": approval.decision_id,
+        "action": approval.action,
+        "guardian_id": approval.guardian_id,
+        "timestamp": approval.timestamp,
+        "status": "recorded"
+    }
+
+@app.get("/api/guardian/check-approval/{decision_id}")
+async def check_approval(decision_id: str):
+    """Check if a decision has been approved"""
+    approval_system = get_approval_system()
+    
+    approval = approval_system.get_approval(decision_id)
+    is_approved = approval_system.is_approved(decision_id)
+    
+    if approval:
+        return {
+            "decision_id": decision_id,
+            "is_approved": is_approved,
+            "approval": {
+                "approval_id": approval.approval_id,
+                "action": approval.action,
+                "guardian_id": approval.guardian_id,
+                "reasoning": approval.reasoning,
+                "timestamp": approval.timestamp
+            }
+        }
+    else:
+        return {
+            "decision_id": decision_id,
+            "is_approved": False,
+            "approval": None
+        }
+
+@app.get("/api/guardian/approvals")
+async def get_all_approvals(
+    decision_type: Optional[str] = None,
+    action: Optional[str] = None,
+    limit: int = 100
+):
+    """Get all guardian approvals with optional filtering"""
+    approval_system = get_approval_system()
+    
+    approvals = approval_system.get_all_approvals(
+        decision_type=decision_type,
+        action=action,
+        limit=limit
+    )
+    
+    return {
+        "approvals": [
+            {
+                "approval_id": a.approval_id,
+                "decision_id": a.decision_id,
+                "decision_type": a.decision_type,
+                "guardian_id": a.guardian_id,
+                "action": a.action,
+                "reasoning": a.reasoning,
+                "priority": a.priority,
+                "confidence": a.confidence,
+                "timestamp": a.timestamp,
+                "metadata": a.metadata
+            }
+            for a in approvals
+        ],
+        "count": len(approvals)
+    }
+
+@app.get("/api/guardian/approval-stats")
+async def get_approval_stats():
+    """Get statistics about guardian approvals"""
+    approval_system = get_approval_system()
+    return approval_system.get_approval_stats()
 
 # --- MONITORING AGENTS ENDPOINTS ---
 

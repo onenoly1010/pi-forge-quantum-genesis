@@ -151,6 +151,9 @@ dist/
 Thumbs.db
 deployment_log.json
 
+# Guardian approval system data
+.guardian_approvals/
+
 # Solidity / Foundry
 contracts/cache/
 contracts/out/
