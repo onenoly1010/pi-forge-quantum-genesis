@@ -228,6 +228,7 @@ gh run rerun <run-id>
 ## 📚 Documentation
 
 - **Full Guide**: `docs/AI_AGENT_HANDOFF_RUNBOOK.md`
+- **Rollback Validation**: `docs/ROLLBACK_VALIDATION.md`
 - **Automation**: `docs/automation.md`
 - **Production**: `docs/PRODUCTION_DEPLOYMENT.md`
 - **Workflow File**: `.github/workflows/ai-agent-handoff-runbook.yml`
