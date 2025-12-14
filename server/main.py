@@ -1382,6 +1382,37 @@ async def get_validation_history(
         "count": len(history)
     }
 
+@app.get("/api/guardian/dashboard")
+async def guardian_dashboard():
+    """Guardian oversight dashboard - shows pending escalations"""
+    decision_matrix = get_decision_matrix()
+    guardian_monitor = get_guardian_monitor()
+    
+    pending_decisions = [
+        d for d in decision_matrix.decision_history[-50:]
+        if d.requires_guardian and not d.approved
+    ]
+    
+    return {
+        "guardian_team": "Issue #100 - @onenoly1010",
+        "pending_escalations": len(pending_decisions),
+        "recent_decisions": [
+            {
+                "decision_id": d.decision_id,
+                "decision_type": d.decision_type.value,
+                "priority": d.metadata.get("priority") if d.metadata else "unknown",
+                "confidence": d.confidence,
+                "reasoning": d.reasoning,
+                "requires_guardian": d.requires_guardian,
+                "approved": d.approved,
+                "timestamp": d.timestamp
+            }
+            for d in pending_decisions
+        ],
+        "monitoring_status": guardian_monitor.get_monitoring_status(),
+        "escalation_endpoint": "https://github.com/onenoly1010/pi-forge-quantum-genesis/issues/100"
+    }
+
 # --- MONITORING AGENTS ENDPOINTS ---
 
 @app.get("/api/monitoring/status")

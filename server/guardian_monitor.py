@@ -430,6 +430,44 @@ class GuardianMonitor:
         
         return history[-limit:]
 
+    def log_escalation_to_metrics(
+        self,
+        escalation_data: Dict[str, Any],
+        vercel_endpoint: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Log escalation to Vercel metrics endpoint
+        
+        Args:
+            escalation_data: Escalation data to log
+            vercel_endpoint: Optional Vercel metrics endpoint URL
+            
+        Returns:
+            Logging result
+        """
+        log_entry = {
+            "type": "guardian_escalation",
+            "escalation_id": escalation_data.get("escalation_id"),
+            "decision_id": escalation_data.get("decision_id"),
+            "guardian": escalation_data.get("guardian_username"),
+            "timing": escalation_data.get("escalation_timing"),
+            "timestamp": time.time()
+        }
+        
+        logger.info(
+            f"📊 Escalation logged to metrics: {escalation_data.get('escalation_id')}"
+        )
+        
+        # If Vercel endpoint provided, would send data there
+        if vercel_endpoint:
+            logger.info(f"📡 Would send escalation metrics to: {vercel_endpoint}")
+        
+        return {
+            "logged": True,
+            "log_entry": log_entry,
+            "endpoint": vercel_endpoint
+        }
+
 
 # Global guardian monitor instance
 _guardian_monitor: Optional[GuardianMonitor] = None

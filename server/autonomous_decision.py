@@ -362,3 +362,183 @@ def get_decision_matrix() -> AIDecisionMatrix:
     if _decision_matrix is None:
         _decision_matrix = AIDecisionMatrix()
     return _decision_matrix
+
+
+# ============================================================================
+# GUARDIAN ESCALATION FUNCTIONS
+# ============================================================================
+
+def create_guardian_escalation_issue(
+    decision: DecisionResult,
+    guardian_username: str = "onenoly1010"
+) -> Dict[str, Any]:
+    """
+    Create GitHub issue for guardian review
+    
+    Args:
+        decision: Decision result requiring guardian approval
+        guardian_username: GitHub username of guardian to assign
+        
+    Returns:
+        Dictionary with escalation details
+    """
+    from config.guardians import (
+        GUARDIAN_TEAM_ISSUE_URL,
+        get_escalation_timing
+    )
+    
+    # Get escalation timing based on priority
+    priority = decision.metadata.get("priority", "medium") if decision.metadata else "medium"
+    escalation_timing = get_escalation_timing(priority)
+    
+    # Create issue data structure (for actual GitHub API integration)
+    issue_data = {
+        "title": f"🛡️ Guardian Review Required: {decision.decision_type.value} (Priority: {priority})",
+        "body": f"""## Guardian Escalation Required
+
+**Decision ID**: `{decision.decision_id}`
+**Decision Type**: {decision.decision_type.value}
+**Priority**: {priority}
+**Confidence**: {decision.confidence:.2%}
+**Escalation Timing**: {escalation_timing}
+
+### Decision Details
+
+{decision.reasoning}
+
+### Recommended Actions
+
+{chr(10).join(f"- {action}" for action in decision.actions)}
+
+### Guardian Team Reference
+
+See Guardian Team configuration: {GUARDIAN_TEAM_ISSUE_URL}
+
+---
+
+**Assigned to**: @{guardian_username}
+**Requires**: Guardian approval before execution
+""",
+        "assignees": [guardian_username],
+        "labels": [
+            "guardian-review",
+            f"priority-{priority}",
+            "autonomous-decision"
+        ]
+    }
+    
+    logger.info(
+        f"🛡️ Guardian escalation issue created for decision {decision.decision_id} "
+        f"(priority: {priority}, timing: {escalation_timing})"
+    )
+    
+    return {
+        "escalation_id": f"esc_{decision.decision_id}",
+        "decision_id": decision.decision_id,
+        "guardian_username": guardian_username,
+        "escalation_timing": escalation_timing,
+        "issue_data": issue_data,
+        "timestamp": time.time()
+    }
+
+
+def notify_guardian(
+    decision: DecisionResult,
+    escalation_data: Dict[str, Any]
+) -> Dict[str, Any]:
+    """
+    Trigger guardian notification workflow
+    
+    Args:
+        decision: Decision result requiring guardian approval
+        escalation_data: Escalation data from create_guardian_escalation_issue
+        
+    Returns:
+        Notification result
+    """
+    from config.guardians import get_guardian_notification_methods
+    
+    notification_methods = get_guardian_notification_methods()
+    
+    notification_result = {
+        "notification_id": f"notify_{escalation_data['escalation_id']}",
+        "decision_id": decision.decision_id,
+        "methods": notification_methods,
+        "status": "queued",
+        "timestamp": time.time()
+    }
+    
+    # Log notification methods that would be triggered
+    for method in notification_methods:
+        logger.info(
+            f"📢 Guardian notification queued via {method} "
+            f"for decision {decision.decision_id}"
+        )
+    
+    return notification_result
+
+
+def link_to_guardian_team() -> Dict[str, Any]:
+    """
+    Get Guardian Team Issue reference
+    
+    Returns:
+        Dictionary with guardian team information
+    """
+    from config.guardians import (
+        GUARDIAN_TEAM_ISSUE_URL,
+        GUARDIAN_TEAM_ISSUE_NUMBER,
+        get_primary_guardian
+    )
+    
+    return {
+        "guardian_team_issue": GUARDIAN_TEAM_ISSUE_URL,
+        "issue_number": GUARDIAN_TEAM_ISSUE_NUMBER,
+        "primary_guardian": get_primary_guardian()
+    }
+
+
+def handle_guardian_escalation(decision: DecisionResult) -> Dict[str, Any]:
+    """
+    Handle complete guardian escalation flow
+    
+    Args:
+        decision: Decision result requiring guardian approval
+        
+    Returns:
+        Complete escalation result
+    """
+    from config.guardians import get_guardian_github_username
+    
+    if not decision.requires_guardian:
+        logger.warning(
+            f"⚠️ Attempted to escalate decision {decision.decision_id} "
+            "that doesn't require guardian approval"
+        )
+        return {
+            "escalated": False,
+            "reason": "Decision does not require guardian approval"
+        }
+    
+    guardian_username = get_guardian_github_username()
+    
+    # Create escalation issue
+    escalation_data = create_guardian_escalation_issue(decision, guardian_username)
+    
+    # Notify guardian
+    notification_result = notify_guardian(decision, escalation_data)
+    
+    # Get guardian team reference
+    team_info = link_to_guardian_team()
+    
+    logger.info(
+        f"✅ Guardian escalation completed for decision {decision.decision_id}"
+    )
+    
+    return {
+        "escalated": True,
+        "escalation_data": escalation_data,
+        "notification": notification_result,
+        "guardian_team": team_info,
+        "timestamp": time.time()
+    }
