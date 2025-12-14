@@ -196,4 +196,15 @@ Examples:
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\n⚠️  Operation cancelled by user")
+        sys.exit(1)
+    except PermissionError as e:
+        print(f"❌ Permission denied: {e}")
+        print("   Try running with appropriate permissions or check directory access")
+        sys.exit(1)
+    except Exception as e:
+        print(f"❌ Error: {e}")
+        sys.exit(1)

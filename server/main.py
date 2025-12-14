@@ -224,6 +224,17 @@ class SmartContractAudit(BaseModel):
     contract_name: str = Field(..., min_length=1, max_length=100)
     audit_depth: str = Field(default="standard", pattern="^(basic|standard|comprehensive)$")
 
+class GuardianApprovalRequest(BaseModel):
+    """Request model for guardian approval recording"""
+    decision_id: str = Field(..., description="Original decision ID")
+    decision_type: str = Field(..., description="Type of decision (deployment, scaling, rollback, etc.)")
+    guardian_id: str = Field(..., description="Guardian identifier")
+    action: str = Field(..., pattern="^(approve|reject|modify)$", description="Action: approve, reject, or modify")
+    reasoning: str = Field(..., min_length=1, description="Reasoning for the action")
+    priority: str = Field(default="high", pattern="^(critical|high|medium|low)$", description="Priority level")
+    confidence: float = Field(default=0.0, ge=0.0, le=1.0, description="Decision confidence score")
+    metadata: Optional[Dict[str, Any]] = Field(default=None, description="Additional metadata")
+
 # --- CYBER SAMURAI GUARDIAN STATE ---
 # --- PI NETWORK API INTEGRATION HELPERS ---
 async def call_pi_network_api(endpoint: str, method: str = "GET", data: Optional[Dict] = None) -> Dict[str, Any]:
@@ -1389,40 +1400,31 @@ async def get_validation_history(
 # --- GUARDIAN APPROVAL ENDPOINTS ---
 
 @app.post("/api/guardian/record-approval")
-async def record_guardian_approval(
-    decision_id: str,
-    decision_type: str,
-    guardian_id: str,
-    action: str,
-    reasoning: str,
-    priority: str = "high",
-    confidence: float = 0.0,
-    metadata: Optional[Dict[str, Any]] = None
-):
+async def record_guardian_approval(request: GuardianApprovalRequest):
     """
     Record a guardian approval for a deployment decision
     
-    Args:
-        decision_id: Original decision ID (e.g., deployment_1734134400000)
-        decision_type: Type of decision (deployment, scaling, rollback, etc.)
-        guardian_id: ID of the guardian (e.g., user email or username)
-        action: approve, reject, or modify
-        reasoning: Reasoning for the action
-        priority: Priority level (critical, high, medium, low)
-        confidence: Original decision confidence score
-        metadata: Additional metadata about the decision
+    Uses GuardianApprovalRequest model for validation:
+    - decision_id: Original decision ID (e.g., deployment_1734134400000)
+    - decision_type: Type of decision (deployment, scaling, rollback, etc.)
+    - guardian_id: ID of the guardian (e.g., user email or username)
+    - action: approve, reject, or modify (validated)
+    - reasoning: Reasoning for the action
+    - priority: Priority level - critical, high, medium, low (validated)
+    - confidence: Original decision confidence score (0.0 to 1.0)
+    - metadata: Additional metadata about the decision
     """
     approval_system = get_approval_system()
     
     approval = approval_system.record_approval(
-        decision_id=decision_id,
-        decision_type=decision_type,
-        guardian_id=guardian_id,
-        action=action,
-        reasoning=reasoning,
-        priority=priority,
-        confidence=confidence,
-        metadata=metadata
+        decision_id=request.decision_id,
+        decision_type=request.decision_type,
+        guardian_id=request.guardian_id,
+        action=request.action,
+        reasoning=request.reasoning,
+        priority=request.priority,
+        confidence=request.confidence,
+        metadata=request.metadata
     )
     
     return {
