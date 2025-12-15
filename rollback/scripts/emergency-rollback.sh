@@ -19,7 +19,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROLLBACK_ROOT="$(dirname "$SCRIPT_DIR")"
 PROJECT_ROOT="$(dirname "$ROLLBACK_ROOT")"
 LOG_FILE="${ROLLBACK_ROOT}/logs/rollback-$(date +%Y%m%d-%H%M%S).log"
-BACKUP_DIR="${ROLLBACK_ROOT}/backups/state-$(date +%Y%m%d-%H%M%S)"
+BACKUP_DIR="${ROLLBACK_ROOT}/backups/state-$(date +%Y%m%d-%H%M%S)-$$"
 
 # Default values
 ROLLBACK_LEVEL="fast"
