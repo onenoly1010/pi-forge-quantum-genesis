@@ -1,9 +1,9 @@
 # Pi Forge Quantum Genesis - Ledger API Dependencies
 
 # FastAPI and web framework
-fastapi==0.104.1
-uvicorn[standard]==0.24.0
-python-multipart==0.0.18
+fastapi>=0.115.2,<0.125
+uvicorn[standard]>=0.24.0,<0.35
+python-multipart>=0.0.18
 
 # Database
 sqlalchemy==2.0.23
@@ -18,9 +18,9 @@ passlib[bcrypt]==1.7.4
 cryptography==44.0.1
 
 # Data validation
-pydantic==2.5.0
-pydantic-settings==2.1.0
-email-validator==2.1.0
+pydantic>=2.5.2,<3.0
+pydantic-settings>=2.1.0,<3.0
+email-validator>=2.1.0
 
 # Testing
 pytest==7.4.3
