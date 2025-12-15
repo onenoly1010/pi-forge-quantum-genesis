@@ -879,9 +879,6 @@ class CrossComponentIntegrationEvaluator:
 class AuthenticationFlowEvaluator:
     """Custom evaluator for Authentication Flow"""
     
-    def __init__(self):
-        pass
-        
     def __call__(self, *, query: str, expected_response: str, component: str, evaluation_focus: str = "authentication", **kwargs):
         """Evaluate authentication flow quality"""
         # JWT token validation
@@ -917,9 +914,6 @@ class AuthenticationFlowEvaluator:
 class PaymentProcessingEvaluator:
     """Custom evaluator for Payment Processing"""
     
-    def __init__(self):
-        pass
-        
     def __call__(self, *, query: str, expected_response: str, component: str, evaluation_focus: str = "payment", **kwargs):
         """Evaluate payment processing quality"""
         # Payment verification
@@ -955,9 +949,6 @@ class PaymentProcessingEvaluator:
 class SVGVisualizationEvaluator:
     """Custom evaluator for SVG Visualization"""
     
-    def __init__(self):
-        pass
-        
     def __call__(self, *, query: str, expected_response: str, component: str, evaluation_focus: str = "visualization", **kwargs):
         """Evaluate SVG visualization quality"""
         # SVG rendering
