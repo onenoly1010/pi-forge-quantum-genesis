@@ -167,14 +167,14 @@ class QuantumLatticeEvaluator:
         # Cross-Component Integration Evaluator
         evaluators["cross_component_integration"] = CrossComponentIntegrationEvaluator()
         
-        # Authentication Flow Evaluator
-        evaluators["authentication_flow"] = AuthenticationFlowEvaluator()
+        # TODO: Authentication Flow Evaluator - to be implemented
+        # evaluators["authentication_flow"] = AuthenticationFlowEvaluator()
         
-        # Payment Processing Evaluator
-        evaluators["payment_processing"] = PaymentProcessingEvaluator()
+        # TODO: Payment Processing Evaluator - to be implemented
+        # evaluators["payment_processing"] = PaymentProcessingEvaluator()
         
-        # SVG Visualization Evaluator
-        evaluators["svg_visualization"] = SVGVisualizationEvaluator()
+        # TODO: SVG Visualization Evaluator - to be implemented
+        # evaluators["svg_visualization"] = SVGVisualizationEvaluator()
         
         # Ethical Audit Evaluator
         evaluators["ethical_audit"] = EthicalAuditEvaluator()
@@ -189,9 +189,10 @@ class QuantumLatticeEvaluator:
             "sacred_trinity_quality": SacredTrinityQualityEvaluator(),
             "quantum_coherence": QuantumCoherenceEvaluator(), 
             "cross_component_integration": CrossComponentIntegrationEvaluator(),
-            "authentication_flow": AuthenticationFlowEvaluator(),
-            "payment_processing": PaymentProcessingEvaluator(),
-            "svg_visualization": SVGVisualizationEvaluator(),
+            # TODO: authentication_flow, payment_processing, svg_visualization evaluators to be implemented
+            # "authentication_flow": AuthenticationFlowEvaluator(),
+            # "payment_processing": PaymentProcessingEvaluator(),
+            # "svg_visualization": SVGVisualizationEvaluator(),
             "ethical_audit": EthicalAuditEvaluator(),
             "resonance_visualization": ResonanceVisualizationEvaluator()
         }
@@ -503,12 +504,6 @@ class QuantumLatticeEvaluator:
                 "evaluation_focus": "consciousness_coherence"
             }
         ]
-        
-        with open(filepath, 'w') as f:
-            for item in test_queries:
-                f.write(json.dumps(item) + "\n")
-        
-        logger.info(f"Generated comprehensive Sacred Trinity test dataset with {len(test_queries)} scenarios at {filepath}")
     
     async def run_evaluation(self) -> Dict[str, Any]:
         """Execute comprehensive Sacred Trinity evaluation"""
