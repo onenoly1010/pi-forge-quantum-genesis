@@ -223,6 +223,24 @@ fast_rollback() {
     git reset --hard "$TARGET_COMMIT"
     
     # Clean untracked files
+    log INFO "Backing up untracked files before cleaning..."
+    BACKUP_UNTRACKED_DIR="${ROLLBACK_ROOT}/backup/untracked-$(date +%Y%m%d-%H%M%S)"
+    mkdir -p "$BACKUP_UNTRACKED_DIR"
+    # Find untracked files and move them to backup
+    UNTRACKED_FILES=$(git ls-files --others --exclude-standard)
+    if [ -n "$UNTRACKED_FILES" ]; then
+        while IFS= read -r file; do
+            # Only move if file/directory still exists
+            if [ -e "$file" ]; then
+                # Create target directory if needed
+                mkdir -p "$BACKUP_UNTRACKED_DIR/$(dirname "$file")"
+                mv "$file" "$BACKUP_UNTRACKED_DIR/$file"
+                log INFO "Moved untracked: $file -> $BACKUP_UNTRACKED_DIR/$file"
+            fi
+        done <<< "$UNTRACKED_FILES"
+    else
+        log INFO "No untracked files to back up."
+    fi
     log INFO "Cleaning untracked files..."
     git clean -fd
     
