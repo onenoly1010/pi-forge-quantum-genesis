@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # 🔄 QUANTUM RESONANCE LATTICE - EMERGENCY ROLLBACK SYSTEM
 # Production-ready rollback script for Railway deployment
 # Compatible with Linux/Unix systems
