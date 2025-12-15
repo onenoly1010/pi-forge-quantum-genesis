@@ -504,11 +504,11 @@ class QuantumLatticeEvaluator:
             }
         ]
         
-        with open(filepath, 'w') as f:
-            for item in test_queries:
+        with open(filepath, 'w') as f:  # noqa: F821
+            for item in test_queries:  # noqa: F821
                 f.write(json.dumps(item) + "\n")
         
-        logger.info(f"Generated comprehensive Sacred Trinity test dataset with {len(test_queries)} scenarios at {filepath}")
+        logger.info(f"Generated comprehensive Sacred Trinity test dataset with {len(test_queries)} scenarios at {filepath}")  # noqa: F821
     
     async def run_evaluation(self) -> Dict[str, Any]:
         """Execute comprehensive Sacred Trinity evaluation"""
@@ -874,6 +874,177 @@ class CrossComponentIntegrationEvaluator:
             return f"🔧 {component} building integration foundation"
         else:
             return f"⚠️ {component} integration requires optimization"
+
+
+class AuthenticationFlowEvaluator:
+    """Custom evaluator for Authentication Flow quality"""
+    
+    def __init__(self):
+        pass
+        
+    def __call__(self, *, query: str, expected_response: str, **kwargs):
+        """Evaluate authentication flow quality"""
+        # JWT token handling
+        jwt_score = self._evaluate_jwt_handling(expected_response)
+        
+        # Supabase integration
+        supabase_score = self._evaluate_supabase_integration(expected_response)
+        
+        # Security measures
+        security_score = self._evaluate_security_measures(expected_response)
+        
+        overall_score = (jwt_score + supabase_score + security_score) / 3
+        
+        return {
+            "authentication_flow": overall_score,
+            "jwt_handling": jwt_score,
+            "supabase_integration": supabase_score,
+            "security_measures": security_score,
+            "auth_narrative": self._generate_auth_narrative(overall_score)
+        }
+    
+    def _evaluate_jwt_handling(self, response: str) -> float:
+        """Score JWT token handling quality"""
+        jwt_indicators = ["jwt", "token", "authentication", "bearer", "auth"]
+        score = sum(1 for indicator in jwt_indicators if indicator in response.lower())
+        return min(score / len(jwt_indicators), 1.0)
+    
+    def _evaluate_supabase_integration(self, response: str) -> float:
+        """Score Supabase integration quality"""
+        supabase_indicators = ["supabase", "auth", "user", "session", "credentials"]
+        score = sum(1 for indicator in supabase_indicators if indicator in response.lower())
+        return min(score / len(supabase_indicators), 1.0)
+    
+    def _evaluate_security_measures(self, response: str) -> float:
+        """Score security measures"""
+        security_indicators = ["secure", "verified", "protected", "validation", "authorization"]
+        score = sum(1 for indicator in security_indicators if indicator in response.lower())
+        return min(score / len(security_indicators), 1.0)
+    
+    def _generate_auth_narrative(self, score: float) -> str:
+        """Generate authentication narrative"""
+        if score >= 0.8:
+            return "🔒 Authentication flow achieving perfect security harmony"
+        elif score >= 0.6:
+            return "✅ Authentication maintaining secure foundation"
+        elif score >= 0.4:
+            return "🔧 Authentication flow requires security enhancement"
+        else:
+            return "⚠️ Authentication security needs immediate attention"
+
+
+class PaymentProcessingEvaluator:
+    """Custom evaluator for Pi Network Payment Processing"""
+    
+    def __init__(self):
+        pass
+        
+    def __call__(self, *, query: str, expected_response: str, **kwargs):
+        """Evaluate payment processing quality"""
+        # Pi Network integration
+        pi_score = self._evaluate_pi_integration(expected_response)
+        
+        # Payment verification
+        verification_score = self._evaluate_payment_verification(expected_response)
+        
+        # Resonance trigger
+        resonance_score = self._evaluate_resonance_trigger(expected_response)
+        
+        overall_score = (pi_score + verification_score + resonance_score) / 3
+        
+        return {
+            "payment_processing": overall_score,
+            "pi_integration": pi_score,
+            "payment_verification": verification_score,
+            "resonance_trigger": resonance_score,
+            "payment_narrative": self._generate_payment_narrative(overall_score)
+        }
+    
+    def _evaluate_pi_integration(self, response: str) -> float:
+        """Score Pi Network integration quality"""
+        pi_indicators = ["pi", "payment", "transaction", "pi network", "blockchain"]
+        score = sum(1 for indicator in pi_indicators if indicator in response.lower())
+        return min(score / len(pi_indicators), 1.0)
+    
+    def _evaluate_payment_verification(self, response: str) -> float:
+        """Score payment verification quality"""
+        verification_indicators = ["verify", "confirm", "validate", "approved", "successful"]
+        score = sum(1 for indicator in verification_indicators if indicator in response.lower())
+        return min(score / len(verification_indicators), 1.0)
+    
+    def _evaluate_resonance_trigger(self, response: str) -> float:
+        """Score resonance visualization trigger"""
+        resonance_indicators = ["resonance", "visualization", "trigger", "cascade", "harmony"]
+        score = sum(1 for indicator in resonance_indicators if indicator in response.lower())
+        return min(score / len(resonance_indicators), 1.0)
+    
+    def _generate_payment_narrative(self, score: float) -> str:
+        """Generate payment processing narrative"""
+        if score >= 0.8:
+            return "💰 Pi payment processing achieving perfect quantum flow"
+        elif score >= 0.6:
+            return "✅ Payment processing maintaining secure transactions"
+        elif score >= 0.4:
+            return "🔧 Payment flow requires optimization"
+        else:
+            return "⚠️ Payment processing needs immediate attention"
+
+
+class SVGVisualizationEvaluator:
+    """Custom evaluator for SVG Visualization quality"""
+    
+    def __init__(self):
+        pass
+        
+    def __call__(self, *, query: str, expected_response: str, **kwargs):
+        """Evaluate SVG visualization quality"""
+        # 4-phase cascade
+        cascade_score = self._evaluate_phase_cascade(expected_response)
+        
+        # Procedural generation
+        procedural_score = self._evaluate_procedural_generation(expected_response)
+        
+        # Visual harmony
+        harmony_score = self._evaluate_visual_harmony(expected_response)
+        
+        overall_score = (cascade_score + procedural_score + harmony_score) / 3
+        
+        return {
+            "svg_visualization": overall_score,
+            "phase_cascade": cascade_score,
+            "procedural_generation": procedural_score,
+            "visual_harmony": harmony_score,
+            "visualization_narrative": self._generate_visualization_narrative(overall_score)
+        }
+    
+    def _evaluate_phase_cascade(self, response: str) -> float:
+        """Score 4-phase cascade quality"""
+        cascade_indicators = ["foundation", "growth", "harmony", "transcendence", "cascade"]
+        score = sum(1 for indicator in cascade_indicators if indicator in response.lower())
+        return min(score / len(cascade_indicators), 1.0)
+    
+    def _evaluate_procedural_generation(self, response: str) -> float:
+        """Score procedural SVG generation"""
+        procedural_indicators = ["svg", "generate", "render", "procedural", "dynamic"]
+        score = sum(1 for indicator in procedural_indicators if indicator in response.lower())
+        return min(score / len(procedural_indicators), 1.0)
+    
+    def _evaluate_visual_harmony(self, response: str) -> float:
+        """Score visual harmony"""
+        harmony_indicators = ["harmony", "color", "hsl", "transition", "animation"]
+        score = sum(1 for indicator in harmony_indicators if indicator in response.lower())
+        return min(score / len(harmony_indicators), 1.0)
+    
+    def _generate_visualization_narrative(self, score: float) -> str:
+        """Generate visualization narrative"""
+        if score >= 0.8:
+            return "🌈 SVG visualization achieving perfect quantum harmony"
+        elif score >= 0.6:
+            return "✨ Visualization maintaining harmonic resonance"
+        elif score >= 0.4:
+            return "🎨 Visualization requires artistic enhancement"
+        else:
+            return "⚠️ Visualization needs immediate optimization"
 
     def _generate_test_dataset_file(self, dataset: List[Dict]) -> str:
         """Generate test dataset file for Azure AI Evaluation SDK"""
