@@ -38,6 +38,9 @@ gh issue view 76  # Automated health reports
 ```
 
 ### For Developers
+
+**Prerequisites:** Python 3.11+
+
 ```bash
 # Clone and setup
 git clone https://github.com/onenoly1010/pi-forge-quantum-genesis.git
