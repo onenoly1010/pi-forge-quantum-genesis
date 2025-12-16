@@ -765,11 +765,7 @@ jobs:
             
             ## Deployment Information
             
-            ${overall === 'success' ? \`
-            - **URL**: ${{ needs.deployment.outputs.deployment_url || 'N/A' }}
-            - **ID**: ${{ needs.deployment.outputs.deployment_id || 'N/A' }}
-            - **Commit**: \`${{ github.sha }}\`
-            \` : ''}
+            ${overall === 'success' ? '- **URL**: ${{ needs.deployment.outputs.deployment_url || "N/A" }}\n- **ID**: ${{ needs.deployment.outputs.deployment_id || "N/A" }}\n- **Commit**: `${{ github.sha }}`' : ''}
             
             ## AI Agent Instructions
             
@@ -841,10 +837,10 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: parseInt(issueNumber),
-                body: \`### Status Update: ${statusEmojis[overall]} ${statusMessages[overall]}\\n\\n**Timestamp**: ${timestamp}\\n[View Run](${runUrl})\`
+                body: `### Status Update: ${statusEmojis[overall]} ${statusMessages[overall]}\n\n**Timestamp**: ${timestamp}\n[View Run](${runUrl})`
               });
               
-              console.log(\`Updated issue #\${issueNumber}\`);
+              console.log(`Updated issue #${issueNumber}`);
             } else {
               // Create new issue
               const newIssue = await github.rest.issues.create({
@@ -855,7 +851,7 @@ jobs:
                 labels: ['ai-agent', 'automated', 'runbook']
               });
               
-              console.log(\`Created issue #\${newIssue.data.number}\`);
+              console.log(`Created issue #${newIssue.data.number}`);
             }
 
       - name: 📧 Send Webhook Notifications
