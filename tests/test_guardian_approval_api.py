@@ -10,11 +10,9 @@ import tempfile
 import shutil
 
 # Add parent directory to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'server'))
-
-from guardian_approvals import GuardianApprovalSystem, get_approval_system
 
 
+from server.guardian_approvals import GuardianApprovalSystem, get_approval_system
 @pytest.fixture
 def temp_storage():
     """Create a temporary storage directory for tests"""
