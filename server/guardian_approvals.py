@@ -72,7 +72,7 @@ class GuardianApprovalSystem:
             logger.info(f"Saved {len(self.approvals)} approvals to storage")
         except Exception as e:
             logger.error(f"Failed to save approvals: {e}")
-    
+            raise
     def record_approval(
         self,
         decision_id: str,
