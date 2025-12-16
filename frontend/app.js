@@ -161,13 +161,27 @@ class PiForgeApp {
                 ? await this.fetchLeaderboard()
                 : this.mockLeaderboard();
 
-            tbody.innerHTML = data.map((entry, i) => `
-                <tr>
-                    <td>${i + 1}</td>
-                    <td>${entry.user_id}</td>
-                    <td>${entry.digits_mined.toLocaleString()}</td>
-                </tr>
-            `).join('');
+            // Clear existing content
+            tbody.innerHTML = '';
+            
+            // Build rows safely to prevent XSS
+            data.forEach((entry, i) => {
+                const row = document.createElement('tr');
+                
+                const rankCell = document.createElement('td');
+                rankCell.textContent = i + 1;
+                row.appendChild(rankCell);
+                
+                const userCell = document.createElement('td');
+                userCell.textContent = entry.user_id;  // Safe from XSS
+                row.appendChild(userCell);
+                
+                const digitsCell = document.createElement('td');
+                digitsCell.textContent = entry.digits_mined.toLocaleString();
+                row.appendChild(digitsCell);
+                
+                tbody.appendChild(row);
+            });
         } catch (error) {
             console.error('Leaderboard error:', error);
             tbody.innerHTML = '<tr><td colspan="3">⚠️ Failed to load leaderboard</td></tr>';
@@ -221,8 +235,10 @@ class PiForgeApp {
     }
 
     generateMockPi(digits) {
+        const piConstant = "3.14159265358979323846";
         if (digits <= 20) {
-            return "3.14159265358979323846".substring(0, digits + 2);
+            // Return digits+2 characters to include "3." plus the requested decimal places
+            return piConstant.substring(0, Math.min(digits + 2, piConstant.length));
         } else {
             return `3.14... [computed ${digits.toLocaleString()} digits in quantum state]`;
         }
