@@ -765,7 +765,11 @@ jobs:
             
             ## Deployment Information
             
-            ${overall === 'success' ? '- **URL**: ${{ needs.deployment.outputs.deployment_url || "N/A" }}\n- **ID**: ${{ needs.deployment.outputs.deployment_id || "N/A" }}\n- **Commit**: `${{ github.sha }}`' : ''}
+            ${overall === 'success' ? 
+              '- **URL**: ${{ needs.deployment.outputs.deployment_url || "N/A" }}\n' +
+              '- **ID**: ${{ needs.deployment.outputs.deployment_id || "N/A" }}\n' +
+              '- **Commit**: `${{ github.sha }}`' 
+              : ''}
             
             ## AI Agent Instructions
             
