@@ -58,13 +58,15 @@ echo "🔍 Running pre-flight checks..."
 
 # Check RPC connectivity
 echo "   Testing RPC connectivity..."
+EXPECTED_CHAIN_ID="0x4115"  # 16661 in hex for 0G Aristotle
 RPC_CHECK=$(curl -s -X POST "$RPC_URL" \
     -H "Content-Type: application/json" \
-    -d '{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}' | grep -o '"result":"0x4115"')
+    -d '{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}' | grep -o "\"result\":\"$EXPECTED_CHAIN_ID\"")
 
 if [ -z "$RPC_CHECK" ]; then
-    echo "❌ Failed to connect to 0G RPC endpoint"
+    echo "❌ Failed to connect to 0G RPC endpoint or chain ID mismatch"
     echo "   Please verify RPC_URL in .env: $RPC_URL"
+    echo "   Expected Chain ID: $EXPECTED_CHAIN_ID (16661)"
     exit 1
 fi
 echo "   ✅ RPC connectivity: OK"

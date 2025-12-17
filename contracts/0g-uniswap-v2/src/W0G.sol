@@ -41,7 +41,11 @@ contract W0G {
     function withdraw(uint256 wad) public {
         require(balanceOf[msg.sender] >= wad, "W0G: insufficient balance");
         balanceOf[msg.sender] -= wad;
-        payable(msg.sender).transfer(wad);
+        
+        // Use call instead of transfer for better compatibility with contracts
+        (bool success, ) = payable(msg.sender).call{value: wad}("");
+        require(success, "W0G: withdrawal transfer failed");
+        
         emit Withdrawal(msg.sender, wad);
     }
 

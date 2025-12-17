@@ -102,6 +102,15 @@ def test_swap_client_initialization():
     assert hasattr(client, 'w0g_address')
 
 
+def test_swap_client_initialization_without_addresses():
+    """Test that swap client raises error when addresses not provided"""
+    from server.integrations.zero_g_swap import create_swap_client
+    
+    # Should raise ValueError when addresses are missing
+    with pytest.raises(ValueError, match="Router and W0G addresses must be provided"):
+        create_swap_client()
+
+
 def test_swap_client_methods_exist():
     """Test that swap client has all required methods"""
     from server.integrations.zero_g_swap import ZeroGSwapClient

@@ -123,7 +123,13 @@ class ZeroGSwapClient:
             router_address: UniswapV2Router02 contract address
             w0g_address: W0G (Wrapped 0G) contract address
             private_key: Optional private key for signing transactions
+        
+        Raises:
+            ValueError: If router_address or w0g_address are empty or invalid
         """
+        if not router_address or not w0g_address:
+            raise ValueError("router_address and w0g_address must be provided and non-empty")
+        
         self.w3 = Web3(Web3.HTTPProvider(rpc_url))
         self.router_address = Web3.to_checksum_address(router_address)
         self.w0g_address = Web3.to_checksum_address(w0g_address)
@@ -408,11 +414,23 @@ def create_swap_client(
     
     Returns:
         Configured ZeroGSwapClient instance
+    
+    Raises:
+        ValueError: If required addresses are not provided via args or environment
     """
+    final_router = router_address or os.getenv("ZERO_G_UNIVERSAL_ROUTER")
+    final_w0g = w0g_address or os.getenv("ZERO_G_W0G")
+    
+    if not final_router or not final_w0g:
+        raise ValueError(
+            "Router and W0G addresses must be provided either as arguments or via "
+            "ZERO_G_UNIVERSAL_ROUTER and ZERO_G_W0G environment variables"
+        )
+    
     return ZeroGSwapClient(
         rpc_url=rpc_url or os.getenv("ZERO_G_RPC", "https://evmrpc.0g.ai"),
-        router_address=router_address or os.getenv("ZERO_G_UNIVERSAL_ROUTER", ""),
-        w0g_address=w0g_address or os.getenv("ZERO_G_W0G", ""),
+        router_address=final_router,
+        w0g_address=final_w0g,
         private_key=private_key
     )
 
