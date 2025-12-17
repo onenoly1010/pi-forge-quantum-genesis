@@ -759,9 +759,9 @@ jobs:
             
             ## System Health
             
-            - **FastAPI Quantum Conduit** (Port 8000): ${{ needs.monitoring.outputs.health_status == 'healthy' && '✅' || '⚠️' }} ${needs.monitoring.outputs.health_status || 'Unknown'}
-            - **Flask Glyph Weaver** (Port 5000): ${{ needs.monitoring.outputs.health_status == 'healthy' && '✅' || '⚠️' }} ${needs.monitoring.outputs.health_status || 'Unknown'}
-            - **Gradio Truth Mirror** (Port 7860): ${{ needs.monitoring.outputs.health_status == 'healthy' && '✅' || '⚠️' }} ${needs.monitoring.outputs.health_status || 'Unknown'}
+            - **FastAPI Quantum Conduit** (Port 8000): ${{ needs.monitoring.outputs.health_status == 'healthy' && '✅' || '⚠️' }} ${{ needs.monitoring.outputs.health_status || 'Unknown' }}
+            - **Flask Glyph Weaver** (Port 5000): ${{ needs.monitoring.outputs.health_status == 'healthy' && '✅' || '⚠️' }} ${{ needs.monitoring.outputs.health_status || 'Unknown' }}
+            - **Gradio Truth Mirror** (Port 7860): ${{ needs.monitoring.outputs.health_status == 'healthy' && '✅' || '⚠️' }} ${{ needs.monitoring.outputs.health_status || 'Unknown' }}
             
             ## Deployment Information
             
