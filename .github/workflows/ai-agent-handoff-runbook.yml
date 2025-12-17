@@ -724,6 +724,22 @@ jobs:
             const overall = '${{ steps.collect-status.outputs.overall }}';
             const timestamp = new Date().toISOString();
             const runUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const runId = '${{ github.run_id }}';
+            const eventName = '${{ github.event_name }}';
+            const refName = '${{ github.ref_name }}';
+            const sha = '${{ github.sha }}';
+
+            // Job results
+            const safetyGateResult = '${{ needs.safety-gate.result }}';
+            const safetyGateApproved = '${{ needs.safety-gate.outputs.deployment_approved }}';
+            const ciPipelineResult = '${{ needs.ci-pipeline.result }}';
+            const ciBuildSuccess = '${{ needs.ci-pipeline.outputs.build_success }}';
+            const deploymentResult = '${{ needs.deployment.result }}';
+            const deploymentUrl = '${{ needs.deployment.outputs.deployment_url }}';
+            const deploymentId = '${{ needs.deployment.outputs.deployment_id }}';
+            const monitoringResult = '${{ needs.monitoring.result }}';
+            const healthStatus = '${{ needs.monitoring.outputs.health_status }}';
+            const rollbackResult = '${{ needs.rollback.result }}';
 
             const statusEmojis = {
               'success': '🟢',
@@ -739,47 +755,56 @@ jobs:
               'rolled_back': 'ROLLED BACK'
             };
 
-            const body = `
-            # ${statusEmojis[overall]} ${statusMessages[overall]}
+            const safetyGateStatus = safetyGateApproved === 'true' ? '✅ Approved' : '❌ Blocked';
+            const ciStatus = ciBuildSuccess === 'true' ? '✅ Success' : '⚠️ Issues';
+            const deploymentStatus = deploymentResult === 'success' ? '✅ Deployed' : (deploymentResult === 'skipped' ? '⏭️ Skipped' : '❌ Failed');
+            const monitoringStatus = healthStatus || 'N/A';
+            const rollbackStatus = rollbackResult === 'success' ? '✅ Executed' : (rollbackResult === 'skipped' ? '⏭️ Not Needed' : '❌ Failed');
+            const healthEmoji = healthStatus === 'healthy' ? '✅' : '⚠️';
+            const healthDisplay = healthStatus || 'Unknown';
+
+            const deploymentInfo = overall === 'success' ? `
+
+            ## Deployment Information
+
+            - **URL**: ${deploymentUrl || 'N/A'}
+            - **ID**: ${deploymentId || 'N/A'}
+            - **Commit**: \`${sha}\`
+            ` : '';
+
+            const body = `# ${statusEmojis[overall]} ${statusMessages[overall]}
 
             **Last Updated**: ${timestamp}
-            **Run**: [#${{ github.run_id }}](${runUrl})
-            **Trigger**: ${{ github.event_name }}
-            **Branch**: ${{ github.ref_name }}
+            **Run**: [#${runId}](${runUrl})
+            **Trigger**: ${eventName}
+            **Branch**: ${refName}
 
             ## Job Status Summary
 
             | Job | Status | Result |
             |-----|--------|--------|
-            | 🛡️ Safety Gate | ${{ needs.safety-gate.result }} | ${{ needs.safety-gate.outputs.deployment_approved == 'true' && '✅ Approved' || '❌ Blocked' }} |
-            | 🔧 CI Pipeline | ${{ needs.ci-pipeline.result }} | ${{ needs.ci-pipeline.outputs.build_success == 'true' && '✅ Success' || '⚠️ Issues' }} |
-            | 🚀 Deployment | ${{ needs.deployment.result }} | ${{ needs.deployment.result == 'success' && '✅ Deployed' || needs.deployment.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |
-            | 📊 Monitoring | ${{ needs.monitoring.result }} | ${{ needs.monitoring.outputs.health_status || 'N/A' }} |
-            | 🔄 Rollback | ${{ needs.rollback.result }} | ${{ needs.rollback.result == 'success' && '✅ Executed' || needs.rollback.result == 'skipped' && '⏭️ Not Needed' || '❌ Failed' }} |
+            | 🛡️ Safety Gate | ${safetyGateResult} | ${safetyGateStatus} |
+            | 🔧 CI Pipeline | ${ciPipelineResult} | ${ciStatus} |
+            | 🚀 Deployment | ${deploymentResult} | ${deploymentStatus} |
+            | 📊 Monitoring | ${monitoringResult} | ${monitoringStatus} |
+            | 🔄 Rollback | ${rollbackResult} | ${rollbackStatus} |
 
             ## System Health
 
-            - **FastAPI Quantum Conduit** (Port 8000): ${{ needs.monitoring.outputs.health_status == 'healthy' && '✅' || '⚠️' }} ${{ needs.monitoring.outputs.health_status || 'Unknown' }}
-            - **Flask Glyph Weaver** (Port 5000): ${{ needs.monitoring.outputs.health_status == 'healthy' && '✅' || '⚠️' }} ${{ needs.monitoring.outputs.health_status || 'Unknown' }}
-            - **Gradio Truth Mirror** (Port 7860): ${{ needs.monitoring.outputs.health_status == 'healthy' && '✅' || '⚠️' }} ${{ needs.monitoring.outputs.health_status || 'Unknown' }}
-
-            ## Deployment Information
-
-            ${overall === 'success' ? \`
-            - **URL**: ${{ needs.deployment.outputs.deployment_url || 'N/A' }}
-            - **ID**: ${{ needs.deployment.outputs.deployment_id || 'N/A' }}
-            - **Commit**: \`${{ github.sha }}\`
-            \` : ''}
+            - **FastAPI Quantum Conduit** (Port 8000): ${healthEmoji} ${healthDisplay}
+            - **Flask Glyph Weaver** (Port 5000): ${healthEmoji} ${healthDisplay}
+            - **Gradio Truth Mirror** (Port 7860): ${healthEmoji} ${healthDisplay}
+            ${deploymentInfo}
 
             ## AI Agent Instructions
 
             ### For Monitoring
             \`\`\`bash
             # Check current deployment status
-            gh run view ${{ github.run_id }}
+            gh run view ${runId}
 
             # Download monitoring reports
-            gh run download ${{ github.run_id }} -n monitoring-report
+            gh run download ${runId} -n monitoring-report
             \`\`\`
 
             ### For Rollback (if needed)
@@ -841,10 +866,10 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: parseInt(issueNumber),
-                body: \`### Status Update: ${statusEmojis[overall]} ${statusMessages[overall]}\\n\\n**Timestamp**: ${timestamp}\\n[View Run](${runUrl})\`
+                body: `### Status Update: ${statusEmojis[overall]} ${statusMessages[overall]}\n\n**Timestamp**: ${timestamp}\n[View Run](${runUrl})`
               });
 
-              console.log(\`Updated issue #\${issueNumber}\`);
+              console.log(`Updated issue #${issueNumber}`);
             } else {
               // Create new issue
               const newIssue = await github.rest.issues.create({
@@ -855,7 +880,7 @@ jobs:
                 labels: ['ai-agent', 'automated', 'runbook']
               });
 
-              console.log(\`Created issue #\${newIssue.data.number}\`);
+              console.log(`Created issue #${newIssue.data.number}`);
             }
 
       - name: 📧 Send Webhook Notifications
