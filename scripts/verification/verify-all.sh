@@ -196,9 +196,9 @@ generate_summary_report() {
     "failed": $FAILED_VERIFICATIONS
   },
   "individual_reports": [
-$(find "$SCRIPT_DIR/../../reports" -name "*.json" -newer "$SCRIPT_DIR/verify-all.sh" -type f | while read -r file; do
-    echo "    \"$(basename "$file")\""
-done | paste -sd ',' -)
+$(find "$SCRIPT_DIR/../../reports" -name "*.json" -newer "$SCRIPT_DIR/verify-all.sh" -type f 2>/dev/null | while read -r file; do
+    echo "    \"$(basename "$file")\","
+done | sed '$ s/,$//')
   ]
 }
 EOF

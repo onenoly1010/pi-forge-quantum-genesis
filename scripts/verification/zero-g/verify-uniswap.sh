@@ -167,11 +167,13 @@ main() {
         info "Router Factory Reference: $(highlight "$router_factory")"
         
         # Verify Router points to correct Factory
-        if addresses_match "$router_factory" "$FACTORY"; then
-            success "Router correctly references Factory"
-        else
-            error "Router factory mismatch! Router points to: $router_factory, Expected: $FACTORY"
+        if ! addresses_match "$router_factory" "$FACTORY"; then
+            error "Assertion failed: Router factory mismatch!"
+            error "  Router points to: $router_factory"
+            error "  Expected: $FACTORY"
             ((ASSERTION_FAILURES++))
+        else
+            success "Router correctly references Factory"
         fi
     fi
     

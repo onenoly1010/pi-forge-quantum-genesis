@@ -51,12 +51,23 @@ assert_greater_than() {
     local min=$2
     local description=$3
     
-    # Use bc for floating point comparison
-    if (( $(echo "$value <= $min" | bc -l) )); then
-        error "Assertion failed: $description"
-        error "  Value: $(highlight "$value") (expected > $min)"
-        ((ASSERTION_FAILURES++))
-        return 1
+    # Check if values are integers for direct comparison, otherwise use bc
+    if [[ "$value" =~ ^[0-9]+$ ]] && [[ "$min" =~ ^[0-9]+$ ]]; then
+        # Integer comparison
+        if [ "$value" -le "$min" ]; then
+            error "Assertion failed: $description"
+            error "  Value: $(highlight "$value") (expected > $min)"
+            ((ASSERTION_FAILURES++))
+            return 1
+        fi
+    else
+        # Floating point comparison using bc
+        if (( $(echo "$value <= $min" | bc -l) )); then
+            error "Assertion failed: $description"
+            error "  Value: $(highlight "$value") (expected > $min)"
+            ((ASSERTION_FAILURES++))
+            return 1
+        fi
     fi
     
     success "$description"

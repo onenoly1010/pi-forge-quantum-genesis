@@ -90,6 +90,13 @@ jobs:
             
             // Find the latest summary report
             const reportsDir = 'reports';
+            
+            // Check if reports directory exists and has files
+            if (!fs.existsSync(reportsDir)) {
+              console.log('Reports directory not found');
+              return;
+            }
+            
             const files = fs.readdirSync(reportsDir)
               .filter(f => f.startsWith('verification-summary-'))
               .sort()

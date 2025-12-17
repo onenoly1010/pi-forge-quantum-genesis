@@ -27,8 +27,10 @@ validate_contract_exists() {
         return 1
     fi
     
-    local byte_count=$(echo "$code" | wc -c)
-    success "$name contract exists ($(echo "$byte_count / 2 - 1" | bc) bytes)"
+    # Calculate bytecode size (remove 0x prefix and divide by 2)
+    local code_length=${#code}
+    local byte_count=$(( (code_length - 2) / 2 ))
+    success "$name contract exists ($byte_count bytes)"
     return 0
 }
 

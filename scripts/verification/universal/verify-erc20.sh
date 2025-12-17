@@ -129,24 +129,24 @@ main() {
     # Step 8: Check for optional features
     section "⚙️ Optional ERC20 Features"
     
-    # Check if token is burnable
+    # Check if token is burnable (using selector check, not actual call)
     progress "Checking for burn functionality..."
-    local burn_sig=$(cast call "$TOKEN_ADDRESS" "burn(uint256)" --rpc-url "$RPC_URL" 2>&1 || echo "not_found")
-    
-    if [[ "$burn_sig" != *"not_found"* ]] && [[ "$burn_sig" != *"revert"* ]]; then
-        info "✓ Token appears to support burning"
+    # Just check if the function signature exists in the bytecode
+    local contract_code=$(cast code "$TOKEN_ADDRESS" --rpc-url "$RPC_URL" 2>/dev/null)
+    # burn(uint256) selector is 0x42966c68
+    if [[ "$contract_code" == *"42966c68"* ]]; then
+        info "✓ Token appears to support burning (burn function exists)"
     else
-        info "ℹ Token does not support burning (or requires balance)"
+        info "ℹ Token does not appear to have burn function"
     fi
     
-    # Check if token is mintable
+    # Check if token is mintable (using selector check, not actual call)
     progress "Checking for mint functionality..."
-    local mint_sig=$(cast call "$TOKEN_ADDRESS" "mint(address,uint256)" --rpc-url "$RPC_URL" 2>&1 || echo "not_found")
-    
-    if [[ "$mint_sig" != *"not_found"* ]] && [[ "$mint_sig" != *"revert"* ]]; then
-        info "✓ Token appears to support minting"
+    # mint(address,uint256) selector is 0x40c10f19
+    if [[ "$contract_code" == *"40c10f19"* ]]; then
+        info "✓ Token appears to support minting (mint function exists)"
     else
-        info "ℹ Token does not support minting (or requires authorization)"
+        info "ℹ Token does not appear to have mint function"
     fi
     
     # Check if token is pausable

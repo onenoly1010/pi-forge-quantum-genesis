@@ -3,6 +3,8 @@
 # Part of Pi Forge Quantum Genesis verification framework
 
 # Format wei to human-readable with symbol
+# Note: Currently only supports 18-decimal tokens (standard ERC20)
+# For other decimals, manual conversion would be needed
 format_token_amount() {
     local wei_value=$1
     local decimals=${2:-18}
@@ -13,6 +15,13 @@ format_token_amount() {
         return 1
     fi
     
+    # Only handles 18 decimals using cast's built-in conversion
+    if [ "$decimals" != "18" ]; then
+        # For non-18 decimals, display raw value with warning
+        echo "$wei_value (raw) $symbol [Warning: ${decimals}-decimal conversion not implemented]"
+        return 0
+    fi
+    
     # Convert wei to ether (handles 18 decimals)
     local human=$(cast --to-unit "$wei_value" ether 2>/dev/null | head -1)
     
@@ -21,8 +30,6 @@ format_token_amount() {
         return 1
     fi
     
-    # For non-18 decimal tokens, we'd need additional math
-    # For now, assuming 18 decimals
     echo "$human $symbol"
 }
 
