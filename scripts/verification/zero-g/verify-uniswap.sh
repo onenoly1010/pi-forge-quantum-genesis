@@ -166,15 +166,8 @@ main() {
     if [ -n "$router_factory" ]; then
         info "Router Factory Reference: $(highlight "$router_factory")"
         
-        # Verify Router points to correct Factory
-        if ! addresses_match "$router_factory" "$FACTORY"; then
-            error "Assertion failed: Router factory mismatch!"
-            error "  Router points to: $router_factory"
-            error "  Expected: $FACTORY"
-            ((ASSERTION_FAILURES++))
-        else
-            success "Router correctly references Factory"
-        fi
+        # Verify Router points to correct Factory using assertion framework
+        assert_address_equals "$FACTORY" "$router_factory" "Router correctly references Factory"
     fi
     
     if [ -n "$router_weth" ]; then
@@ -260,6 +253,8 @@ main() {
 
 # Export verification results to JSON
 export_json_report() {
+    # Ensure reports directory exists
+    mkdir -p "$(dirname "$0")/../../../reports"
     local report_file="reports/zero-g-${NETWORK}-verification-$(date +%Y%m%d-%H%M%S).json"
     
     cat > "$report_file" <<EOF

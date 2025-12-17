@@ -79,6 +79,7 @@ jobs:
           name: verification-reports-${{ inputs.network }}-${{ github.run_number }}
           path: reports/
           retention-days: 90
+          if-no-files-found: warn
       
       - name: Comment on PR (if applicable)
         if: github.event_name == 'pull_request' && always()

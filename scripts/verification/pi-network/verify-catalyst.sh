@@ -180,6 +180,8 @@ main() {
 
 # Export verification results to JSON
 export_json_report() {
+    # Ensure reports directory exists
+    mkdir -p "$(dirname "$0")/../../../reports"
     local report_file="reports/pi-network-${NETWORK}-verification-$(date +%Y%m%d-%H%M%S).json"
     
     cat > "$report_file" <<EOF

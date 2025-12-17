@@ -108,22 +108,12 @@ main() {
     progress "Testing balanceOf()..."
     local zero_balance=$(cast call "$TOKEN_ADDRESS" "balanceOf(address)(uint256)" "0x0000000000000000000000000000000000000000" --rpc-url "$RPC_URL" 2>/dev/null || echo "")
     
-    if [ -n "$zero_balance" ]; then
-        success "balanceOf() function works correctly"
-    else
-        error "balanceOf() function failed"
-        ((ASSERTION_FAILURES++))
-    fi
+    assert_not_empty "$zero_balance" "balanceOf() function works correctly"
     
     progress "Testing allowance()..."
     local zero_allowance=$(cast call "$TOKEN_ADDRESS" "allowance(address,address)(uint256)" "0x0000000000000000000000000000000000000000" "0x0000000000000000000000000000000000000000" --rpc-url "$RPC_URL" 2>/dev/null || echo "")
     
-    if [ -n "$zero_allowance" ]; then
-        success "allowance() function works correctly"
-    else
-        error "allowance() function failed"
-        ((ASSERTION_FAILURES++))
-    fi
+    assert_not_empty "$zero_allowance" "allowance() function works correctly"
     echo ""
     
     # Step 8: Check for optional features
@@ -184,6 +174,8 @@ export_json_report() {
     local decimals=$3
     local supply=$4
     
+    # Ensure reports directory exists
+    mkdir -p "$(dirname "$0")/../../../reports"
     local report_file="reports/erc20-verification-$(echo "$TOKEN_ADDRESS" | cut -c1-10)-$(date +%Y%m%d-%H%M%S).json"
     
     cat > "$report_file" <<EOF
