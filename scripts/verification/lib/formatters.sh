@@ -3,8 +3,17 @@
 # Part of Pi Forge Quantum Genesis verification framework
 
 # Format wei to human-readable with symbol
-# Note: Currently only supports 18-decimal tokens (standard ERC20)
-# For other decimals, manual conversion would be needed
+# 
+# IMPORTANT LIMITATION: This function only supports 18-decimal tokens.
+# For tokens with different decimals, it will display the raw value with a warning.
+# 
+# Args:
+#   $1 - wei_value: The token amount in wei (smallest unit)
+#   $2 - decimals: Token decimals (default: 18, only 18 is fully supported)
+#   $3 - symbol: Token symbol for display (default: "tokens")
+#
+# Returns:
+#   Formatted string like "1.5 ETH" or raw value with warning for non-18 decimals
 format_token_amount() {
     local wei_value=$1
     local decimals=${2:-18}

@@ -175,6 +175,8 @@ get_assertion_failures() {
 }
 
 # Export all functions
+# Note: ASSERTION_FAILURES is exported for internal framework use only
+# External scripts should use get_assertion_failures() to read the value
 export -f assert_equals assert_address_equals assert_greater_than assert_less_than
 export -f assert_not_empty assert_true assert_contract_deployed
 export -f finalize_assertions reset_assertions get_assertion_failures

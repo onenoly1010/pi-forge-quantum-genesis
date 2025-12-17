@@ -269,7 +269,8 @@ test_formatting_functions() {
 
 # Main test runner
 main() {
-    section "🧪 Verification Framework Test Suite" "$(divider)"
+    section "🧪 Verification Framework Test Suite"
+    divider
     info "Testing core library functions"
     echo ""
     

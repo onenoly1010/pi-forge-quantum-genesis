@@ -197,16 +197,18 @@ generate_summary_report() {
   },
   "individual_reports": [
 $(find "$SCRIPT_DIR/../../reports" -name "*.json" -newer "$SCRIPT_DIR/verify-all.sh" -type f 2>/dev/null | {
-    first=true
+    count=0
+    files_array=""
     while read -r file; do
-        if [ "$first" = true ]; then
-            first=false
-        else
-            echo ","
+        if [ $count -gt 0 ]; then
+            files_array="$files_array,"
         fi
-        echo -n "    \"$(basename "$file")\""
+        files_array="$files_array
+    \"$(basename "$file")\""
+        count=$((count + 1))
     done
-    echo ""
+    echo "$files_array"
+    # Ensures empty array [] if no files found
 })
   ]
 }

@@ -174,9 +174,13 @@ export_json_report() {
     local decimals=$3
     local supply=$4
     
+    # Determine reports directory relative to script location
+    local script_real_dir="$(cd "$(dirname "$0")" && pwd)"
+    local reports_dir="$script_real_dir/../../../reports"
+    
     # Ensure reports directory exists
-    mkdir -p "$(dirname "$0")/../../../reports"
-    local report_file="reports/erc20-verification-$(echo "$TOKEN_ADDRESS" | cut -c1-10)-$(date +%Y%m%d-%H%M%S).json"
+    mkdir -p "$reports_dir"
+    local report_file="$reports_dir/erc20-verification-$(echo "$TOKEN_ADDRESS" | cut -c1-10)-$(date +%Y%m%d-%H%M%S).json"
     
     cat > "$report_file" <<EOF
 {
