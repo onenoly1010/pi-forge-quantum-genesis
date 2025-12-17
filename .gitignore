@@ -163,3 +163,8 @@ contracts/lib/
 *.sol.d
 *.abi
 *.bin
+
+# Verification Reports
+reports/*.json
+reports/*.html
+.env.verification
