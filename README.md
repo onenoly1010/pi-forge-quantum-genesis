@@ -268,6 +268,33 @@ forge test
 forge script script/Deploy.s.sol --rpc-url $RPC_URL_TESTNET --broadcast
 ```
 
+### 0G DEX Deployment (Uniswap V2 Fork)
+
+Deploy decentralized exchange to 0G Aristotle Mainnet:
+
+```bash
+# Quick deployment
+cd contracts/0g-uniswap-v2
+./scripts/setup.sh
+./scripts/deploy.sh
+
+# Verify deployment
+python scripts/verify_0g_dex.py
+
+# Or use GitHub Actions workflow
+# Go to Actions → Deploy 0G DEX → Run workflow
+```
+
+**Documentation**:
+- 📖 [Full Deployment Guide](./docs/0G_DEX_DEPLOYMENT.md) - Complete 26KB guide
+- ⚡ [Quick Start](./docs/0G_DEX_QUICKSTART.md) - 2-3 hour deployment
+- 📦 [Contract Reference](./contracts/0g-dex/README.md) - Solidity contracts
+
+**Deployed Contracts** (after deployment):
+- **W0G** (Wrapped 0G): Check `.env.launch`
+- **Factory**: Creates trading pairs
+- **Router**: Swap and liquidity interface
+
 ---
 
 ## 🔒 Branch Protection
