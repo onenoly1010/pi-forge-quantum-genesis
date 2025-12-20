@@ -1,6 +1,423 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pi Forge Quantum Genesis | Cyber Samurai Guardian</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #22d3ee;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        /* Header */
+        header {
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+        }
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            border-radius: 20px;
+            font-size: 0.875rem;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        /* Hero */
+        .hero {
+            padding: 80px 0;
+            text-align: center;
+        }
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--text-primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 40px;
+        }
+        .cta-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+        .btn-secondary:hover {
+            background: var(--primary);
+            color: white;
+        }
+        /* Coherence Demo */
+        .coherence-demo {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 40px;
+            margin: 40px 0;
+            text-align: center;
+        }
+        .coherence-demo h2 {
+            margin-bottom: 24px;
+            color: var(--secondary);
+        }
+        .coherence-display {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+        .coherence-metric {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 12px;
+            padding: 24px 40px;
+            min-width: 180px;
+        }
+        .metric-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--secondary);
+            font-family: 'Courier New', monospace;
+        }
+        .latency-bar {
+            height: 8px;
+            background: rgba(99, 102, 241, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 16px;
+        }
+        .latency-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success), var(--secondary));
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        /* Features */
+        .features {
+            padding: 60px 0;
+        }
+        .features h2 {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+        .feature-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+            transition: all 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary);
+        }
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 16px;
+        }
+        .feature-card h3 {
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        /* Footer */
+        footer {
+            padding: 40px 0;
+            border-top: 1px solid rgba(99, 102, 241, 0.2);
+            text-align: center;
+            color: var(--text-secondary);
+        }
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container header-content">
+            <div class="logo">⚡ Pi Forge Quantum Genesis</div>
+            <div class="status-badge" id="status-badge">
+                <div class="status-dot"></div>
+                <span id="status-text">LIVE</span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>🛡️ Quantum Guardian Activated</h1>
+                <p class="hero-subtitle">
+                    Cyber Samurai OINIO guardian protecting the Pi Network lattice with 
+                    quantum coherence monitoring and microsecond-precision latency enforcement.
+                </p>
+                <div class="cta-buttons">
+                    <a href="https://github.com/onenoly1010/pi-forge-quantum-genesis" class="btn btn-primary">
+                        View on GitHub
+                    </a>
+                    <a href="#features" class="btn btn-secondary">
+                        Explore Features
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section class="coherence-demo">
+            <div class="container">
+                <h2>🌌 Live Quantum Coherence Monitor</h2>
+                <div class="coherence-display">
+                    <div class="coherence-metric">
+                        <div class="metric-label">Coherence Level</div>
+                        <div class="metric-value" id="coherence-value">0.000</div>
+                    </div>
+                    <div class="coherence-metric">
+                        <div class="metric-label">Latency (μs)</div>
+                        <div class="metric-value" id="latency-value">0</div>
+                    </div>
+                    <div class="coherence-metric">
+                        <div class="metric-label">Guardian State</div>
+                        <div class="metric-value" id="guardian-state">INIT</div>
+                    </div>
+                </div>
+                <div class="latency-bar">
+                    <div class="latency-fill" id="latency-bar" style="width: 0%"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="features" id="features">
+            <div class="container">
+                <h2>🚀 Core Capabilities</h2>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🔮</div>
+                        <h3>Quantum Coherence Monitoring</h3>
+                        <p>Real-time monitoring of system coherence levels with automatic threshold alerts and resonance tuning.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">⚡</div>
+                        <h3>Microsecond Latency Enforcement</h3>
+                        <p>Sub-millisecond response times guaranteed through intelligent request routing and quantum optimization.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🛡️</div>
+                        <h3>Sacred Trinity Architecture</h3>
+                        <p>FastAPI + Flask + Gradio working in perfect harmony for production-grade deployment.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🌐</div>
+                        <h3>Pi Network Integration</h3>
+                        <p>Seamless connection to Pi Network for blockchain-verified transactions and wallet sync.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <h3>OpenTelemetry Tracing</h3>
+                        <p>Full distributed tracing with quantum span attributes for deep system observability.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔒</div>
+                        <h3>Supabase Auth & Storage</h3>
+                        <p>Enterprise-grade authentication and data persistence with row-level security.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>
+                Built with 💜 by <a href="https://github.com/onenoly1010">onenoly1010</a> | 
+                <a href="https://github.com/onenoly1010/pi-forge-quantum-genesis">GitHub</a> |
+                Powered by Quantum Resonance
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Interactive Coherence Demo - Simulates quantum guardian activity
+        const coherenceEl = document.getElementById('coherence-value');
+        const latencyEl = document.getElementById('latency-value');
+        const guardianEl = document.getElementById('guardian-state');
+        const latencyBar = document.getElementById('latency-bar');
+        const statusText = document.getElementById('status-text');
+        
+        const guardianStates = ['WATCH', 'SCAN', 'GUARD', 'SYNC', 'RESONANCE'];
+        let tick = 0;
+
+        // Helper function to check if all required DOM elements exist
+        function allElementsExist() {
+            return coherenceEl && latencyEl && guardianEl && latencyBar && statusText;
+        }
+
+        function updateCoherence() {
+            // Check if all required elements exist before proceeding
+            if (!allElementsExist()) {
+                return;
+            }
+            
+            tick++;
+            
+            // Simulate coherence oscillation (0.95-0.99 range)
+            const baseCoherence = 0.97;
+            const oscillation = Math.sin(tick * 0.1) * 0.02;
+            const noise = (Math.random() - 0.5) * 0.01;
+            const coherence = Math.max(0.95, Math.min(0.99, baseCoherence + oscillation + noise));
+            coherenceEl.textContent = coherence.toFixed(3);
+            
+            // Simulate latency (50-200 μs range)
+            const baseLatency = 100;
+            const latencyNoise = Math.random() * 100 - 50;
+            const latency = Math.max(50, Math.min(200, baseLatency + latencyNoise));
+            latencyEl.textContent = Math.round(latency);
+            
+            // Update latency bar (inverse - lower is better)
+            const latencyPercent = 100 - ((latency - 50) / 150 * 100);
+            latencyBar.style.width = latencyPercent + '%';
+            
+            // Cycle guardian state every 3 seconds
+            const stateIndex = Math.floor(tick / 30) % guardianStates.length;
+            guardianEl.textContent = guardianStates[stateIndex];
+            
+            // Update status color based on coherence
+            if (coherence >= 0.97) {
+                statusText.textContent = 'OPTIMAL';
+                statusText.style.color = '#10b981';
+            } else if (coherence >= 0.95) {
+                statusText.textContent = 'LIVE';
+                statusText.style.color = '#10b981';
+            } else {
+                statusText.textContent = 'CALIBRATING';
+                statusText.style.color = '#f59e0b';
+            }
+        }
+
+        // Only start the interval if all required elements exist
+        if (allElementsExist()) {
+            // Update every 100ms for smooth animation
+            setInterval(updateCoherence, 100);
+            
+            // Initial update
+            updateCoherence();
+        }
+        
+        // Health check ping every 30 seconds
+        async function checkHealth() {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            
+            try {
+                const response = await fetch('/api/health', { 
+                    method: 'GET',
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                if (!response.ok) throw new Error('Health check failed');
+            } catch (e) {
+                clearTimeout(timeoutId);
+                // Silent fail - demo mode continues
+                console.log('Health endpoint not available - running in demo mode');
+            }
+        }
+        
+        // Initial health check
+        checkHealth();
+        setInterval(checkHealth, 30000);
+    </script>
+</body>
+</html>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Pi Forge Quantum Genesis</title>
