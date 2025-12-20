@@ -67,11 +67,11 @@ Each repo is sovereign, but all are aligned through this Space.
 # 🌱 Start Here
 
 If you're new:
-1. Read the **Canon of Autonomy**  
-2. Visit the **Start Here** onboarding page  
-3. Explore the **Ecosystem Overview**  
-4. Learn the **Agent System**  
-5. Ask the GitHub Agent for guidance  
+1. Read the [**Canon of Closure**](canon/README.md) — the living documentation system  
+2. Read the [Quick Start guide](docs/QUICK_START.md) — get up and running  
+3. Explore the [Architecture & Ecosystem Overview](docs/ARCHITECTURE.md) — understand the constellation  
+4. Learn about the [AI Agent System](docs/AI_AGENT_HANDOFF_RUNBOOK.md) — autonomous operations  
+5. Ask the GitHub Agent for guidance — @mention copilot in issues for coordination and routing  
 
 You are welcome here.
 
