@@ -53,7 +53,7 @@ jobs:
             }
             
             if (!pr_number) {
-              core.setFailed('Could not determine PR number from event payload');
+              core.setFailed(`Could not determine PR number from event payload. Event: ${context.eventName}, Payload keys: ${Object.keys(context.payload).join(', ')}`);
               return;
             }
             
