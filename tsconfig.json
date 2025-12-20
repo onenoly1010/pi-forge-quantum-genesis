@@ -12,5 +12,18 @@
     "types": ["node"]
   },
   "include": ["api/**/*.ts"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2020"],
+    "types": ["node"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true
+  },
+  "include": ["api/**/*.ts", "guardian-alerts.ts"],
   "exclude": ["node_modules"]
 }

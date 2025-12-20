@@ -14,7 +14,8 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# Ignore Python lib directories but not scripts/verification/lib/
+/lib/
 lib64/
 parts/
 sdist/
@@ -119,3 +120,52 @@ dmypy.json
 
 # Node.js
 node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+*.tgz
+yarn.lock
+
+# Press Agent logs
+press-agent/logs/
+# Windows executables and binaries (excluded from Pi Studio packages)
+*.exe
+*.dll
+*.msi
+
+# Node modules
+node_modules/
+
+# Build artifacts
+build/
+artifacts/
+public/
+dist/
+
+# IDE/Editor settings
+.vs/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+deployment_log.json
+
+# Guardian approval system data
+.guardian_approvals/
+
+# Solidity / Foundry
+contracts/cache/
+contracts/out/
+contracts/broadcast/
+contracts/.env
+contracts/lib/
+*.sol.d
+*.abi
+*.bin
+
+# Verification Reports
+reports/*.json
+reports/*.html
+.env.verification
