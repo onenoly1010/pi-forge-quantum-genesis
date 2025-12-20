@@ -88,7 +88,8 @@ Emergency response:
 
 3. **Rollback** immediately if recent deploy caused it
    ```bash
-   git checkout $(git describe --tags --abbrev=0)
+   # Get previous stable tag (before current)
+   git checkout $(git describe --tags --abbrev=0 HEAD^)
    ./deploy.sh production --rollback
    ```
 

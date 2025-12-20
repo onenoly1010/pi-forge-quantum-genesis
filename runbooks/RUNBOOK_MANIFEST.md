@@ -275,16 +275,16 @@ git pull origin main
 git add .
 git commit -m "Bump version to v1.0.0"
 
-# 5. Create annotated tag
-git tag -a v1.0.0 -m "Release version 1.0.0
-
-Features:
-- Feature A
-- Feature B
-
-Fixes:
-- Bug fix C
-- Bug fix D"
+# 5. Create annotated tag with multi-line message
+git tag -a v1.0.0 -m "Release version 1.0.0" \
+  -m "" \
+  -m "Features:" \
+  -m "- Feature A" \
+  -m "- Feature B" \
+  -m "" \
+  -m "Fixes:" \
+  -m "- Bug fix C" \
+  -m "- Bug fix D"
 
 # 6. Push commit and tag
 git push origin main

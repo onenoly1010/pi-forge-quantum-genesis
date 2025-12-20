@@ -13,6 +13,21 @@ from pathlib import Path
 # Get the repository root directory
 REPO_ROOT = Path(__file__).parent.parent
 
+# Canon of Closure configuration
+CIRCLE_OF_CLOSURE_STEPS = [
+    "Lint", "Host", "Test", "Pre-aggregate", "Release",
+    "Deploy", "Rollback", "Monitor", "Visualize", "Alert"
+]
+
+HANDOFF_ARTIFACTS = [
+    ("assets", "ascii-banner.txt"),
+    ("docs", "CANON_OF_CLOSURE.md"),
+    ("docs", "QUICK_USER_GUIDE.md"),
+    ("docs", "DEV_REFERENCE.md"),
+    ("runbooks", "RUNBOOK_MANIFEST.md"),
+    ("assets", "runbook-wheel.svg"),
+]
+
 
 class TestCanonOfClosureArtifacts:
     """Test that all Canon of Closure artifacts exist."""
@@ -74,11 +89,8 @@ class TestCanonOfClosureContent:
         canon_path = REPO_ROOT / "docs" / "CANON_OF_CLOSURE.md"
         content = canon_path.read_text()
         
-        # Check for the 10 steps
-        steps = ["Lint", "Host", "Test", "Pre-aggregate", "Release", 
-                 "Deploy", "Rollback", "Monitor", "Visualize", "Alert"]
-        
-        for step in steps:
+        # Check for all steps defined in configuration
+        for step in CIRCLE_OF_CLOSURE_STEPS:
             assert step in content, f"Step '{step}' not found in Canon of Closure"
 
     def test_handoff_index_references_all_artifacts(self):
@@ -171,16 +183,8 @@ class TestHandoffPackageCompleteness:
 
     def test_all_six_artifacts_present(self):
         """Verify all 6 artifacts mentioned in issue are present."""
-        artifacts = [
-            REPO_ROOT / "assets" / "ascii-banner.txt",
-            REPO_ROOT / "docs" / "CANON_OF_CLOSURE.md",
-            REPO_ROOT / "docs" / "QUICK_USER_GUIDE.md",
-            REPO_ROOT / "docs" / "DEV_REFERENCE.md",
-            REPO_ROOT / "runbooks" / "RUNBOOK_MANIFEST.md",
-            REPO_ROOT / "assets" / "runbook-wheel.svg",
-        ]
-        
-        for artifact in artifacts:
+        for directory, filename in HANDOFF_ARTIFACTS:
+            artifact = REPO_ROOT / directory / filename
             assert artifact.exists(), f"Missing artifact: {artifact}"
             assert artifact.stat().st_size > 0, f"Empty artifact: {artifact}"
 
