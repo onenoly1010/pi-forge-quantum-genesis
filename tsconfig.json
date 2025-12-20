@@ -1,6 +1,17 @@
 {
   "compilerOptions": {
     "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "types": ["node"]
+  },
+  "include": ["api/**/*.ts"],
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "lib": ["ES2020"],
