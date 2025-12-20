@@ -41,7 +41,7 @@ def test_all_main_dependencies():
         'flask',
         'flask_cors',
         'gradio',
-        'dotenv',  # Note: package name is python-dotenv, module name is dotenv
+        'dotenv',  # Import name for python-dotenv package
         'aiohttp',
         'schedule',
         'psutil',
