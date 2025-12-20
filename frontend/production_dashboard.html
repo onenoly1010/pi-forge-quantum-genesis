@@ -435,6 +435,14 @@
             ];
             // ===============================================
 
+            // Check if contract address is still placeholder
+            if (TREASURY_CONTRACT_ADDRESS === '0x0000000000000000000000000000000000000000') {
+                console.warn('⚠️ Treasury contract address not configured. Please update TREASURY_CONTRACT_ADDRESS in the code.');
+                console.warn('📖 See docs/WEB3_TREASURY_CONFIGURATION.md for setup instructions.');
+                displayFallbackMetrics();
+                return;
+            }
+
             // Fallback values if blockchain is unavailable
             const fallback = {
                 tvl: 12456789,
@@ -497,7 +505,7 @@
 
                 document.getElementById('tvl-value').innerText = format(fallback.tvl);
                 document.getElementById('balance-value').innerText = format(fallback.available);
-                document.getElementById('error-row').style.display = 'table-row';
+                document.getElementById('error-row').style.display = 'block'; // Changed from 'table-row' to 'block'
                 
                 console.warn('⚠️ Using fallback treasury metrics');
             }
