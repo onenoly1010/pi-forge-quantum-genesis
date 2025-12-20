@@ -337,7 +337,17 @@
         const guardianStates = ['WATCH', 'SCAN', 'GUARD', 'SYNC', 'RESONANCE'];
         let tick = 0;
 
+        // Helper function to check if all required DOM elements exist
+        function allElementsExist() {
+            return coherenceEl && latencyEl && guardianEl && latencyBar && statusText;
+        }
+
         function updateCoherence() {
+            // Check if all required elements exist before proceeding
+            if (!allElementsExist()) {
+                return;
+            }
+            
             tick++;
             
             // Simulate coherence oscillation (0.95-0.99 range)
@@ -374,11 +384,14 @@
             }
         }
 
-        // Update every 100ms for smooth animation
-        setInterval(updateCoherence, 100);
-        
-        // Initial update
-        updateCoherence();
+        // Only start the interval if all required elements exist
+        if (allElementsExist()) {
+            // Update every 100ms for smooth animation
+            setInterval(updateCoherence, 100);
+            
+            // Initial update
+            updateCoherence();
+        }
         
         // Health check ping every 30 seconds
         async function checkHealth() {
