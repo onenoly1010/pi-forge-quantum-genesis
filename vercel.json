@@ -1,9 +1,7 @@
 {
   "version": 2,
-  "outputDirectory": "public",
   "cleanUrls": true,
   "trailingSlash": false,
-  "buildCommand": "npm run build",
   "rewrites": [
     { "source": "/api/(.*)", "destination": "https://pi-forge-quantum-genesis-production-4fc8.up.railway.app/api/$1" },
     { "source": "/health",      "destination": "https://pi-forge-quantum-genesis-production-4fc8.up.railway.app/health" },
