@@ -8,13 +8,14 @@
 const fs = require('fs');
 const path = require('path');
 
-// Use process.cwd() for Vercel compatibility instead of __dirname
-const rootDir = process.cwd();
+// Resolve project root relative to this script's directory for stable behavior
+const rootDir = path.resolve(__dirname, '..');
 const publicDir = path.join(rootDir, 'public');
 
 // Debug logging for path resolution
 console.log('Build script path resolution:');
-console.log(`  Working directory: ${rootDir}`);
+console.log(`  Script directory: ${__dirname}`);
+console.log(`  Project root:    ${rootDir}`);
 console.log(`  Public directory: ${publicDir}\n`);
 
 // Files to copy from root to public directory
