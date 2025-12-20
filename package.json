@@ -2,6 +2,7 @@
   "name": "pi-forge-quantum-genesis",
   "version": "1.0.0",
   "description": "Pi Forge Quantum Genesis - Multi-application repository with FastAPI, Flask, and Gradio",
+  "private": true,
   "main": "index.html",
   "scripts": {
     "build": "npm run build:static",
