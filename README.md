@@ -69,7 +69,7 @@ Each repo is sovereign, but all are aligned through this Space.
 If you're new:
 1. Read the **Canon of Autonomy**  
 2. Visit the **Start Here** onboarding page  
-3. Explore the **Ecosystem Overview**  
+3. Explore the **Ecosystem Overview** in the [🧩 The Constellation](#-the-constellation) section below  
 4. Learn the **Agent System**  
 5. Ask the GitHub Agent for guidance  
 
