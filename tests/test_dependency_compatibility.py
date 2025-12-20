@@ -3,6 +3,7 @@ Test to verify that all required dependencies can be imported together
 without version conflicts, specifically the FastAPI and Gradio compatibility issue.
 """
 import pytest
+from packaging import version
 
 
 def test_fastapi_gradio_compatibility():
@@ -10,7 +11,6 @@ def test_fastapi_gradio_compatibility():
     try:
         import fastapi
         import gradio
-        from packaging import version
         
         # Verify FastAPI version meets Gradio's requirements (>=0.115.2)
         fastapi_version = fastapi.__version__
@@ -69,7 +69,6 @@ def test_all_main_dependencies():
 def test_fastapi_version_range():
     """Test that FastAPI version is within the acceptable range."""
     import fastapi
-    from packaging import version
     
     current_version = version.parse(fastapi.__version__)
     min_version = version.parse("0.115.2")
@@ -87,7 +86,6 @@ def test_fastapi_version_range():
 def test_gradio_version_range():
     """Test that Gradio version is within the acceptable range."""
     import gradio
-    from packaging import version
     
     current_version = version.parse(gradio.__version__)
     min_version = version.parse("5.24.0")
