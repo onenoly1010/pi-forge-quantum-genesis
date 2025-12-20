@@ -64,8 +64,8 @@ Thank you for your contribution to Pi Forge Quantum Genesis! This is a
 collaborative space where your sovereignty and autonomy are valued.
 
 **Getting Started:**
-- 📖 [Space Rituals](./docs/SPACE_RITUALS.md) - Our engagement framework
-- 🛡️ [Guardian Playbook](./docs/GUARDIAN_PLAYBOOK.md) - Oversight and safety
+- 📖 [Space Rituals](./SPACE_RITUALS.md) - Our engagement framework
+- 🛡️ [Guardian Playbook](./GUARDIAN_PLAYBOOK.md) - Oversight and safety
 - 🚀 [Quick Start](./QUICK_START.md) - Technical setup
 
 Your voice matters here. Contribute at your own pace, and feel free to 

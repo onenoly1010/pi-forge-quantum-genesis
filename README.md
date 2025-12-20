@@ -161,6 +161,7 @@ See the [Guardian Playbook](./docs/GUARDIAN_PLAYBOOK.md) for operational procedu
 - [Pi Network Integration](./docs/PI_NETWORK_INTEGRATION.md)
 
 ### For Contributors
+- [Contributors](./CONTRIBUTORS.md) - Community roster and contribution guide
 - [Space Rituals](./docs/SPACE_RITUALS.md) - Engagement ceremonies, handoff protocols, and celebrations
 - [Guardian Playbook](./docs/GUARDIAN_PLAYBOOK.md) - Complete operational guide
 - [Quick Reference](./docs/GUARDIAN_QUICK_REFERENCE.md) - Fast decision-making

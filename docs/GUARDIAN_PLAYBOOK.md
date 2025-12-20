@@ -740,6 +740,7 @@ Use template: `.github/ISSUE_TEMPLATE/incident-report.md`
 
 ### Reference Documentation
 
+- [Space Rituals](./SPACE_RITUALS.md) - Engagement ceremonies and handoff protocols
 - [Quick Reference](./GUARDIAN_QUICK_REFERENCE.md) - Fast decision-making guide
 - [Architecture](./ARCHITECTURE.md) - System design
 - [Autonomous Handover](./AUTONOMOUS_HANDOVER.md) - AI decision system details
