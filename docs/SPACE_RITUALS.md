@@ -247,7 +247,7 @@ Thanks for picking this up! Happy to answer questions as you continue.
 
 4. **Formal Handoff**
    - Community acknowledgment of transition (GitHub Discussion or sync meeting)
-   - Update MAINTAINERS.md, README.md, and relevant docs
+   - Update CONTRIBUTORS.md, README.md, and relevant docs
    - Transfer repository permissions and access
 
 5. **Retrospective & Celebration**
