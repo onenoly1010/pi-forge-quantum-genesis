@@ -169,3 +169,6 @@ contracts/lib/
 reports/*.json
 reports/*.html
 .env.verification
+
+# Vercel build output
+.vercel/
