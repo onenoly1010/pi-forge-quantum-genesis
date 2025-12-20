@@ -163,6 +163,8 @@ See the [Guardian Playbook](./docs/GUARDIAN_PLAYBOOK.md) for operational procedu
 ### For Contributors
 - [Contributors](./CONTRIBUTORS.md) - Community roster and contribution guide
 - [Space Rituals](./docs/SPACE_RITUALS.md) - Engagement ceremonies, handoff protocols, and celebrations
+
+### For Guardians
 - [Guardian Playbook](./docs/GUARDIAN_PLAYBOOK.md) - Complete operational guide
 - [Quick Reference](./docs/GUARDIAN_QUICK_REFERENCE.md) - Fast decision-making
 - [Decision Templates](./.github/ISSUE_TEMPLATE/guardian-decision-template.md)
