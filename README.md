@@ -160,7 +160,8 @@ See the [Guardian Playbook](./docs/GUARDIAN_PLAYBOOK.md) for operational procedu
 - [Architecture Overview](./docs/ARCHITECTURE.md)
 - [Pi Network Integration](./docs/PI_NETWORK_INTEGRATION.md)
 
-### For Guardians
+### For Contributors
+- [Space Rituals](./docs/SPACE_RITUALS.md) - Engagement ceremonies, handoff protocols, and celebrations
 - [Guardian Playbook](./docs/GUARDIAN_PLAYBOOK.md) - Complete operational guide
 - [Quick Reference](./docs/GUARDIAN_QUICK_REFERENCE.md) - Fast decision-making
 - [Decision Templates](./.github/ISSUE_TEMPLATE/guardian-decision-template.md)
