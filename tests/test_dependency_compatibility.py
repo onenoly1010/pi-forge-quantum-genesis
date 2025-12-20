@@ -10,13 +10,17 @@ def test_fastapi_gradio_compatibility():
     try:
         import fastapi
         import gradio
+        from packaging import version
         
         # Verify FastAPI version meets Gradio's requirements (>=0.115.2)
         fastapi_version = fastapi.__version__
-        major, minor, patch = map(int, fastapi_version.split('.')[:3])
         
-        assert major == 0, f"FastAPI major version should be 0, got {major}"
-        assert minor >= 115 or major > 0, f"FastAPI version should be >=0.115.2, got {fastapi_version}"
+        # Use packaging.version for robust version comparison
+        current_version = version.parse(fastapi_version)
+        min_required = version.parse("0.115.2")
+        
+        assert current_version >= min_required, \
+            f"FastAPI version should be >=0.115.2, got {fastapi_version}"
         
         print(f"✅ FastAPI version {fastapi_version} is compatible with Gradio")
         print(f"✅ Gradio version {gradio.__version__} imported successfully")
@@ -37,7 +41,7 @@ def test_all_main_dependencies():
         'flask',
         'flask_cors',
         'gradio',
-        'dotenv',
+        'dotenv',  # Note: package name is python-dotenv, module name is dotenv
         'aiohttp',
         'schedule',
         'psutil',
@@ -49,12 +53,7 @@ def test_all_main_dependencies():
     failed_imports = []
     for dep in dependencies:
         try:
-            if dep == 'dotenv':
-                __import__('dotenv')
-            elif dep == 'flask_cors':
-                __import__('flask_cors')
-            else:
-                __import__(dep)
+            __import__(dep)
         except ImportError as e:
             failed_imports.append((dep, str(e)))
     
@@ -70,26 +69,34 @@ def test_all_main_dependencies():
 def test_fastapi_version_range():
     """Test that FastAPI version is within the acceptable range."""
     import fastapi
+    from packaging import version
     
-    version = fastapi.__version__
-    major, minor, patch = map(int, version.split('.')[:3])
+    current_version = version.parse(fastapi.__version__)
+    min_version = version.parse("0.115.2")
+    max_version = version.parse("0.125.0")
     
     # Should be >= 0.115.2 and < 0.125
-    assert major == 0, f"FastAPI major version should be 0, got {major}"
-    assert 115 <= minor < 125, f"FastAPI minor version should be between 115 and 124, got {minor}"
+    assert current_version >= min_version, \
+        f"FastAPI version should be >= 0.115.2, got {fastapi.__version__}"
+    assert current_version < max_version, \
+        f"FastAPI version should be < 0.125, got {fastapi.__version__}"
     
-    print(f"✅ FastAPI version {version} is within acceptable range (>=0.115.2, <0.125)")
+    print(f"✅ FastAPI version {fastapi.__version__} is within acceptable range (>=0.115.2, <0.125)")
 
 
 def test_gradio_version_range():
     """Test that Gradio version is within the acceptable range."""
     import gradio
+    from packaging import version
     
-    version = gradio.__version__
-    major, minor = map(int, version.split('.')[:2])
+    current_version = version.parse(gradio.__version__)
+    min_version = version.parse("5.24.0")
+    max_version = version.parse("5.32.0")
     
     # Should be >= 5.24.0 and < 5.32
-    assert major == 5, f"Gradio major version should be 5, got {major}"
-    assert 24 <= minor < 32, f"Gradio minor version should be between 24 and 31, got {minor}"
+    assert current_version >= min_version, \
+        f"Gradio version should be >= 5.24.0, got {gradio.__version__}"
+    assert current_version < max_version, \
+        f"Gradio version should be < 5.32, got {gradio.__version__}"
     
-    print(f"✅ Gradio version {version} is within acceptable range (>=5.24.0, <5.32)")
+    print(f"✅ Gradio version {gradio.__version__} is within acceptable range (>=5.24.0, <5.32)")
