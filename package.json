@@ -1,19 +1,8 @@
 {
   "name": "pi-forge-quantum-genesis",
   "version": "1.0.0",
-  "description": "Quantum Resonance Lattice - Pi Network Integration",
-  "private": true,
-  "scripts": {
-    "build": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@vercel/node": "^5.5.13"
-  },
-  "devDependencies": {
-    "@types/node": "^24.10.1",
-    "typescript": "^5.9.3"
-  }
   "description": "Pi Forge Quantum Genesis - Multi-application repository with FastAPI, Flask, and Gradio",
+  "private": true,
   "main": "index.html",
   "scripts": {
     "build": "npm run build:static",
