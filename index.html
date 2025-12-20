@@ -338,6 +338,11 @@
         let tick = 0;
 
         function updateCoherence() {
+            // Check if all required elements exist before proceeding
+            if (!coherenceEl || !latencyEl || !guardianEl || !latencyBar || !statusText) {
+                return;
+            }
+            
             tick++;
             
             // Simulate coherence oscillation (0.95-0.99 range)
@@ -374,11 +379,14 @@
             }
         }
 
-        // Update every 100ms for smooth animation
-        setInterval(updateCoherence, 100);
-        
-        // Initial update
-        updateCoherence();
+        // Only start the interval if all required elements exist
+        if (coherenceEl && latencyEl && guardianEl && latencyBar && statusText) {
+            // Update every 100ms for smooth animation
+            setInterval(updateCoherence, 100);
+            
+            // Initial update
+            updateCoherence();
+        }
         
         // Health check ping every 30 seconds
         async function checkHealth() {
