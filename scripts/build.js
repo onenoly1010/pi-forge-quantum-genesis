@@ -8,8 +8,14 @@
 const fs = require('fs');
 const path = require('path');
 
-const rootDir = path.join(__dirname, '..');
+// Use process.cwd() for Vercel compatibility instead of __dirname
+const rootDir = process.cwd();
 const publicDir = path.join(rootDir, 'public');
+
+// Debug logging for path resolution
+console.log('Build script path resolution:');
+console.log(`  Working directory: ${rootDir}`);
+console.log(`  Public directory: ${publicDir}\n`);
 
 // Files to copy from root to public directory
 const staticFiles = [
@@ -97,7 +103,24 @@ function build() {
   }
 
   console.log('\n✅ Build completed successfully!');
-  console.log(`📁 Output directory: ${publicDir}\n`);
+  console.log(`📁 Output directory: ${publicDir}`);
+  
+  // Verification step: Confirm public directory exists and list contents
+  console.log('\nVerification:');
+  if (fs.existsSync(publicDir)) {
+    console.log('✓ Public directory exists');
+    const files = fs.readdirSync(publicDir);
+    console.log(`✓ Contains ${files.length} items:`);
+    files.forEach(file => {
+      const filePath = path.join(publicDir, file);
+      const stats = fs.statSync(filePath);
+      const type = stats.isDirectory() ? 'dir' : 'file';
+      console.log(`  - ${file} (${type})`);
+    });
+  } else {
+    throw new Error('Public directory was not created!');
+  }
+  console.log('');
 }
 
 // Run the build
@@ -106,5 +129,7 @@ try {
   process.exit(0);
 } catch (error) {
   console.error('\n❌ Build failed:', error.message);
+  console.error('\nStack trace:');
+  console.error(error.stack);
   process.exit(1);
 }
