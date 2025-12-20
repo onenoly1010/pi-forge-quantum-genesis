@@ -337,9 +337,14 @@
         const guardianStates = ['WATCH', 'SCAN', 'GUARD', 'SYNC', 'RESONANCE'];
         let tick = 0;
 
+        // Helper function to check if all required DOM elements exist
+        function allElementsExist() {
+            return coherenceEl && latencyEl && guardianEl && latencyBar && statusText;
+        }
+
         function updateCoherence() {
             // Check if all required elements exist before proceeding
-            if (!coherenceEl || !latencyEl || !guardianEl || !latencyBar || !statusText) {
+            if (!allElementsExist()) {
                 return;
             }
             
@@ -380,7 +385,7 @@
         }
 
         // Only start the interval if all required elements exist
-        if (coherenceEl && latencyEl && guardianEl && latencyBar && statusText) {
+        if (allElementsExist()) {
             // Update every 100ms for smooth animation
             setInterval(updateCoherence, 100);
             
