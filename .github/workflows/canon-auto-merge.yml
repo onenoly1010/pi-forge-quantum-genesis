@@ -51,8 +51,6 @@ jobs:
               if (prs.length > 0) {
                 pr_number = prs[0].number;
                 core.info(`Found PR #${pr_number} from check_suite event`);
-              } else {
-                core.warning('No PRs associated with check_suite event. Job condition should have prevented this execution.');
               }
             }
             
