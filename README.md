@@ -16,6 +16,25 @@ It is the living center of the ecosystem.
 
 ---
 
+## 🎭 Explore the Demos
+
+**New to OINIO?** Start with the **[Demo Dashboard](docs/DEMO_DASHBOARD.md)** — your gateway to the Quantum Pi Forge constellation.
+
+### What You Can Explore:
+- 🌐 **Live Web Demos** - See OINIO in action with real-time monitoring
+- 💼 **Smart Contract Suite** - Production-ready ERC-20 and ERC-721 contracts on Pi Network
+- 🏛️ **Community Governance** - Immutable memorial and transparent decision-making
+- 🎬 **Interactive Tools** - CLI demos, deployment scripts, and integration examples
+
+**Choose your experience level and dive in:**
+- **Beginners:** [Live Coherence Monitor](https://pi-forge-quantum-genesis.vercel.app) (2 minutes, no setup)
+- **Developers:** [Smart Contract Suite](docs/DEMO_DASHBOARD.md#3-smart-contract-suite) (60 minutes, Foundry required)
+- **Operators:** [Model Deployment Scripts](docs/DEMO_DASHBOARD.md#7-model-deployment-scripts) (30 minutes, Python)
+
+👉 **[View Complete Demo Dashboard →](docs/DEMO_DASHBOARD.md)**
+
+---
+
 # 🧭 Purpose of This Space
 
 This Space is not a code repository — it is a **governance and coordination environment**.
