@@ -72,7 +72,7 @@ The implementation features:
 ## 🔧 Technical Architecture
 
 ```mermaid
-graph LR
+flowchart LR
     A[Production Dashboard] --> B{Web3 Available?}
     B -->|Yes| C[Initialize Web3]
     B -->|No| D[Use Fallback Values]
