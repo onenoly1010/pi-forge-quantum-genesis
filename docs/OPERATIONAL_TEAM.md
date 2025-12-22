@@ -316,7 +316,7 @@ python scripts/record_guardian_approval.py \
 
 | Severity | Response Time | Notification Method | Escalation Path |
 |----------|--------------|-------------------|-----------------|
-| **P0 - Critical** | 1 hour | All channels + phone | Direct to Lead Guardian |
+| **P0 - Critical** | 1 hour | All channels + Telegram | Direct to Lead Guardian |
 | **P1 - High** | 4 hours | Slack/Discord + GitHub | Lead Guardian |
 | **P2 - Medium** | 24 hours | GitHub Issue | AI Agent triage → Guardian |
 | **P3 - Low** | 72 hours | GitHub Issue | AI Agent autonomous |
@@ -365,10 +365,10 @@ python scripts/record_guardian_approval.py \
 ### Operational Metrics
 
 **Handoff Performance**:
-- Autonomous success rate: 85%+ (current: tracking)
-- Guardian response time: < 4 hours average
+- Autonomous success rate: 85%+ (current: establishing baseline)
+- Guardian response time: < 4 hours average (current: establishing baseline)
 - Emergency response: < 1 hour (100% compliance)
-- Handoff completion rate: 95%+
+- Handoff completion rate: 95%+ (current: establishing baseline)
 
 **System Health**:
 - Uptime: 99.9%+
