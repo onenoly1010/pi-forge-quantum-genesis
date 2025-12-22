@@ -72,7 +72,7 @@ env:
   DEPLOYMENT_ENVIRONMENT: 'production'
   SAFETY_GATE_ENABLED: true
   ENABLE_TELEMETRY: false  # Disable OpenTelemetry in CI environment
-  
+
 # ═══════════════════════════════════════════════════════════════════════════
 # JOB 1: SAFETY GATE & PRE-FLIGHT CHECKS
 # ═══════════════════════════════════════════════════════════════════════════
@@ -95,22 +95,22 @@ jobs:
         id: safety-check
         run: |
           echo "=== SAFETY GATE ANALYSIS ==="
-          
+
           APPROVED=true
           SKIP_DEPLOYMENT=false
-          
+
           # Check if this is a scheduled run
           if [ "${{ github.event_name }}" = "schedule" ]; then
             echo "📅 Scheduled run - skipping deployment, running health check only"
             SKIP_DEPLOYMENT=true
           fi
-          
+
           # Check for emergency stop
           if [ "${{ github.event.inputs.action }}" = "emergency-stop" ]; then
             echo "🚨 EMERGENCY STOP requested"
             APPROVED=false
           fi
-          
+
           # Check for critical files
           CRITICAL_FILES=(
             "server/main.py"
@@ -119,7 +119,7 @@ jobs:
             "Dockerfile"
             "railway.toml"
           )
-          
+
           for file in "${CRITICAL_FILES[@]}"; do
             if [ ! -f "$file" ]; then
               echo "❌ Critical file missing: $file"
@@ -128,7 +128,7 @@ jobs:
               echo "✅ Critical file exists: $file"
             fi
           done
-          
+
           # Check for breaking changes in commit messages
           if [ "${{ github.event_name }}" = "push" ]; then
             RECENT_COMMITS=$(git log -5 --pretty=format:"%s" 2>/dev/null | head -c 500 || echo "")
@@ -137,10 +137,10 @@ jobs:
               APPROVED=false
             fi
           fi
-          
+
           echo "approved=$APPROVED" >> $GITHUB_OUTPUT
           echo "skip_deployment=$SKIP_DEPLOYMENT" >> $GITHUB_OUTPUT
-          
+
           if [ "$APPROVED" = true ]; then
             echo "✅ Safety gate PASSED"
           else
@@ -151,16 +151,16 @@ jobs:
         id: env-check
         run: |
           echo "=== ENVIRONMENT HEALTH CHECK ==="
-          
+
           HEALTHY=true
-          
+
           # Check if previous deployment exists and is healthy
           # This would normally check Railway/production status
           echo "📊 Checking production environment status..."
-          
+
           # Placeholder for actual environment check
           # In production, this would query Railway API or health endpoints
-          
+
           echo "healthy=$HEALTHY" >> $GITHUB_OUTPUT
           echo "✅ Environment check complete"
 
@@ -168,27 +168,27 @@ jobs:
         run: |
           cat > safety-gate-report.md << EOF
           # 🛡️ Safety Gate Report
-          
+
           **Run ID**: ${{ github.run_id }}
           **Timestamp**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
           **Event**: ${{ github.event_name }}
           **Branch**: ${{ github.ref_name }}
-          
+
           ## Results
-          
+
           - **Deployment Approved**: ${{ steps.safety-check.outputs.approved }}
           - **Environment Healthy**: ${{ steps.env-check.outputs.healthy }}
           - **Skip Deployment**: ${{ steps.safety-check.outputs.skip_deployment }}
-          
+
           ## Next Steps
-          
+
           $(if [ "${{ steps.safety-check.outputs.approved }}" = "true" ]; then
             echo "✅ Proceeding with deployment pipeline"
           else
             echo "❌ Deployment blocked - manual intervention required"
           fi)
           EOF
-          
+
           cat safety-gate-report.md
 
       - name: 📤 Upload Safety Gate Report
@@ -261,27 +261,27 @@ jobs:
         id: build-status
         run: |
           echo "=== BUILDING APPLICATION ==="
-          
+
           # Verify imports work
           python -c "import sys; sys.path.insert(0, 'server'); from main import app; print('✅ FastAPI OK')"
           python -c "import sys; sys.path.insert(0, 'server'); from app import app; print('✅ Flask OK')"
-          
+
           echo "success=true" >> $GITHUB_OUTPUT
           echo "✅ Build successful"
 
       - name: 📦 Create Deployment Package
         run: |
           echo "=== CREATING DEPLOYMENT PACKAGE ==="
-          
+
           mkdir -p build/deployment
-          
+
           # Copy essential files
           cp -r server/ build/deployment/server/
           cp -r frontend/ build/deployment/frontend/
           cp Dockerfile build/deployment/
           cp railway.toml build/deployment/
           cp -r docs/ build/deployment/docs/ || true
-          
+
           # Create package info
           cat > build/deployment/deployment-info.json << EOF
           {
@@ -292,7 +292,7 @@ jobs:
             "run_id": "${{ github.run_id }}"
           }
           EOF
-          
+
           echo "✅ Deployment package created"
 
       - name: 📤 Upload Deployment Package
@@ -344,30 +344,30 @@ jobs:
         run: |
           TAG="deploy-$(date +%Y%m%d-%H%M%S)-$(git rev-parse --short HEAD)"
           echo "tag=$TAG" >> $GITHUB_OUTPUT
-          
+
           # Only create tag if it doesn't exist
           if git rev-parse "$TAG" >/dev/null 2>&1; then
             echo "⚠️ Tag $TAG already exists, skipping creation"
           else
             git tag "$TAG" && echo "✅ Created tag: $TAG" || echo "⚠️ Tag creation failed (non-critical)"
           fi
-          
+
           echo "📌 Deployment tag: $TAG"
 
       - name: 🚀 Deploy to Railway (Simulated)
         id: deploy
         run: |
           echo "=== DEPLOYING TO PRODUCTION ==="
-          
+
           # In a real deployment, this would use Railway CLI or API
           # For this runbook, we simulate the deployment
-          
+
           DEPLOYMENT_ID="deploy-${{ github.run_id }}"
           DEPLOYMENT_URL="https://pi-forge-quantum-genesis-production.up.railway.app"
-          
+
           echo "deployment_id=$DEPLOYMENT_ID" >> $GITHUB_OUTPUT
           echo "url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
-          
+
           echo "✅ Deployment initiated"
           echo "📍 URL: $DEPLOYMENT_URL"
           echo "🆔 ID: $DEPLOYMENT_ID"
@@ -390,7 +390,7 @@ jobs:
             "success": true
           }
           EOF
-          
+
           cat deployment-record.json
 
       - name: 📤 Upload Deployment Record
@@ -429,10 +429,10 @@ jobs:
         id: health-check
         run: |
           echo "=== COMPREHENSIVE HEALTH CHECK ==="
-          
+
           STATUS="healthy"
           REPORT=""
-          
+
           # Test 1: FastAPI module import
           echo "Test 1: FastAPI Module Import"
           if python -c "import sys; sys.path.insert(0, 'server'); from main import app; print('OK')" 2>/dev/null; then
@@ -441,7 +441,7 @@ jobs:
             REPORT="${REPORT}❌ FastAPI module: FAILED\n"
             STATUS="degraded"
           fi
-          
+
           # Test 2: Flask module import
           echo "Test 2: Flask Module Import"
           if python -c "import sys; sys.path.insert(0, 'server'); from app import app; print('OK')" 2>/dev/null; then
@@ -450,7 +450,7 @@ jobs:
             REPORT="${REPORT}❌ Flask module: FAILED\n"
             STATUS="degraded"
           fi
-          
+
           # Test 3: Critical files
           echo "Test 3: Critical Files"
           CRITICAL_FILES="server/main.py server/app.py index.html server/requirements.txt"
@@ -462,7 +462,7 @@ jobs:
               STATUS="degraded"
             fi
           done
-          
+
           # Test 4: File sizes
           echo "Test 4: File Size Check"
           MAX_SIZE=$((1024 * 1024))
@@ -473,19 +473,19 @@ jobs:
             REPORT="${REPORT}⚠️ Found $OVERSIZED oversized files\n"
             STATUS="warning"
           fi
-          
+
           echo "status=$STATUS" >> $GITHUB_OUTPUT
           echo "report<<EOF" >> $GITHUB_OUTPUT
           echo -e "$REPORT" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
-          
+
           echo "🏥 Health Status: $STATUS"
 
       - name: 📈 Collect Performance Metrics
         id: metrics
         run: |
           echo "=== PERFORMANCE METRICS ==="
-          
+
           # Collect system metrics
           METRICS=$(cat << EOF
           {
@@ -497,7 +497,7 @@ jobs:
           }
           EOF
           )
-          
+
           echo "$METRICS" | jq .
           echo "status=ok" >> $GITHUB_OUTPUT
           echo "✅ Metrics collected"
@@ -506,32 +506,32 @@ jobs:
         run: |
           cat > monitoring-report.md << EOF
           # 📊 Monitoring Report
-          
+
           **Run ID**: ${{ github.run_id }}
           **Timestamp**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
-          
+
           ## Health Status: ${{ steps.health-check.outputs.status }}
-          
+
           ### Health Checks
-          
+
           ${{ steps.health-check.outputs.report }}
-          
+
           ### Performance Metrics
-          
+
           - Disk Usage: ~$(du -sm . | cut -f1) MB
           - Total Files: $(find . -type f | wc -l)
           - Python Files: $(find server/ -name "*.py" | wc -l)
-          
+
           ### System Status
-          
+
           - **FastAPI Quantum Conduit**: ✅ Operational
           - **Flask Glyph Weaver**: ✅ Operational
           - **Gradio Truth Mirror**: ✅ Operational
-          
+
           ---
           *Generated by AI Agent Autonomous Runbook*
           EOF
-          
+
           cat monitoring-report.md
 
       - name: 📤 Upload Monitoring Report
@@ -551,7 +551,7 @@ jobs:
     needs: [deployment, monitoring]
     if: |
       always() &&
-      (needs.deployment.result == 'failure' || 
+      (needs.deployment.result == 'failure' ||
        needs.monitoring.outputs.health_status == 'degraded' ||
        github.event.inputs.action == 'rollback')
     steps:
@@ -564,7 +564,7 @@ jobs:
         id: find-rollback
         run: |
           echo "=== FINDING ROLLBACK TARGET ==="
-          
+
           # If manual rollback with version specified
           if [ -n "${{ github.event.inputs.rollback_version }}" ]; then
             ROLLBACK_TAG="${{ github.event.inputs.rollback_version }}"
@@ -577,31 +577,31 @@ jobs:
             fi
             echo "📌 Automatic rollback to: $ROLLBACK_TAG"
           fi
-          
+
           echo "tag=$ROLLBACK_TAG" >> $GITHUB_OUTPUT
 
       - name: 🔄 Execute Rollback
         run: |
           echo "=== EXECUTING ROLLBACK ==="
-          
+
           ROLLBACK_TAG="${{ steps.find-rollback.outputs.tag }}"
-          
+
           echo "🔄 Rolling back to: $ROLLBACK_TAG"
-          
+
           # Verify tag exists before checkout
           if git rev-parse "$ROLLBACK_TAG" >/dev/null 2>&1; then
             echo "✅ Rollback tag verified: $ROLLBACK_TAG"
-            
+
             # In production, this would:
             # 1. Checkout the rollback tag
             # 2. Redeploy to Railway
             # 3. Verify health
-            
+
             git checkout "$ROLLBACK_TAG" 2>&1 || {
               echo "⚠️ Git checkout failed, attempting alternative rollback method"
               # Alternative rollback could involve Railway API or deployment manifest
             }
-            
+
             echo "✅ Rollback complete"
           else
             echo "❌ Rollback tag $ROLLBACK_TAG not found"
@@ -620,33 +620,33 @@ jobs:
         run: |
           cat > rollback-report.md << EOF
           # 🔄 Rollback Report
-          
+
           **Run ID**: ${{ github.run_id }}
           **Timestamp**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
           **Rollback Target**: ${{ steps.find-rollback.outputs.tag }}
-          
+
           ## Reason
-          
+
           - Deployment Status: ${{ needs.deployment.result }}
           - Health Status: ${{ needs.monitoring.outputs.health_status }}
           - Manual Trigger: ${{ github.event.inputs.action == 'rollback' }}
-          
+
           ## Actions Taken
-          
+
           1. ✅ Identified rollback target
           2. ✅ Executed rollback deployment
           3. ✅ Generated alert
-          
+
           ## Next Steps
-          
+
           1. Investigate deployment failure
           2. Fix issues in development
           3. Retest before next deployment
-          
+
           ---
           *Automated Rollback by AI Agent*
           EOF
-          
+
           cat rollback-report.md
 
       - name: 📤 Upload Rollback Report
@@ -673,13 +673,13 @@ jobs:
         id: collect-status
         run: |
           echo "=== COLLECTING JOB STATUSES ==="
-          
+
           SAFETY_GATE="${{ needs.safety-gate.result }}"
           CI_PIPELINE="${{ needs.ci-pipeline.result }}"
           DEPLOYMENT="${{ needs.deployment.result }}"
           MONITORING="${{ needs.monitoring.result }}"
           ROLLBACK="${{ needs.rollback.result }}"
-          
+
           # Determine overall status
           if [ "$ROLLBACK" = "success" ]; then
             OVERALL="rolled_back"
@@ -690,9 +690,9 @@ jobs:
           else
             OVERALL="failed"
           fi
-          
+
           echo "overall=$OVERALL" >> $GITHUB_OUTPUT
-          
+
           echo "Overall Status: $OVERALL"
 
       - name: 🔍 Find or Create Status Issue
@@ -706,11 +706,11 @@ jobs:
               state: 'open',
               labels: 'ai-agent,automated,runbook'
             });
-            
-            const existingIssue = issues.data.find(issue => 
+
+            const existingIssue = issues.data.find(issue =>
               issue.title.includes('AI Agent Autonomous Runbook Status')
             );
-            
+
             if (existingIssue) {
               core.setOutput('issue_number', existingIssue.number);
               return existingIssue.number;
@@ -724,64 +724,89 @@ jobs:
             const overall = '${{ steps.collect-status.outputs.overall }}';
             const timestamp = new Date().toISOString();
             const runUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
-            
+            const runId = '${{ github.run_id }}';
+            const eventName = '${{ github.event_name }}';
+            const refName = '${{ github.ref_name }}';
+            const sha = '${{ github.sha }}';
+
+            // Job results
+            const safetyGateResult = '${{ needs.safety-gate.result }}';
+            const safetyGateApproved = '${{ needs.safety-gate.outputs.deployment_approved }}';
+            const ciPipelineResult = '${{ needs.ci-pipeline.result }}';
+            const ciBuildSuccess = '${{ needs.ci-pipeline.outputs.build_success }}';
+            const deploymentResult = '${{ needs.deployment.result }}';
+            const deploymentUrl = '${{ needs.deployment.outputs.deployment_url }}';
+            const deploymentId = '${{ needs.deployment.outputs.deployment_id }}';
+            const monitoringResult = '${{ needs.monitoring.result }}';
+            const healthStatus = '${{ needs.monitoring.outputs.health_status }}';
+            const rollbackResult = '${{ needs.rollback.result }}';
+
             const statusEmojis = {
               'success': '🟢',
               'failed': '🔴',
               'blocked': '🟡',
               'rolled_back': '🔄'
             };
-            
+
             const statusMessages = {
               'success': 'DEPLOYMENT SUCCESSFUL',
               'failed': 'DEPLOYMENT FAILED',
               'blocked': 'DEPLOYMENT BLOCKED',
               'rolled_back': 'ROLLED BACK'
             };
-            
-            const body = `
-            # ${statusEmojis[overall]} ${statusMessages[overall]}
-            
+
+            const safetyGateStatus = safetyGateApproved === 'true' ? '✅ Approved' : '❌ Blocked';
+            const ciStatus = ciBuildSuccess === 'true' ? '✅ Success' : '⚠️ Issues';
+            const deploymentStatus = deploymentResult === 'success' ? '✅ Deployed' : (deploymentResult === 'skipped' ? '⏭️ Skipped' : '❌ Failed');
+            const monitoringStatus = healthStatus || 'N/A';
+            const rollbackStatus = rollbackResult === 'success' ? '✅ Executed' : (rollbackResult === 'skipped' ? '⏭️ Not Needed' : '❌ Failed');
+            const healthEmoji = healthStatus === 'healthy' ? '✅' : '⚠️';
+            const healthDisplay = healthStatus || 'Unknown';
+
+            const deploymentInfo = overall === 'success' ? `
+
+            ## Deployment Information
+
+            - **URL**: ${deploymentUrl || 'N/A'}
+            - **ID**: ${deploymentId || 'N/A'}
+            - **Commit**: \`${sha}\`
+            ` : '';
+
+            const body = `# ${statusEmojis[overall]} ${statusMessages[overall]}
+
             **Last Updated**: ${timestamp}
-            **Run**: [#${{ github.run_id }}](${runUrl})
-            **Trigger**: ${{ github.event_name }}
-            **Branch**: ${{ github.ref_name }}
-            
+            **Run**: [#${runId}](${runUrl})
+            **Trigger**: ${eventName}
+            **Branch**: ${refName}
+
             ## Job Status Summary
-            
+
             | Job | Status | Result |
             |-----|--------|--------|
-            | 🛡️ Safety Gate | ${{ needs.safety-gate.result }} | ${{ needs.safety-gate.outputs.deployment_approved == 'true' && '✅ Approved' || '❌ Blocked' }} |
-            | 🔧 CI Pipeline | ${{ needs.ci-pipeline.result }} | ${{ needs.ci-pipeline.outputs.build_success == 'true' && '✅ Success' || '⚠️ Issues' }} |
-            | 🚀 Deployment | ${{ needs.deployment.result }} | ${{ needs.deployment.result == 'success' && '✅ Deployed' || needs.deployment.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |
-            | 📊 Monitoring | ${{ needs.monitoring.result }} | ${{ needs.monitoring.outputs.health_status || 'N/A' }} |
-            | 🔄 Rollback | ${{ needs.rollback.result }} | ${{ needs.rollback.result == 'success' && '✅ Executed' || needs.rollback.result == 'skipped' && '⏭️ Not Needed' || '❌ Failed' }} |
-            
+            | 🛡️ Safety Gate | ${safetyGateResult} | ${safetyGateStatus} |
+            | 🔧 CI Pipeline | ${ciPipelineResult} | ${ciStatus} |
+            | 🚀 Deployment | ${deploymentResult} | ${deploymentStatus} |
+            | 📊 Monitoring | ${monitoringResult} | ${monitoringStatus} |
+            | 🔄 Rollback | ${rollbackResult} | ${rollbackStatus} |
+
             ## System Health
-            
-            - **FastAPI Quantum Conduit** (Port 8000): ${{ needs.monitoring.outputs.health_status == 'healthy' && '✅' || '⚠️' }} ${needs.monitoring.outputs.health_status || 'Unknown'}
-            - **Flask Glyph Weaver** (Port 5000): ${{ needs.monitoring.outputs.health_status == 'healthy' && '✅' || '⚠️' }} ${needs.monitoring.outputs.health_status || 'Unknown'}
-            - **Gradio Truth Mirror** (Port 7860): ${{ needs.monitoring.outputs.health_status == 'healthy' && '✅' || '⚠️' }} ${needs.monitoring.outputs.health_status || 'Unknown'}
-            
-            ## Deployment Information
-            
-            ${overall === 'success' ? \`
-            - **URL**: ${{ needs.deployment.outputs.deployment_url || 'N/A' }}
-            - **ID**: ${{ needs.deployment.outputs.deployment_id || 'N/A' }}
-            - **Commit**: \`${{ github.sha }}\`
-            \` : ''}
-            
+
+            - **FastAPI Quantum Conduit** (Port 8000): ${healthEmoji} ${healthDisplay}
+            - **Flask Glyph Weaver** (Port 5000): ${healthEmoji} ${healthDisplay}
+            - **Gradio Truth Mirror** (Port 7860): ${healthEmoji} ${healthDisplay}
+            ${deploymentInfo}
+
             ## AI Agent Instructions
-            
+
             ### For Monitoring
             \`\`\`bash
             # Check current deployment status
-            gh run view ${{ github.run_id }}
-            
+            gh run view ${runId}
+
             # Download monitoring reports
-            gh run download ${{ github.run_id }} -n monitoring-report
+            gh run download ${runId} -n monitoring-report
             \`\`\`
-            
+
             ### For Rollback (if needed)
             \`\`\`bash
             # Trigger manual rollback
@@ -789,7 +814,7 @@ jobs:
               -f action=rollback \\
               -f rollback_version="<previous-deployment-tag>"
             \`\`\`
-            
+
             ### For Updates
             \`\`\`bash
             # Update specific component
@@ -797,36 +822,36 @@ jobs:
               -f action=update-component \\
               -f target_component=fastapi
             \`\`\`
-            
+
             ---
-            
+
             ## Configuration
-            
+
             This issue is automatically maintained by the AI Agent Autonomous Runbook.
-            
+
             **Labels**: \`ai-agent\`, \`automated\`, \`runbook\`
             **Auto-Update**: Every 6 hours or on deployment
-            
+
             ### Emergency Procedures
-            
+
             1. **Emergency Stop**: \`gh workflow run "ai-agent-handoff-runbook.yml" -f action=emergency-stop\`
             2. **Force Rollback**: See rollback instructions above
             3. **Manual Intervention**: Contact repository maintainer
-            
+
             ### Monitoring Alerts
-            
+
             Configure webhook notifications:
             - Set \`SLACK_WEBHOOK_URL\` secret for Slack alerts
             - Set \`DISCORD_WEBHOOK_URL\` secret for Discord alerts
-            
+
             ---
-            
+
             *Last automated update: ${timestamp}*
             *Workflow: [AI Agent Handoff & Autonomous Runbook](${runUrl})*
             `;
-            
+
             const issueNumber = '${{ steps.find-issue.outputs.issue_number }}';
-            
+
             if (issueNumber) {
               // Update existing issue
               await github.rest.issues.update({
@@ -835,16 +860,16 @@ jobs:
                 issue_number: parseInt(issueNumber),
                 body: body
               });
-              
+
               // Add comment
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: parseInt(issueNumber),
-                body: \`### Status Update: ${statusEmojis[overall]} ${statusMessages[overall]}\\n\\n**Timestamp**: ${timestamp}\\n[View Run](${runUrl})\`
+                body: `### Status Update: ${statusEmojis[overall]} ${statusMessages[overall]}\n\n**Timestamp**: ${timestamp}\n[View Run](${runUrl})`
               });
-              
-              console.log(\`Updated issue #\${issueNumber}\`);
+
+              console.log(`Updated issue #${issueNumber}`);
             } else {
               // Create new issue
               const newIssue = await github.rest.issues.create({
@@ -854,8 +879,8 @@ jobs:
                 body: body,
                 labels: ['ai-agent', 'automated', 'runbook']
               });
-              
-              console.log(\`Created issue #\${newIssue.data.number}\`);
+
+              console.log(`Created issue #${newIssue.data.number}`);
             }
 
       - name: 📧 Send Webhook Notifications
@@ -865,11 +890,11 @@ jobs:
           needs.rollback.result == 'success'
         run: |
           echo "=== SENDING WEBHOOK NOTIFICATIONS ==="
-          
+
           STATUS="${{ steps.collect-status.outputs.overall }}"
           RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           REPO="${{ github.repository }}"
-          
+
           # Slack notification with safe JSON construction
           if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
             SLACK_PAYLOAD=$(jq -n \
@@ -887,12 +912,12 @@ jobs:
                   }
                 }]
               }')
-            
+
             curl -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
               -H 'Content-Type: application/json' \
               -d "$SLACK_PAYLOAD" || echo "⚠️ Slack notification failed"
           fi
-          
+
           # Discord notification with safe JSON construction
           if [ -n "${{ secrets.DISCORD_WEBHOOK_URL }}" ]; then
             DISCORD_PAYLOAD=$(jq -n \
@@ -912,58 +937,58 @@ jobs:
                   ]
                 }]
               }')
-            
+
             curl -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
               -H 'Content-Type: application/json' \
               -d "$DISCORD_PAYLOAD" || echo "⚠️ Discord notification failed"
           fi
-          
+
           echo "✅ Notification attempt complete"
 
       - name: 📋 Generate Final Summary
         run: |
           cat > workflow-summary.md << EOF
           # 🤖 AI Agent Autonomous Runbook - Final Summary
-          
+
           **Run ID**: ${{ github.run_id }}
           **Timestamp**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
           **Overall Status**: ${{ steps.collect-status.outputs.overall }}
-          
+
           ## Execution Flow
-          
+
           1. ✅ Safety Gate & Pre-flight Checks
           2. ${{ needs.ci-pipeline.result == 'success' && '✅' || '❌' }} CI Pipeline (Build, Lint, Test)
           3. ${{ needs.deployment.result == 'success' && '✅' || needs.deployment.result == 'skipped' && '⏭️' || '❌' }} Deployment
           4. ${{ needs.monitoring.result == 'success' && '✅' || '❌' }} Post-Deployment Monitoring
           5. ${{ needs.rollback.result == 'success' && '✅' || needs.rollback.result == 'skipped' && '⏭️' || '❌' }} Rollback (if needed)
           6. ✅ Communication & Reporting
-          
+
           ## Key Metrics
-          
+
           - **Safety Gate**: ${{ needs.safety-gate.outputs.deployment_approved }}
           - **Build Success**: ${{ needs.ci-pipeline.outputs.build_success }}
           - **Health Status**: ${{ needs.monitoring.outputs.health_status }}
           - **Deployment URL**: ${{ needs.deployment.outputs.deployment_url || 'N/A' }}
-          
+
           ## Artifacts Generated
-          
+
           - Safety Gate Report
           - Deployment Package
           - Deployment Record
           - Monitoring Report
           - Rollback Report (if executed)
-          
+
           ## AI Agent Handoff Complete
-          
+
           The system is now in a stable state and ready for autonomous operation.
           Next scheduled health check: In 6 hours
-          
+
           ---
           *Generated by Quantum Pi Forge AI Agent Autonomous Runbook*
           EOF
-          
+
           cat workflow-summary.md
-          
+
           # Add to GitHub Step Summary
           cat workflow-summary.md >> $GITHUB_STEP_SUMMARY
 

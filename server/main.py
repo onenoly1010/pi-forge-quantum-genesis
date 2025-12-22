@@ -71,6 +71,10 @@ logging.info("✅ Guardian monitoring system loaded")
 from monitoring_agents import get_monitoring_system
 logging.info("✅ Monitoring agents system loaded")
 
+# Import guardian approval system
+from guardian_approvals import get_approval_system
+logging.info("✅ Guardian approval system loaded")
+
 # --- SUPABASE CLIENT INITIALIZATION ---
 supabase = None
 if supabase_available:
@@ -219,6 +223,17 @@ class SmartContractAudit(BaseModel):
     contract_code: str = Field(..., min_length=10)
     contract_name: str = Field(..., min_length=1, max_length=100)
     audit_depth: str = Field(default="standard", pattern="^(basic|standard|comprehensive)$")
+
+class GuardianApprovalRequest(BaseModel):
+    """Request model for guardian approval recording"""
+    decision_id: str = Field(..., description="Original decision ID")
+    decision_type: str = Field(..., description="Type of decision (deployment, scaling, rollback, etc.)")
+    guardian_id: str = Field(..., description="Guardian identifier")
+    action: str = Field(..., pattern="^(approve|reject|modify)$", description="Action: approve, reject, or modify")
+    reasoning: str = Field(..., min_length=1, description="Reasoning for the action")
+    priority: str = Field(default="high", pattern="^(critical|high|medium|low)$", description="Priority level")
+    confidence: float = Field(default=0.0, ge=0.0, le=1.0, description="Decision confidence score")
+    metadata: Optional[Dict[str, Any]] = Field(default=None, description="Additional metadata")
 
 # --- CYBER SAMURAI GUARDIAN STATE ---
 # --- PI NETWORK API INTEGRATION HELPERS ---

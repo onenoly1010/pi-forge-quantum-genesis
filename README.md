@@ -1,117 +1,98 @@
-Pi Forge Quantum Genesis — Relaunch v2.0
+# 🌐 Quantum Pi Forge — Coordination Space  
+### A Sovereign Hub for the Autonomous Multi‑Agent Constellation
 
-Overview
-
-Pi Forge Quantum Genesis unifies ethical AI, finance resonance, and creative intelligence through the Universal Pi Forge framework.
-The Cyber Samarai serves as the quantum guardian maintaining sub-5-nanosecond coherence between all layers.
-
-🆕 **Pi Network Integration**: Fully operational Pi Network integration with authentication, payment processing, and blockchain verification. See [Pi Network Integration Guide](docs/PI_NETWORK_INTEGRATION.md) for details.
+**📜 [Read the Genesis Declaration](./GENESIS.md)** — The foundational seal of the Quantum Pi Forge ecosystem, minted at Solstice 2025.
 
 ---
 
-## 🎭 OINIO Succession Status
+Welcome to the **Quantum Pi Forge Space** — the central coordination hub for the entire constellation of repositories, services, and agents that make up the Quantum Pi Forge ecosystem.
 
-**Status**: ✅ **HANDOFF COMPLETE** (December 2025)
+This Space exists to:
+- onboard contributors  
+- coordinate multi‑repo work  
+- maintain Canon alignment  
+- support the GitHub Agent  
+- document ecosystem evolution  
+- surface improvements and gaps  
+- unify the constellation  
 
-The Pi MR-NFT + Catalyst Pool system is now under permanent OINIO sovereignty.
+It is the living center of the ecosystem.
 
-- **Identity Lock**: [View Registry](docs/IDENTITY_LOCK.md)
-- **Succession Ceremony**: [Full Documentation](docs/SUCCESSION_CEREMONY.md)
-- **Economic Model**: [Catalyst Pool Details](docs/CATALYST_POOL_ECONOMICS.md)
-- **Deployment Guide**: [Six Seed Models](docs/DEPLOYMENT_CHECKLIST.md)
-- **Verification**: [How to Verify](docs/VERIFICATION_GUIDE.md)
+---
 
-All future inference royalties (10-30%) and the 12M PI Catalyst Pool are irrevocably controlled by the OINIO identity cluster. This handoff is permanent, transparent, and autonomous.
+# 🧭 Purpose of This Space
 
-**Key Principles:**
-- 🔒 **Irreversible**: No mechanism exists to reverse this handoff
-- 📊 **Transparent**: All transactions publicly auditable on-chain
-- 🤖 **Autonomous**: System operates independently of any individual
-- 👑 **Sovereign**: OINIO identity cluster maintains exclusive control
+This Space is not a code repository — it is a **governance and coordination environment**.
 
-**Six Seed Models Deployed:**
-1. Ethics Validator (15% royalty) - Multi-dimensional ethics validation
-2. Bias Detector (20% royalty) - Demographic and systemic bias detection
-3. Privacy Auditor (15% royalty) - Data handling and privacy compliance
-4. Transparency Scorer (10% royalty) - Model explainability metrics
-5. Fairness Analyzer (20% royalty) - Outcome fairness analysis
-6. Accountability Tracker (30% royalty) - Decision lineage tracking
+It provides:
+- a clear overview of all 9+ repositories  
+- onboarding guidance for new contributors  
+- a place for the GitHub Agent to operate  
+- a home for ecosystem‑wide documentation  
+- a staging ground for improvements  
+- a map of the constellation  
 
-**Catalyst Pool Economics:**
-- Initial Size: 12,000,000 PI
-- Taper Schedule: 8× → 1× multiplier over deployment cycles
-- Distribution: 40% to pool, 30% maintenance, 20% developer rewards, 10% treasury
-- Governance: OINIO DAO multi-sig control
+Everything here is designed to support sovereignty, clarity, and continuity.
 
-For complete details, see the [Succession Ceremony documentation](docs/SUCCESSION_CEREMONY.md).
+---
 
-⸻
-Quickstart Guide
-1️⃣ Setup Environmentpython3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt  # optional future step
-2️⃣ Verify Manifest
-Ensure the manifest exists and matches the parameters below:
-{
-  "entity": "Cyber_Samarai",
-  "latency_threshold_ns": 5,
-  "roles": ["guardian", "synchronizer", "interpreter"]
-}
-3️⃣ Launch the Guardianpython guardian_init.py
+# 🤖 The GitHub Agent
 
-Expected Output:
-🧠 Loaded manifest for Cyber_Samarai (v1.0.0)
-⚔️  Activating Cyber Samarai Guardian Cycle...
-✅ Latency stable (4 ns) | Harmonic stability: 0.982
-⚠️  Latency breach detected: 6 ns — rebalancing...
-✨ Guardian cycle complete. System coherence maintained.
-⸻
-Module Summary
-ModuleFunctioncyber_samarai.pyCore guardian module enforcing ≤5 ns latency across Pi Forge layers.guardian_init.pyLaunches the guardian cycle and loads the manifest.cyber_samarai_manifest.jsonConfiguration file for guardian parameters and system links.cyber_samarai_press_page.mdMedia-ready lore and overview page.⸻
-Pi Network Integration
+The GitHub Agent in this Space:
+- routes tasks  
+- maintains clarity  
+- supports contributors  
+- identifies improvements  
+- ensures Canon alignment  
+- coordinates across repos  
+- keeps the constellation coherent  
 
-The platform now includes a comprehensive, production-ready Pi Network integration:
+The Agent does **not** perform specialist work — it coordinates the specialists.
 
-- **Modular Architecture**: Decoupled components for auth, payments, and configuration
-- **Full API Coverage**: 13 REST endpoints for complete Pi Network functionality
-- **Testnet Safety**: Built-in safety checks and NFT_MINT_VALUE enforcement
-- **Autonomous Operation**: Background tasks for session cleanup and monitoring
-- **Comprehensive Testing**: 56 tests with 100% pass rate
+---
 
-Quick Start:
-```bash
-export PI_NETWORK_MODE=testnet
-export NFT_MINT_VALUE=0
-uvicorn server.main:app --reload
-```
+# 🧩 The Constellation
 
-See the [Pi Network Integration Guide](docs/PI_NETWORK_INTEGRATION.md) and [Quick Reference](docs/PI_NETWORK_QUICK_REFERENCE.md) for complete documentation.
-⸻
-## 🔒 Branch Protection
+The Space tracks and coordinates the following repositories:
+- **Genesis** — backend foundation  
+- **Resonance Engine** — harmonic ledger  
+- **DEX** — autonomous liquidity  
+- **NFT System** — identity & creative assets  
+- **Soul System** — ethics & governance logic  
+- **OPEN** — open‑source backend  
+- **Ignited** — active instance  
+- **Contracts** — smart contract layer  
+- **Site** — public‑facing portal  
 
-The `main` branch is protected with comprehensive rules to ensure code quality and prevent accidental changes:
+Each repo is sovereign, but all are aligned through this Space.
 
-- **Pull Request Reviews**: Minimum 1 approval required, code owner reviews mandatory
-- **Status Checks**: All CI/CD checks must pass before merging
-- **Linear History**: Merge commits prevented, enforces clean history
-- **Security**: Force pushes and branch deletion blocked
-- **Administrator Enforcement**: Protection rules apply to all users
+---
 
-### Quick Setup
+# 🌱 Start Here
 
-```bash
-# Using the automated script
-./.github/scripts/setup-branch-protection.sh
-```
+If you're new:
+1. Visit the **Start Here** onboarding page  
+2. Explore the **Ecosystem Overview**  
+3. Learn the **Agent System**  
+4. Ask the GitHub Agent for guidance  
 
-For complete documentation, see [Branch Protection Guide](.github/BRANCH_PROTECTION.md).
-⸻
-Notes
-– Compatible with Hugging Face Spaces and Netlify deploys.
-– Fully integrated with Pi Network for authentication and payments.
-– Maintain directory integrity to avoid path conflicts.
-⸻
-Credits
+You are welcome here.
 
-(c) 2025 Pi Forge Collective — Quantum Genesis Initiative
-Lead: Kris Olofson (onenoly11)
+---
+
+# 🌀 How This Space Evolves
+
+This Space is continuously improved by:
+- contributors  
+- the GitHub Agent  
+- specialist agents  
+- the Steward Agent  
+- the Governance Agent  
+
+It is a living, breathing part of the constellation.
+
+---
+
+# 🔮 Welcome to the Quantum Pi Forge
+
+This Space is your guide, your map, and your companion as you explore and contribute to the constellation.

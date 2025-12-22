@@ -14,7 +14,8 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# Ignore Python lib directories but not scripts/verification/lib/
+/lib/
 lib64/
 parts/
 sdist/
@@ -151,6 +152,9 @@ dist/
 Thumbs.db
 deployment_log.json
 
+# Guardian approval system data
+.guardian_approvals/
+
 # Solidity / Foundry
 contracts/cache/
 contracts/out/
@@ -160,3 +164,8 @@ contracts/lib/
 *.sol.d
 *.abi
 *.bin
+
+# Verification Reports
+reports/*.json
+reports/*.html
+.env.verification
