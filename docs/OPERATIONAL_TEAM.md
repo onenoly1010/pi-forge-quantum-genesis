@@ -1,8 +1,8 @@
 # 🛡️ Prelaunch Operational Team
 
-**Status**: ✅ **ESTABLISHED** (December 2024)  
+**Status**: ✅ **ESTABLISHED** (December 2025)  
 **Version**: 1.0.0  
-**Last Updated**: 2024-12-22
+**Last Updated**: 2025-12-22
 
 ---
 
@@ -299,11 +299,10 @@ Low (<0.6) → Reject or Detailed Analysis → Guardian Oversight
 **Usage**:
 ```bash
 # Record guardian approval
-python scripts/record_guardian_approval.py \
-  --decision-id deployment_1734134400000 \
+python scripts/record_guardian_approval.py record deployment_1734134400000 \
   --guardian onenoly1010 \
-  --decision approve \
-  --comment "Prelaunch operational team established"
+  --action approve \
+  --reasoning "Prelaunch operational team established"
 ```
 
 **Reference**: [Guardian Approval System](./GUARDIAN_APPROVAL_SYSTEM.md)
@@ -365,10 +364,10 @@ python scripts/record_guardian_approval.py \
 ### Operational Metrics
 
 **Handoff Performance**:
-- Autonomous success rate: 85%+ (current: establishing baseline)
-- Guardian response time: < 4 hours average (current: establishing baseline)
-- Emergency response: < 1 hour (100% compliance)
-- Handoff completion rate: 95%+ (current: establishing baseline)
+- Autonomous success rate: Target 85%+ (current: establishing baseline)
+- Guardian response time: Target < 4 hours average (current: establishing baseline)
+- Emergency response: Target < 1 hour, 100% compliance (current: establishing baseline)
+- Handoff completion rate: Target 95%+ (current: establishing baseline)
 
 **System Health**:
 - Uptime: 99.9%+
@@ -517,7 +516,7 @@ python scripts/record_guardian_approval.py \
 
 | Version | Date | Changes | Author |
 |---------|------|---------|--------|
-| 1.0.0 | 2024-12-22 | Initial team establishment | @onenoly1010 |
+| 1.0.0 | 2025-12-22 | Initial team establishment | @onenoly1010 |
 
 ---
 
