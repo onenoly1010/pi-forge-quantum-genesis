@@ -34,6 +34,18 @@ curl http://localhost:8000/api/metrics
 
 ---
 
+## 🌐 Production Endpoints
+
+| Service | Local Development | Production | Status |
+|---------|-------------------|------------|--------|
+| **Core API** | `http://localhost:8000` | `https://pi-forge-quantum-genesis.railway.app` | ✅ Live |
+| **Resonance** | `http://localhost:8001` | `https://quantum-resonance-clean.vercel.app` | ⚠️ Exposed |
+| **Site** | `http://localhost:3000` | `https://onenoly1010.github.io/quantum-pi-forge-site/` | ✅ Live |
+
+> **Full deployment status:** See [docs/DEPLOYMENT_STATUS.md](./docs/DEPLOYMENT_STATUS.md)
+
+---
+
 ## 📡 Telemetry Ceremony
 **Purpose:** Control OpenTelemetry collector in local vs CI environments.
 
@@ -135,7 +147,7 @@ vercel --prod
 ## 🚨 Alert Ritual
 **Purpose:** Ensure alerts propagate.
 
-- Slack webhook: stored in `SLACK_WEBHOOK_URL`
+- Slack webhook: `https://pi-forge-quantum-genesis.railway.app/webhook`
 - Email credentials: stored in `EMAIL_USERNAME` / `EMAIL_PASSWORD`
 
 ---
