@@ -80,6 +80,26 @@ You are welcome here.
 
 ---
 
+# 🚀 Deployment
+
+For complete deployment instructions across all platforms (Railway, Vercel, Supabase, Pi Network), see the **[Deployment Dashboard](docs/DEPLOYMENT_DASHBOARD.md)**.
+
+The Deployment Dashboard is your single source of truth for:
+- Prerequisites and required tools
+- Step-by-step setup guides for each platform
+- Environment variable configuration
+- Troubleshooting common issues
+- Maintenance and monitoring
+
+**Quick Links:**
+- [Railway Backend Setup](docs/DEPLOYMENT_DASHBOARD.md#-railway-backend-setup)
+- [Vercel Frontend Setup](docs/DEPLOYMENT_DASHBOARD.md#-vercel-frontend-setup)
+- [Supabase Database Setup](docs/DEPLOYMENT_DASHBOARD.md#️-supabase-database-setup)
+- [Environment Variables Reference](docs/DEPLOYMENT_DASHBOARD.md#-environment-variables-reference)
+- [Troubleshooting](docs/DEPLOYMENT_DASHBOARD.md#-troubleshooting)
+
+---
+
 # 🌀 How This Space Evolves
 
 This Space is continuously improved by:

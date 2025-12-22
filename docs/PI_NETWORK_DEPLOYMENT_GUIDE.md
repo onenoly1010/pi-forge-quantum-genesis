@@ -1,5 +1,8 @@
 # 🚀 Pi Network Mainnet Integration - Deployment Guide
 
+> **📌 Note**: This document is part of the deployment documentation suite.  
+> For the complete deployment guide, see the **[Deployment Dashboard](./DEPLOYMENT_DASHBOARD.md)**.
+
 ## Overview
 
 This guide covers deploying Pi Forge Quantum Genesis with full Pi Network mainnet payment integration.
