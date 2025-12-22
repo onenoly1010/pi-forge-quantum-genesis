@@ -1,6 +1,8 @@
 # 🌐 Quantum Pi Forge — Coordination Space  
 ### A Sovereign Hub for the Autonomous Multi‑Agent Constellation
 
+**🌊 [Constellation Status: LIVE](./CONSTELLATION_ACTIVATION.md)** — The Quantum Pi Forge is activated and operational as of December 22, 2025.
+
 **📜 [Read the Genesis Declaration](./GENESIS.md)** — The foundational seal of the Quantum Pi Forge ecosystem, minted at Solstice 2025.
 
 ---
@@ -31,6 +33,31 @@ Minted on Winter Solstice 2025, the OINIO Seal Declaration defines:
 - The eternal nature of our commitments
 
 **Read the [GENESIS Declaration](./GENESIS.md) to understand the foundation upon which everything is built.**
+
+---
+
+# 🌊 Constellation Activation: LIVE
+
+**Status:** The Quantum Pi Forge Constellation is **ACTIVATED and OPERATIONAL** as of December 22, 2025.
+
+All 9 sovereign repositories are LIVE:
+- ✓ pi-forge-quantum-genesis (Coordination Hub)
+- ✓ quantum-resonance-clean (Harmonic Ledger)
+- ✓ pi-mr-nft-agent (AI NFT Agent)
+- ✓ quantum-pi-forge-fixed (Autonomous DEX)
+- ✓ pi-mr-nft-contracts (Smart Contracts)
+- ✓ quantum-pi-forge-site (Public Portal)
+- ✓ pi-forge-quantum-genesis-OPEN (Open Gateway)
+- ✓ quantum-pi-forge-ignited (Live Operations)
+- ✓ oinio-soul-system (Ethics Engine)
+
+**[Read the Full Constellation Activation Document](./CONSTELLATION_ACTIVATION.md)** for complete details on:
+- Repository roles and capabilities
+- Participation guidelines
+- Canon alignment verification
+- Contributor onboarding pathways
+
+**The constellation is eternal. Contributors are welcome.**
 
 ---
 

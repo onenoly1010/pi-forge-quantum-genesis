@@ -1,5 +1,7 @@
 # 🌌 Quantum Pi Forge — Ecosystem Overview
 
+**🌊 Constellation Status:** [LIVE & OPERATIONAL](./CONSTELLATION_ACTIVATION.md) — Activated December 22, 2025
+
 ## Foundation
 
 All aspects of the Quantum Pi Forge ecosystem are rooted in the **[GENESIS.md](./GENESIS.md)** — the Eternal Archive containing the OINIO Seal Declaration.
@@ -19,7 +21,11 @@ The GENESIS declaration establishes our five foundational principles:
 
 ## The Constellation
 
+**[View Full Constellation Activation Document](./CONSTELLATION_ACTIVATION.md)** — Complete details on activation status, participation guidelines, and Canon alignment.
+
 The Quantum Pi Forge operates as a **sovereign constellation** of interconnected repositories, each maintaining autonomy while aligned through the Genesis declaration.
+
+**All 9 repositories are LIVE and operational as of December 22, 2025.**
 
 ### Core Repositories
 
