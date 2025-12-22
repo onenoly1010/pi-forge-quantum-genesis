@@ -1397,111 +1397,36 @@ async def get_validation_history(
         "count": len(history)
     }
 
-# --- GUARDIAN APPROVAL ENDPOINTS ---
-
-@app.post("/api/guardian/record-approval")
-async def record_guardian_approval(request: GuardianApprovalRequest):
-    """
-    Record a guardian approval for a deployment decision
+@app.get("/api/guardian/dashboard")
+async def guardian_dashboard():
+    """Guardian oversight dashboard - shows pending escalations"""
+    decision_matrix = get_decision_matrix()
+    guardian_monitor = get_guardian_monitor()
     
-    Uses GuardianApprovalRequest model for validation:
-    - decision_id: Original decision ID (e.g., deployment_1734134400000)
-    - decision_type: Type of decision (deployment, scaling, rollback, etc.)
-    - guardian_id: ID of the guardian (e.g., user email or username)
-    - action: approve, reject, or modify (validated)
-    - reasoning: Reasoning for the action
-    - priority: Priority level - critical, high, medium, low (validated)
-    - confidence: Original decision confidence score (0.0 to 1.0)
-    - metadata: Additional metadata about the decision
-    """
-    approval_system = get_approval_system()
-    
-    approval = approval_system.record_approval(
-        decision_id=request.decision_id,
-        decision_type=request.decision_type,
-        guardian_id=request.guardian_id,
-        action=request.action,
-        reasoning=request.reasoning,
-        priority=request.priority,
-        confidence=request.confidence,
-        metadata=request.metadata
-    )
+    pending_decisions = [
+        d for d in decision_matrix.decision_history[-50:]
+        if d.requires_guardian and not d.approved
+    ]
     
     return {
-        "approval_id": approval.approval_id,
-        "decision_id": approval.decision_id,
-        "action": approval.action,
-        "guardian_id": approval.guardian_id,
-        "timestamp": approval.timestamp,
-        "status": "recorded"
-    }
-
-@app.get("/api/guardian/check-approval/{decision_id}")
-async def check_approval(decision_id: str):
-    """Check if a decision has been approved"""
-    approval_system = get_approval_system()
-    
-    approval = approval_system.get_approval(decision_id)
-    is_approved = approval_system.is_approved(decision_id)
-    
-    if approval:
-        return {
-            "decision_id": decision_id,
-            "is_approved": is_approved,
-            "approval": {
-                "approval_id": approval.approval_id,
-                "action": approval.action,
-                "guardian_id": approval.guardian_id,
-                "reasoning": approval.reasoning,
-                "timestamp": approval.timestamp
-            }
-        }
-    else:
-        return {
-            "decision_id": decision_id,
-            "is_approved": False,
-            "approval": None
-        }
-
-@app.get("/api/guardian/approvals")
-async def get_all_approvals(
-    decision_type: Optional[str] = None,
-    action: Optional[str] = None,
-    limit: int = 100
-):
-    """Get all guardian approvals with optional filtering"""
-    approval_system = get_approval_system()
-    
-    approvals = approval_system.get_all_approvals(
-        decision_type=decision_type,
-        action=action,
-        limit=limit
-    )
-    
-    return {
-        "approvals": [
+        "guardian_team": "Issue #100 - @onenoly1010",
+        "pending_escalations": len(pending_decisions),
+        "recent_decisions": [
             {
-                "approval_id": a.approval_id,
-                "decision_id": a.decision_id,
-                "decision_type": a.decision_type,
-                "guardian_id": a.guardian_id,
-                "action": a.action,
-                "reasoning": a.reasoning,
-                "priority": a.priority,
-                "confidence": a.confidence,
-                "timestamp": a.timestamp,
-                "metadata": a.metadata
+                "decision_id": d.decision_id,
+                "decision_type": d.decision_type.value,
+                "priority": d.get_priority(),
+                "confidence": d.confidence,
+                "reasoning": d.reasoning,
+                "requires_guardian": d.requires_guardian,
+                "approved": d.approved,
+                "timestamp": d.timestamp
             }
-            for a in approvals
+            for d in pending_decisions
         ],
-        "count": len(approvals)
+        "monitoring_status": guardian_monitor.get_monitoring_status(),
+        "escalation_endpoint": "https://github.com/onenoly1010/pi-forge-quantum-genesis/issues/100"
     }
-
-@app.get("/api/guardian/approval-stats")
-async def get_approval_stats():
-    """Get statistics about guardian approvals"""
-    approval_system = get_approval_system()
-    return approval_system.get_approval_stats()
 
 # --- MONITORING AGENTS ENDPOINTS ---
 
