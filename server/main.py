@@ -643,10 +643,14 @@ async def production_dashboard():
 
 @app.get("/health")
 async def health_endpoint():
+    """
+    Health check endpoint for Railway.
+    Returns immediately without checking dependencies.
+    """
     return {
         "status": "healthy",
-        "service": "FastAPI Quantum Conduit", 
-        "port": 8000,
+        "service": "pi-forge-quantum-genesis",
+        "port": int(os.environ.get("PORT", 8000)),
         "supabase_connected": supabase is not None,
         "timestamp": time.time()
     }
