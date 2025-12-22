@@ -8,6 +8,8 @@ This playbook provides comprehensive operational procedures for Guardians overse
 **AI Assistant**: @app/copilot-swe-agent  
 **Guardian HQ**: [Issue #100](https://github.com/onenoly1010/pi-forge-quantum-genesis/issues/100)
 
+> **Note**: This playbook is part of the [Prelaunch Operational Team](./OPERATIONAL_TEAM.md) framework. For team structure, roles, and coordination procedures, refer to the operational team documentation.
+
 ---
 
 ## Table of Contents
