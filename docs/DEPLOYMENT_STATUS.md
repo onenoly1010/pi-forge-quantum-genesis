@@ -112,8 +112,8 @@ If any endpoint shows degraded status for >12 hours:
 
 - [Genesis Declaration](../GENESIS.md) — Foundation and principles
 - [API Documentation](./API.md) — Endpoint specifications
-- [Security Summary](../SECURITY_SUMMARY.md) — Security posture
 - [Runbook](../RUNBOOK.md) — Operational procedures
+- [Quick Start Guide](./QUICK_START.md) — Getting started guide
 
 ---
 

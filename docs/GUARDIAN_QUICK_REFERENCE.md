@@ -8,31 +8,31 @@
 
 ### Check System Status
 ```bash
-curl https://[url]/api/guardian/dashboard | jq .
+curl https://pi-forge-quantum-genesis.railway.app/api/guardian/dashboard | jq .
 ```
 
 ### Review Pending Decisions
 ```bash
-curl https://[url]/api/autonomous/decision-history?requires_guardian=true&status=pending | jq .
+curl https://pi-forge-quantum-genesis.railway.app/api/autonomous/decision-history?requires_guardian=true&status=pending | jq .
 ```
 
 ### Approve Decision
 ```bash
-curl -X POST https://[url]/api/guardian/approve/{decision_id} \
+curl -X POST https://pi-forge-quantum-genesis.railway.app/api/guardian/approve/{decision_id} \
   -H "Authorization: Bearer <token>" \
   -d '{"approved": true, "comments": "Approved: [reason]"}'
 ```
 
 ### Reject Decision
 ```bash
-curl -X POST https://[url]/api/guardian/approve/{decision_id} \
+curl -X POST https://pi-forge-quantum-genesis.railway.app/api/guardian/approve/{decision_id} \
   -H "Authorization: Bearer <token>" \
   -d '{"approved": false, "comments": "Rejected: [reason]"}'
 ```
 
 ### Emergency Stop
 ```bash
-curl -X POST https://[url]/api/guardian/emergency-stop \
+curl -X POST https://pi-forge-quantum-genesis.railway.app/api/guardian/emergency-stop \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -247,10 +247,10 @@ ETA: [When resolved]
 ### Dashboard Not Loading
 ```bash
 # Check health
-curl https://[url]/api/health
+curl https://pi-forge-quantum-genesis.railway.app/api/health
 
 # Check logs
-curl https://[url]/api/logs/recent?limit=50
+curl https://pi-forge-quantum-genesis.railway.app/api/logs/recent?limit=50
 ```
 
 ### High Error Rate
@@ -308,21 +308,21 @@ curl https://[url]/api/logs/recent?limit=50
 
 ```bash
 # Morning check
-curl https://[url]/api/guardian/dashboard | jq '."system_status", ."pending_decisions", ."safety_metrics"'
+curl https://pi-forge-quantum-genesis.railway.app/api/guardian/dashboard | jq '."system_status", ."pending_decisions", ."safety_metrics"'
 
 # Quick approve (if decision looks good)
-curl -X POST https://[url]/api/guardian/approve/deployment_12345 \
+curl -X POST https://pi-forge-quantum-genesis.railway.app/api/guardian/approve/deployment_12345 \
   -H "Authorization: Bearer <token>" \
   -d '{"approved": true, "comments": "Routine deployment, tests passed"}'
 
 # Get last 10 decisions
-curl https://[url]/api/autonomous/decision-history?limit=10 | jq .
+curl https://pi-forge-quantum-genesis.railway.app/api/autonomous/decision-history?limit=10 | jq .
 
 # Check specific decision
-curl https://[url]/api/autonomous/decision/{decision_id} | jq .
+curl https://pi-forge-quantum-genesis.railway.app/api/autonomous/decision/{decision_id} | jq .
 
 # Today's metrics
-curl https://[url]/api/autonomous/metrics?period=today | jq .
+curl https://pi-forge-quantum-genesis.railway.app/api/autonomous/metrics?period=today | jq .
 ```
 
 ---
