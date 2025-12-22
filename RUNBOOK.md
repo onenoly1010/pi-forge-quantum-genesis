@@ -147,7 +147,7 @@ vercel --prod
 ## 🚨 Alert Ritual
 **Purpose:** Ensure alerts propagate.
 
-- Slack webhook: `https://pi-forge-quantum-genesis.railway.app/webhook`
+- Slack webhook: stored in `SLACK_WEBHOOK_URL` (format: `https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX`)
 - Email credentials: stored in `EMAIL_USERNAME` / `EMAIL_PASSWORD`
 
 ---
