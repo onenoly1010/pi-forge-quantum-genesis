@@ -93,8 +93,8 @@ As specified in GENESIS.md, the following verification routine is recommended:
 # Generate hash of GENESIS.md
 sha256sum GENESIS.md
 
-# Compare with canonical hash (to be established)
-# Expected: [hash to be recorded after first verification]
+# Expected canonical hash:
+# ee68c963d0f32b594c891443d683259cbcd72f822eba06f19aec2a5214455dda
 ```
 
 ### Annual Seal Renewal (Every Winter Solstice)
@@ -130,7 +130,8 @@ sha256sum GENESIS.md
 ### Canonical Hash Registry
 Establish a canonical hash of GENESIS.md to enable verification:
 ```bash
-# Current GENESIS.md hash (to be verified)
+# Canonical GENESIS.md hash (Minted Solstice 2025)
+# SHA256: ee68c963d0f32b594c891443d683259cbcd72f822eba06f19aec2a5214455dda
 sha256sum GENESIS.md > GENESIS.md.sha256
 ```
 
