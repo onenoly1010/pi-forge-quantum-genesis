@@ -36,6 +36,7 @@ This report verifies that the fix implemented in commit `9fb676016b6a017ce579b01
   ```
   ee68c963d0f32b594c891443d683259cbcd72f822eba06f19aec2a5214455dda  GENESIS.md
   ```
+  _Note: This hash is recorded as of the verification date. For current hash, always refer to GENESIS.md.sha256 file._
 
 ### ✅ README.md References
 
