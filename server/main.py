@@ -645,7 +645,7 @@ async def production_dashboard():
 async def health_endpoint():
     """
     Health check endpoint for Railway.
-    Returns immediately without checking dependencies.
+    Returns immediately with basic status checks (no external service calls).
     """
     return {
         "status": "healthy",
