@@ -60,6 +60,15 @@ class DecisionResult(BaseModel):
     timestamp: float = Field(default_factory=time.time)
     requires_guardian: bool = Field(default=False)
     metadata: Optional[Dict[str, Any]] = Field(default=None)
+    
+    def get_priority(self) -> str:
+        """
+        Get decision priority from metadata with default fallback
+        
+        Returns:
+            Priority string (critical, high, medium, low), defaults to "medium"
+        """
+        return self.metadata.get("priority", "medium") if self.metadata else "medium"
 
 
 class AIDecisionMatrix:
@@ -388,7 +397,7 @@ def create_guardian_escalation_issue(
     )
     
     # Get escalation timing based on priority
-    priority = decision.metadata.get("priority", "medium") if decision.metadata else "medium"
+    priority = decision.get_priority()
     escalation_timing = get_escalation_timing(priority)
     
     # Create issue data structure (for actual GitHub API integration)
@@ -449,12 +458,19 @@ def notify_guardian(
     """
     Trigger guardian notification workflow
     
+    Note: This is currently a placeholder implementation that logs notification
+    intent but does not actually trigger GitHub workflow dispatch or create
+    GitHub issues. To enable actual notifications, implement:
+    - GitHub API calls to create issues
+    - GitHub workflow_dispatch API calls
+    - Or integrate with notification service
+    
     Args:
         decision: Decision result requiring guardian approval
         escalation_data: Escalation data from create_guardian_escalation_issue
         
     Returns:
-        Notification result
+        Notification result with status "queued" (placeholder, not actually queued)
     """
     from config.guardians import get_guardian_notification_methods
     
@@ -464,15 +480,15 @@ def notify_guardian(
         "notification_id": f"notify_{escalation_data['escalation_id']}",
         "decision_id": decision.decision_id,
         "methods": notification_methods,
-        "status": "queued",
+        "status": "queued",  # Placeholder status - actual queuing not implemented
         "timestamp": time.time()
     }
     
-    # Log notification methods that would be triggered
+    # Placeholder: Log intended notification methods (actual triggering not implemented)
     for method in notification_methods:
         logger.info(
-            f"📢 Guardian notification queued via {method} "
-            f"for decision {decision.decision_id}"
+            f"📢 Guardian notification intent logged via {method} "
+            f"for decision {decision.decision_id} (actual notification not sent)"
         )
     
     return notification_result

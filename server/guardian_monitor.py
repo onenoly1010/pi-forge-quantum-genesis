@@ -438,12 +438,17 @@ class GuardianMonitor:
         """
         Log escalation to Vercel metrics endpoint
         
+        Note: This is currently a placeholder implementation that logs escalation
+        events locally. Actual HTTP transmission to the Vercel endpoint is not
+        yet implemented. To enable actual transmission, implement HTTP POST to
+        vercel_endpoint with the log_entry data.
+        
         Args:
             escalation_data: Escalation data to log
-            vercel_endpoint: Optional Vercel metrics endpoint URL
+            vercel_endpoint: Optional Vercel metrics endpoint URL (placeholder)
             
         Returns:
-            Logging result
+            Logging result with log_entry and endpoint information
         """
         log_entry = {
             "type": "guardian_escalation",
@@ -458,9 +463,9 @@ class GuardianMonitor:
             f"📊 Escalation logged to metrics: {escalation_data.get('escalation_id')}"
         )
         
-        # If Vercel endpoint provided, would send data there
+        # Placeholder: Actual HTTP transmission to Vercel endpoint not yet implemented
         if vercel_endpoint:
-            logger.info(f"📡 Would send escalation metrics to: {vercel_endpoint}")
+            logger.info(f"📡 Vercel endpoint configured (transmission not implemented): {vercel_endpoint}")
         
         return {
             "logged": True,

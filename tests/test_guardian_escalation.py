@@ -246,8 +246,7 @@ def test_guardian_monitor_log_escalation_with_endpoint():
     assert result["endpoint"] == vercel_endpoint
 
 
-@pytest.mark.asyncio
-async def test_guardian_dashboard_endpoint():
+def test_guardian_dashboard_endpoint():
     """Test guardian dashboard API endpoint"""
     # Skip if main module can't be imported (missing dependencies like supabase)
     pytest.importorskip("supabase")
@@ -255,6 +254,7 @@ async def test_guardian_dashboard_endpoint():
     from fastapi.testclient import TestClient
     from main import app
     
+    # TestClient handles async endpoints automatically, no need for async test
     client = TestClient(app)
     
     # Call guardian dashboard endpoint

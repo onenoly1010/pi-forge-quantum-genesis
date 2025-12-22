@@ -16,9 +16,9 @@ GUARDIANS = {
     }
 }
 
-# Import DecisionPriority from autonomous_decision module
+# Escalation timing enumeration for determining notification urgency
 class EscalationTiming(str, Enum):
-    """Escalation timing types"""
+    """Escalation timing types for guardian notifications"""
     IMMEDIATE = "immediate"
     BATCHED = "batched"
     DAILY_SUMMARY = "daily_summary"

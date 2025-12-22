@@ -1415,7 +1415,7 @@ async def guardian_dashboard():
             {
                 "decision_id": d.decision_id,
                 "decision_type": d.decision_type.value,
-                "priority": d.metadata.get("priority") if d.metadata else "unknown",
+                "priority": d.get_priority(),
                 "confidence": d.confidence,
                 "reasoning": d.reasoning,
                 "requires_guardian": d.requires_guardian,
