@@ -80,6 +80,30 @@ You are welcome here.
 
 ---
 
+# 🛡️ Operational Team
+
+The **Prelaunch Operational Team** coordinates handoffs, closures, and operational excellence:
+
+- **Lead Guardian**: @onenoly1010 — Owner, escalation point, sign-off authority
+- **Autonomous AI Agents** — System-level operations, self-healing, monitoring
+- **Future Guardians** — Technical, community, economic, and compliance roles
+
+**Responsibilities**:
+- Oversee handoff and closure activities
+- Primary human escalation for AI agent decisions
+- Sign off on prelaunch checklist items
+- Maintain Canon of Closure alignment
+- Debug AI agent workflows
+
+📋 **[View Full Operational Team Documentation](./docs/OPERATIONAL_TEAM.md)**
+
+**Related**:
+- [Canon of Closure Handoff Package - Issue #95](https://github.com/onenoly1010/pi-forge-quantum-genesis/issues/95)
+- [Autonomous Handover - PR #92](https://github.com/onenoly1010/pi-forge-quantum-genesis/pull/92)
+- [Guardian Playbook](./docs/GUARDIAN_PLAYBOOK.md)
+
+---
+
 # 🌀 How This Space Evolves
 
 This Space is continuously improved by:

@@ -48,6 +48,7 @@ See [DEPLOYMENT_STATUS.md](./DEPLOYMENT_STATUS.md) for the current status of all
 
 - [Genesis Declaration](../GENESIS.md) — Foundational principles and seal
 - [Canon of Closure](../canon/README.md) — Living documentation system
+- [Operational Team](./OPERATIONAL_TEAM.md) — Prelaunch team structure & handoff coordination
 - [Deployment Status](./DEPLOYMENT_STATUS.md) — Current endpoint status
 - [Agent System](./AGENT_SYSTEM.md) — How autonomous agents coordinate
 - [Contributing Guide](../CONTRIBUTING.md) — How to participate
