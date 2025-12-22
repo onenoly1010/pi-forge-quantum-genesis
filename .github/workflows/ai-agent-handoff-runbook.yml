@@ -277,7 +277,10 @@ jobs:
 
           # Copy essential files
           cp -r server/ build/deployment/server/
-          cp -r frontend/ build/deployment/frontend/
+          # Only copy frontend if it exists
+          if [ -d "frontend/" ]; then
+            cp -r frontend/ build/deployment/frontend/
+          fi
           cp Dockerfile build/deployment/
           cp railway.toml build/deployment/
           cp -r docs/ build/deployment/docs/ || true
