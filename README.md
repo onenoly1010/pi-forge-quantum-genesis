@@ -16,6 +16,20 @@ It is the living center of the ecosystem.
 
 ---
 
+# 🏛️ Foundation: The OINIO Seal
+
+All work in this ecosystem flows from the **[GENESIS.md](./GENESIS.md)** — the Eternal Archive that establishes our foundational commitments and principles.
+
+Minted on Winter Solstice 2025, the OINIO Seal Declaration defines:
+- Our core values (Sovereignty, Transparency, Inclusivity, Non-hierarchy, Safety)
+- The constellation of repositories
+- Verification and integrity protocols
+- The eternal nature of our commitments
+
+**Read the [GENESIS Declaration](./GENESIS.md) to understand the foundation upon which everything is built.**
+
+---
+
 # 🧭 Purpose of This Space
 
 This Space is not a code repository — it is a **governance and coordination environment**.
