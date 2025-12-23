@@ -37,7 +37,10 @@ class TestGenesisReferences:
         
         # Read the expected hash from sha256 file
         with open(sha256_path, 'r') as f:
-            expected_hash = f.read().strip().split()[0]
+            content = f.read().strip()
+        tokens = content.split()
+        assert tokens, "GENESIS.md.sha256 does not contain a valid SHA256 hash"
+        expected_hash = tokens[0]
         
         # Calculate actual hash of GENESIS.md
         sha256_hash = hashlib.sha256()
