@@ -17,4 +17,4 @@ jobs:
       - name: Notify Vercel Status
         uses: vercel/repository-dispatch/actions/status@v1
         with:
-          name: Vercel - pi-forge-quantum-genesis lint
+          name: Vercel - pi-forge-quantum-genesis deployment status

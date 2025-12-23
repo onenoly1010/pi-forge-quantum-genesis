@@ -41,7 +41,7 @@ Configure these in: **Settings → Secrets and variables → Actions**
 
 ## Setting Secrets
 
-1. Go to repository: https://github.com/onenoly1010/pi-forge-quantum-genesis
+1. Go to your repository on GitHub
 2. Navigate to: **Settings → Secrets and variables → Actions**
 3. Click: **New repository secret**
 4. Enter name and value
