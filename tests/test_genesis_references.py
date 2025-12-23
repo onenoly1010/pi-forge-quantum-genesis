@@ -5,6 +5,7 @@ This test verifies that GENESIS.md is properly referenced as the foundational
 archive in key documentation files across the repository.
 """
 
+import hashlib
 import os
 from pathlib import Path
 
@@ -30,8 +31,6 @@ class TestGenesisReferences:
 
     def test_genesis_sha256_verification(self):
         """Verify GENESIS.md SHA256 hash is valid."""
-        import hashlib
-        
         genesis_path = REPO_ROOT / "GENESIS.md"
         sha256_path = REPO_ROOT / "GENESIS.md.sha256"
         
