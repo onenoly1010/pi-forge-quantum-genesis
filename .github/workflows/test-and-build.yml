@@ -77,8 +77,20 @@ jobs:
           # Copy server files
           cp -r server/ build/pi-studio/server/
           
-          # Copy frontend files
-          cp -r frontend/ build/pi-studio/frontend/
+          # Copy frontend files if they exist
+          if [ -d "frontend" ]; then
+            cp -r frontend/ build/pi-studio/frontend/
+            echo "✓ Copied frontend directory"
+          else
+            echo "⚠ Frontend directory not found - skipping"
+          fi
+          
+          # Copy API serverless functions (actual frontend)
+          if [ -d "api" ]; then
+            mkdir -p build/pi-studio/api
+            cp -r api/ build/pi-studio/api/
+            echo "✓ Copied API directory"
+          fi
           
           # Copy root HTML/JS files
           cp index.html build/pi-studio/ || true
