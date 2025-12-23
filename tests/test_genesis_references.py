@@ -77,6 +77,8 @@ class TestGenesisReferences:
 
     def test_architecture_references_genesis(self):
         """Verify docs/ARCHITECTURE.md references GENESIS.md."""
+        import re
+        
         arch_path = REPO_ROOT / "docs" / "ARCHITECTURE.md"
         assert arch_path.exists(), "docs/ARCHITECTURE.md not found"
         
@@ -84,8 +86,12 @@ class TestGenesisReferences:
             content = f.read()
         
         assert "GENESIS.md" in content, "docs/ARCHITECTURE.md does not reference GENESIS.md"
-        assert "../GENESIS.md" in content, \
-            "docs/ARCHITECTURE.md does not use correct relative path (../GENESIS.md)"
+        
+        # Check that ../GENESIS.md is referenced in a proper markdown link format: [text](../GENESIS.md)
+        markdown_link_pattern = r'\[([^\]]+)\]\(\.\.\/GENESIS\.md\)'
+        matches = re.search(markdown_link_pattern, content)
+        assert matches is not None, \
+            "docs/ARCHITECTURE.md does not contain a proper markdown link to ../GENESIS.md (format: [text](../GENESIS.md))"
 
     def test_genesis_content_has_oinio_seal(self):
         """Verify GENESIS.md contains OINIO Seal content."""
