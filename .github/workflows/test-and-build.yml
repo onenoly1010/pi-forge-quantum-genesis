@@ -87,7 +87,7 @@ jobs:
           
           # Copy API serverless functions (actual frontend)
           if [ -d "api" ]; then
-            cp -r api/ build/pi-studio/
+            cp -r api/ build/pi-studio/api/
             echo "✓ Copied API directory"
           fi
           
