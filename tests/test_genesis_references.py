@@ -61,7 +61,8 @@ class TestGenesisReferences:
             content = f.read()
         
         assert "GENESIS.md" in content, "README.md does not reference GENESIS.md"
-        assert "Eternal Archive" in content or "foundational" in content.lower(), \
+        content_lower = content.lower()
+        assert "eternal archive" in content_lower or "foundational" in content_lower, \
             "README.md does not use foundational language for GENESIS.md"
 
     def test_ecosystem_overview_references_genesis(self):
