@@ -7,6 +7,9 @@ name: Vercel Deployment Status Check
     branches: [ main ]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   vercel-check:
     runs-on: ubuntu-latest
