@@ -6,7 +6,6 @@ archive in key documentation files across the repository.
 """
 
 import os
-import pytest
 from pathlib import Path
 
 
