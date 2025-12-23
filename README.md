@@ -94,6 +94,65 @@ You are welcome here.
 
 ---
 
+# 🚀 Deployment & Infrastructure
+
+## About This Repository
+
+**This is a coordination and documentation hub, NOT a deployable frontend application.**
+
+This repository serves as:
+- **Governance center** for the Quantum Pi Forge constellation
+- **Documentation hub** for ecosystem-wide information
+- **Coordination space** for multi-repo workflows
+- **GitHub Agent home base** for task routing
+
+### What This Repo Does NOT Provide:
+- ❌ Deployable frontend application
+- ❌ Production web service
+- ❌ User-facing interface
+
+### What IS Deployed:
+
+#### 1. Public-Facing Site (GitHub Pages)
+- **URL**: https://onenoly1010.github.io/quantum-pi-forge-site/
+- **Repository**: `quantum-pi-forge-site`
+- **Purpose**: External communication and manifesto
+
+#### 2. Backend API (Railway)
+- **URL**: https://pi-forge-quantum-genesis.railway.app
+- **Service**: FastAPI Quantum Conduit
+- **Health Check**: `/health`
+
+#### 3. Resonance Engine (Vercel)
+- **URL**: https://quantum-resonance-clean.vercel.app
+- **Repository**: `quantum-resonance-clean`
+- **Purpose**: Harmonic ledger backend
+
+### Vercel Configuration Note
+
+This repository includes a `vercel.json` file that:
+- Builds static documentation pages from the coordination hub
+- Serves minimal HTML interfaces for demonstration purposes
+- Routes API calls to the Railway backend
+- **Is NOT intended as a production deployment**
+
+**If you connected this repo to Vercel by mistake**, you can safely disconnect it:
+1. Go to Vercel Dashboard → Project Settings
+2. Select this project (`pi-forge-quantum-genesis`)
+3. Navigate to "General" settings
+4. Scroll to "Delete Project" and remove the deployment
+
+The Vercel configuration exists primarily for:
+- Build verification in CI/CD
+- Optional static documentation hosting
+- Development preview environments
+
+For production deployments, refer to the appropriate service repositories listed above.
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment documentation.
+
+---
+
 # 🛡️ Operational Team
 
 The **Prelaunch Operational Team** coordinates handoffs, closures, and operational excellence:
