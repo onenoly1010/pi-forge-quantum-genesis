@@ -1,6 +1,6 @@
 name: Vercel Deployment Status Check
 
-on:
+"on":
   push:
     branches: [ main ]
   pull_request:
