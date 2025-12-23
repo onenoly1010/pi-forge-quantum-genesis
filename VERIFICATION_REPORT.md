@@ -16,7 +16,6 @@ This report verifies that the fix implemented in commit `9fb676016b6a017ce579b01
 
 **Commit Message**: 📚 Reference GENESIS.md as foundational archive in README, ECOSYSTEM_OVERVIEW, and ARCHITECTURE
 
-**Author**: copilot-swe-agent[bot]  
 **Date**: December 22, 2025  
 
 **Files Modified**:
