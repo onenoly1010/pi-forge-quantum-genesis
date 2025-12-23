@@ -5,7 +5,6 @@ This test verifies that GENESIS.md is properly referenced as the foundational
 archive in key documentation files across the repository.
 """
 
-import os
 from pathlib import Path
 
 
