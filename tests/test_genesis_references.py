@@ -118,12 +118,13 @@ class TestGenesisReferences:
         ]
         
         for file_path in files_to_check:
-            if not file_path.exists():
-                continue
-                
+            assert file_path.exists(), (
+                f"Expected documentation file not found: {file_path}. "
+                "All files in files_to_check should exist so foundational language can be verified."
+            )
+
             with open(file_path, 'r') as f:
                 content = f.read().lower()
-            
             # Check if GENESIS.md is mentioned
             if "genesis.md" in content:
                 # At least one foundational term should appear near GENESIS.md
