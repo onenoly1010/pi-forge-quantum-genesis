@@ -94,15 +94,18 @@ class TestRollbackTargetSelection:
         """Test rollback target when no deployment tags exist."""
         deployment_tags = []
         
-        # Logic from workflow: fallback to "main" if no tags
+        # Logic from workflow: no rollback target if no tags (graceful skip)
+        # Updated behavior: returns None/empty and exits gracefully
         if len(deployment_tags) >= 2:
             rollback_target = deployment_tags[1]
         elif len(deployment_tags) == 1:
             rollback_target = deployment_tags[0]
         else:
-            rollback_target = "main"
+            # No rollback target available - should skip rollback gracefully
+            rollback_target = None
         
-        assert rollback_target == "main"
+        # With updated workflow, rollback is skipped when no tags exist
+        assert rollback_target is None, "No rollback should occur when no tags exist"
     
     def test_manual_rollback_version_override(self):
         """Test that manual rollback version takes precedence."""
