@@ -6,6 +6,7 @@ archive in key documentation files across the repository.
 """
 
 import os
+import re
 from pathlib import Path
 
 
@@ -77,8 +78,6 @@ class TestGenesisReferences:
 
     def test_architecture_references_genesis(self):
         """Verify docs/ARCHITECTURE.md references GENESIS.md."""
-        import re
-        
         arch_path = REPO_ROOT / "docs" / "ARCHITECTURE.md"
         assert arch_path.exists(), "docs/ARCHITECTURE.md not found"
         
