@@ -576,24 +576,47 @@ jobs:
             # Find last successful deployment tag
             ROLLBACK_TAG=$(git tag -l "deploy-*" --sort=-version:refname | head -2 | tail -1)
             if [ -z "$ROLLBACK_TAG" ]; then
-              ROLLBACK_TAG="main"
+              echo "⚠️ No previous deployment tags found - cannot rollback"
+              echo "This is likely the first deployment or tags have not been created yet"
+              echo "tag=" >> $GITHUB_OUTPUT
+              echo "has_target=false" >> $GITHUB_OUTPUT
+              exit 0
             fi
             echo "📌 Automatic rollback to: $ROLLBACK_TAG"
           fi
 
           echo "tag=$ROLLBACK_TAG" >> $GITHUB_OUTPUT
+          echo "has_target=true" >> $GITHUB_OUTPUT
 
       - name: 🔄 Execute Rollback
         run: |
           echo "=== EXECUTING ROLLBACK ==="
 
+          HAS_TARGET="${{ steps.find-rollback.outputs.has_target }}"
           ROLLBACK_TAG="${{ steps.find-rollback.outputs.tag }}"
+
+          # Check if we have a rollback target
+          if [ "$HAS_TARGET" != "true" ]; then
+            echo "⚠️ No rollback target available"
+            echo "This indicates one of the following:"
+            echo "  1. This is the first deployment (no previous versions)"
+            echo "  2. Deployment tags have not been created yet"
+            echo "  3. There is no stable version to roll back to"
+            echo ""
+            echo "Recommended actions:"
+            echo "  - Review the deployment failure logs"
+            echo "  - Fix the issues in a new commit"
+            echo "  - Manual intervention may be required"
+            echo ""
+            echo "✅ Rollback skipped - no previous deployment available"
+            exit 0
+          fi
 
           echo "🔄 Rolling back to: $ROLLBACK_TAG"
 
-          # Verify tag exists before checkout
+          # Verify tag/ref exists before checkout
           if git rev-parse "$ROLLBACK_TAG" >/dev/null 2>&1; then
-            echo "✅ Rollback tag verified: $ROLLBACK_TAG"
+            echo "✅ Rollback target verified: $ROLLBACK_TAG"
 
             # In production, this would:
             # 1. Checkout the rollback tag
@@ -603,13 +626,16 @@ jobs:
             git checkout "$ROLLBACK_TAG" 2>&1 || {
               echo "⚠️ Git checkout failed, attempting alternative rollback method"
               # Alternative rollback could involve Railway API or deployment manifest
+              echo "Note: In production, this would trigger Railway API rollback"
             }
 
             echo "✅ Rollback complete"
           else
-            echo "❌ Rollback tag $ROLLBACK_TAG not found"
-            echo "Available tags:"
+            echo "❌ Rollback target $ROLLBACK_TAG not found"
+            echo "Available deployment tags:"
             git tag -l "deploy-*" --sort=-version:refname | head -5
+            echo ""
+            echo "⚠️ Rollback failed - target not accessible"
             exit 1
           fi
 
