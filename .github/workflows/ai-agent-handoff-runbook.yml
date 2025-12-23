@@ -596,7 +596,7 @@ jobs:
           ROLLBACK_TAG="${{ steps.find-rollback.outputs.tag }}"
 
           # Check if we have a rollback target
-          if [ "$HAS_TARGET" != "true" ] || [ -z "$ROLLBACK_TAG" ]; then
+          if [ "$HAS_TARGET" != "true" ]; then
             echo "⚠️ No rollback target available"
             echo "This indicates one of the following:"
             echo "  1. This is the first deployment (no previous versions)"

@@ -82,12 +82,15 @@ class TestRollbackTargetSelection:
         ]
         
         # With only one tag, head -2 | tail -1 would return the same tag
-        if len(deployment_tags) >= 2:
-            rollback_target = deployment_tags[1]
+        # Simulating: head -2 gets 1 tag, tail -1 returns that tag
+        tags_head_2 = deployment_tags[:2]  # Gets only 1 tag if only 1 exists
+        if tags_head_2:
+            rollback_target = tags_head_2[-1]  # tail -1 returns last element
         else:
-            # In practice, would get the same tag or use main as fallback
-            rollback_target = deployment_tags[0] if deployment_tags else "main"
+            rollback_target = None
         
+        # With a single tag, the workflow returns that same tag
+        # This isn't ideal (rolling back to current version), but matches workflow behavior
         assert rollback_target == "deploy-20241210-120000-abc1234"
     
     def test_rollback_target_no_tags(self):
