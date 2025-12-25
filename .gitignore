@@ -155,6 +155,9 @@ deployment_log.json
 # Guardian approval system data
 .guardian_approvals/
 
+# Vercel build output
+.vercel/
+
 # Solidity / Foundry
 contracts/cache/
 contracts/out/
