@@ -13,34 +13,27 @@ Evaluates the multi-app quantum lattice across comprehensive dimensions:
 7. Ethical Audit Effectiveness - Veto Triad synthesis and quantum branch simulation
 """
 
-import os
-import json
 import asyncio
+import json
 import logging
+import os
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 # Azure AI Evaluation SDK imports
-from azure.ai.evaluation import (
-    evaluate,
-    CoherenceEvaluator,
-    RelevanceEvaluator,
-    FluencyEvaluator,
-    TaskAdherenceEvaluator,
-    IntentResolutionEvaluator,
-    ToolCallAccuracyEvaluator,
-    GroundednessEvaluator,
-    AzureOpenAIModelConfiguration,
-    OpenAIModelConfiguration
-)
-from azure.identity import DefaultAzureCredential
+from azure.ai.evaluation import (AzureOpenAIModelConfiguration,
+                                 CoherenceEvaluator, FluencyEvaluator,
+                                 GroundednessEvaluator,
+                                 IntentResolutionEvaluator,
+                                 OpenAIModelConfiguration, RelevanceEvaluator,
+                                 TaskAdherenceEvaluator, evaluate)
 
 # Quantum Lattice imports
 try:
-    from main import app as fastapi_app
     from app import app as flask_app
     from canticle_interface import demo as gradio_interface
+    from main import app as fastapi_app
 except ImportError as e:
     logging.warning(f"Sacred Trinity imports not available: {e}")
     fastapi_app = flask_app = gradio_interface = None
@@ -983,9 +976,9 @@ class SVGVisualizationEvaluator:
 
     def _generate_test_dataset_file(self, dataset: List[Dict]) -> str:
         """Generate test dataset file for Azure AI Evaluation SDK"""
-        import tempfile
         import csv
-        
+        import tempfile
+
         # Create temporary file
         temp_file = tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False, encoding='utf-8')
         
