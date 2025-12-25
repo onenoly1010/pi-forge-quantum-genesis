@@ -99,7 +99,7 @@
 
 4. **Environment Variables:**
    - Verify all required environment variables are set in Vercel dashboard
-   - Check Railway backend URL is correct: `https://pi-forge-quantum-genesis-production-4fc8.up.railway.app`
+   - Check Render backend URL is correct: `https://pi-forge-quantum-genesis-1.onrender.com`
 
 ## Potential Issues to Check
 
@@ -110,12 +110,12 @@ The build script sets up routes to proxy API calls to Railway:
 ```json
 {
   "src": "/api/(.*)",
-  "dest": "https://pi-forge-quantum-genesis-production-4fc8.up.railway.app/api/$1"
+  "dest": "https://pi-forge-quantum-genesis-1.onrender.com/api/$1"
 }
 ```
 
 **Verify:**
-- [ ] Railway backend is running
+- [ ] Render backend is running
 - [ ] API endpoints are accessible
 - [ ] CORS is configured correctly
 

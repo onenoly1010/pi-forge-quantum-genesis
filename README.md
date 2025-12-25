@@ -151,7 +151,7 @@ Pi Forge Quantum Genesis uses a **distributed frontend architecture**:
 
 - **Static Landing Pages:** `index.html`, `ceremonial_interface.html`, etc. (root directory)
 - **Serverless API Functions:** `api/` directory (deployed to Vercel)
-- **Backend Services:** `server/` directory (deployed to Railway)
+- **Backend Services:** `server/` directory (deployed to Render)
 - **Build Process:** `scripts/build.js` packages for Vercel deployment
 
 **Note:** There is no standalone `frontend/` directory. Frontend code is distributed across static HTML and serverless functions.
