@@ -40,7 +40,47 @@ The `public` directory will contain all deployable assets.
 
 ---
 
-## Railway Deployment
+## Render Deployment (Backend)
+
+The backend is now deployed on Render using Docker containerization:
+
+### Docker Configuration
+
+- **Dockerfile**: Multi-stage build with Python 3.11
+- **Service Type**: Web Service
+- **Build Command**: `docker build -t pi-forge-backend .`
+- **Start Command**: `cd server && uvicorn main:app --host 0.0.0.0 --port $PORT`
+
+### Environment Variables
+
+Set these in your Render service environment variables:
+- `SUPABASE_URL` - Supabase project URL
+- `SUPABASE_KEY` - Supabase anon/public key
+- `SECRET_KEY` - Application secret key (generate random string)
+- `PI_APP_SECRET` - Pi Network application secret
+- `GUARDIAN_SLACK_WEBHOOK_URL` - Optional Slack webhook for alerts
+- `MAILGUN_DOMAIN` and `MAILGUN_API_KEY` - Optional for email alerts
+- `SENDGRID_API_KEY` and `SENDGRID_FROM` - Optional for SendGrid emails
+- `OPENAI_API_KEY` - Optional for AI features
+- `ANTHROPIC_API_KEY` - Optional for AI features
+- `SENTRY_DSN` - Optional for error tracking
+
+### Health Checks
+
+- **Health Check Path**: `/health`
+- **Health Check Timeout**: 30 seconds
+
+### Deployment Notes
+
+- The service is configured to auto-deploy from the main branch
+- Docker build context is the root directory
+- Production URL: https://pi-forge-quantum-genesis-1.onrender.com
+
+---
+
+## Railway Deployment (Deprecated)
+
+**Note**: Railway deployment is deprecated. Use Render for new deployments.
 
 This repository includes a `railway.toml` to assist with Railway deployments. Quick notes:
 
