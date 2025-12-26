@@ -204,6 +204,8 @@
         .tooltip-container:hover .tooltip { visibility: visible; opacity: 1; }
         .help-icon { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: rgba(139, 92, 246, 0.3); font-size: 0.7rem; cursor: help; margin-left: 0.5rem; }
         #error-row { display: none; margin-top: 1rem; }
+        .alert { padding: 0.75rem 1rem; border-radius: 8px; border-left: 4px solid; }
+        .alert-warning { background-color: rgba(245, 158, 11, 0.1); border-left-color: #f5a623; color: #d97706; }
         @media (max-width: 768px) { .dashboard-container { grid-template-columns: 1fr; } .sidebar { display: none; } }
     </style>
 </head>
@@ -470,6 +472,8 @@
                 displayFallbackMetrics();
                 return;
             }
+                return;
+            }
             let web3;
             let contract;
             
@@ -532,13 +536,21 @@
                     console.log('✅ Treasury metrics updated from blockchain');
                 } catch (error) {
                     // Distinguish between different error types for better debugging
-                    if (error.message.includes('timeout')) {
+                    const message = (error && error.message) ? String(error.message) : '';
+                    const code = (error && error.code) ? String(error.code) : '';
+
+                    if (message.includes('timeout')) {
                         console.warn("⏱️ Contract call timeout - network may be slow:", error);
-                    } else if (error.message.includes('revert') || error.message.includes('invalid')) {
+                    } else if (message.includes('revert') || message.includes('invalid')) {
                         console.warn("❌ Contract call failed - check ABI matches deployed contract:", error);
-                    } else if (error.message.includes('network') || error.message.includes('connection') || error.message.includes('ECONNREFUSED')) {
+                    } else if (
+                        message.includes('network') ||
+                        message.includes('connection') ||
+                        message.includes('ECONNREFUSED') ||
+                        code === 'ECONNREFUSED'
+                    ) {
                         console.warn("🌐 Network error - check RPC endpoint connectivity:", error);
-                    } else if (error.message.includes('method') || error.message.includes('function')) {
+                    } else if (message.includes('method') || message.includes('function')) {
                         console.warn("⚠️ Method not found - verify contract ABI has the required methods:", error);
                     } else {
                         console.warn("⚠️ Blockchain fetch failed:", error);
