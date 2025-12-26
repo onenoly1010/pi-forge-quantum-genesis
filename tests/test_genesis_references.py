@@ -88,7 +88,7 @@ class TestGenesisReferences:
         
         # Check that ../GENESIS.md is referenced in a proper markdown link format, with an optional section anchor:
         # e.g., [text](../GENESIS.md) or [text](../GENESIS.md#section)
-        markdown_link_pattern = r'\[[^\]]+\]\(\.\./GENESIS\.md(?:#[^\)]*)?\)'
+        markdown_link_pattern = r'\[[^\]]+\]\(\.\./GENESIS\.md(?:#[^\)]+)?\)'
         matches = re.search(markdown_link_pattern, content)
         assert matches is not None, \
             "docs/ARCHITECTURE.md does not contain a proper markdown link to ../GENESIS.md (e.g., [text](../GENESIS.md) or [text](../GENESIS.md#section))"
