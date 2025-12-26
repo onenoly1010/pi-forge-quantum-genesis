@@ -451,17 +451,20 @@
                 maximumFractionDigits: 0
             }).format(num);
 
+            // Fallback metrics configuration
+            const TREASURY_FALLBACK_METRICS = {
+                tvl: 12456789,
+                available: 4567890
+            };
+
             // Check if contract address is still placeholder
             if (TREASURY_CONTRACT_ADDRESS === '0xYOUR_TREASURY_CONTRACT_ADDRESS_HERE' || 
                 TREASURY_CONTRACT_ADDRESS === '0x0000000000000000000000000000000000000000') {
                 console.warn('⚠️ Treasury contract address not configured. Please update TREASURY_CONTRACT_ADDRESS in the code.');
                 console.warn('📖 See docs/WEB3_TREASURY_CONFIGURATION.md for setup instructions.');
                 displayFallbackMetrics();
-            // Fallback metrics configuration
-            const TREASURY_FALLBACK_METRICS = {
-                tvl: 12456789,
-                available: 4567890
-            };
+                return;
+            }
 
             // Fallback values if blockchain is unavailable
             const fallback = TREASURY_FALLBACK_METRICS;
@@ -531,6 +534,10 @@
                         console.warn("⏱️ Contract call timeout - network may be slow:", error);
                     } else if (error.message.includes('revert') || error.message.includes('invalid')) {
                         console.warn("❌ Contract call failed - check ABI matches deployed contract:", error);
+                    } else if (error.message.includes('network') || error.message.includes('connection') || error.message.includes('ECONNREFUSED')) {
+                        console.warn("🌐 Network error - check RPC endpoint connectivity:", error);
+                    } else if (error.message.includes('method') || error.message.includes('function')) {
+                        console.warn("⚠️ Method not found - verify contract ABI has the required methods:", error);
                     } else {
                         console.warn("⚠️ Blockchain fetch failed:", error);
                     }
