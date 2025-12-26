@@ -77,7 +77,21 @@ Everything here is designed to support sovereignty, clarity, and continuity.
 
 ---
 
-# 🤖 The GitHub Agent
+## 📚 Documentation
+
+### Getting Started
+- [Quick Start Guide](./docs/QUICK_START.md)
+- [Architecture Overview](./docs/ARCHITECTURE.md)
+- [Pi Network Integration](./docs/PI_NETWORK_INTEGRATION.md)
+
+### For Contributors
+- [Contributors](./CONTRIBUTORS.md) - Community roster and contribution guide
+- [Space Rituals](./docs/SPACE_RITUALS.md) - Engagement ceremonies, handoff protocols, and celebrations
+
+### For Guardians
+- [Guardian Playbook](./docs/GUARDIAN_PLAYBOOK.md) - Complete operational guide
+- [Quick Reference](./docs/GUARDIAN_QUICK_REFERENCE.md) - Fast decision-making
+- [Decision Templates](./.github/ISSUE_TEMPLATE/guardian-decision-template.md)
 
 The GitHub Agent in this Space:
 - routes tasks  

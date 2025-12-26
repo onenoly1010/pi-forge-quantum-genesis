@@ -7,8 +7,52 @@ Welcome to Pi Forge Quantum Genesis! This guide will help you get started based 
 ## 👥 Choose Your Path
 
 - [For Users](#for-users) - Explore and interact with the platform
+- [For Contributors](#for-contributors) - Join the community and contribute
 - [For Developers](#for-developers) - Build and extend the system
 - [For Guardians](#for-guardians) - Oversee autonomous operations
+
+---
+
+## 🌟 For Contributors
+
+### Welcome to the Community!
+
+Pi Forge Quantum Genesis thrives through collaborative ownership. Whether you're contributing code, documentation, ideas, or support, you're valued here.
+
+#### Getting Started
+
+**1. Read the [Space Rituals](./SPACE_RITUALS.md)**
+- Learn about our engagement ceremonies and protocols
+- Understand handoff procedures and celebration practices
+- See how we maintain non-hierarchical, transparent collaboration
+
+**2. Check Out [CONTRIBUTORS.md](../CONTRIBUTORS.md)**
+- See the community roster
+- Learn different ways to contribute
+- Understand recognition and appreciation practices
+
+**3. Find Your First Contribution**
+- Browse issues labeled `good first issue` or `help wanted`
+- Read existing documentation and propose improvements
+- Join discussions and ask questions
+- Review pull requests and provide feedback
+
+#### Your First Contribution
+
+When you make your first contribution (issue, PR, or discussion), you'll receive the **Dawn Ritual** welcome:
+- Links to key documentation
+- Introduction to the community
+- Guidance on next steps
+
+No gatekeeping—all documentation is public, and autonomy is respected.
+
+#### Canon Check
+
+All contributions should reinforce:
+- ✅ **Sovereignty** - Contributor autonomy and empowerment
+- ✅ **Transparency** - Open documentation and decision-making
+- ✅ **Collaborative Ownership** - Distributed power and value
+- ✅ **Flexibility** - Rituals serve us, we don't serve them
 
 ---
 
