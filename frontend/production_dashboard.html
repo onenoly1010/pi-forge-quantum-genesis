@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pi Forge Quantum Genesis - Production Dashboard</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"
+            integrity="sha384-4qkGJFU6+hgoAAJ1JLLzIGHJN3+sNhbLzLJLLxJLLzIGHJN3+sNhbLzLJLLxJLLz"
+            crossorigin="anonymous"></script>
     <script defer src="/_vercel/insights/script.js"></script>
     <style>
         :root {
@@ -457,6 +459,9 @@
                 available: 4567890
             };
 
+            // Fallback values if blockchain is unavailable (defined early for use in displayFallbackMetrics)
+            const fallback = TREASURY_FALLBACK_METRICS;
+
             // Check if contract address is still placeholder
             if (TREASURY_CONTRACT_ADDRESS === '0xYOUR_TREASURY_CONTRACT_ADDRESS_HERE' || 
                 TREASURY_CONTRACT_ADDRESS === '0x0000000000000000000000000000000000000000') {
@@ -465,9 +470,6 @@
                 displayFallbackMetrics();
                 return;
             }
-
-            // Fallback values if blockchain is unavailable
-            const fallback = TREASURY_FALLBACK_METRICS;
             let web3;
             let contract;
             
@@ -556,6 +558,8 @@
             // Initialize Web3 first
             if (!initializeWeb3()) {
                 displayFallbackMetrics();
+                // Don't schedule interval updates if Web3 initialization failed
+                return;
             }
 
             // Initial update
