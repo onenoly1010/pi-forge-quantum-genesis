@@ -1,6 +1,12 @@
 # 🌐 Quantum Pi Forge — Coordination Space  
 ### A Sovereign Hub for the Autonomous Multi‑Agent Constellation
 
+**🌊 [Constellation Status: LIVE](./CONSTELLATION_ACTIVATION.md)** — The Quantum Pi Forge is activated and operational as of December 22, 2025.
+
+**📜 [Read the Genesis Declaration](./GENESIS.md)** — The foundational seal of the Quantum Pi Forge ecosystem, minted at Solstice 2025.
+
+---
+
 Welcome to the **Quantum Pi Forge Space** — the central coordination hub for the entire constellation of repositories, services, and agents that make up the Quantum Pi Forge ecosystem.
 
 This Space exists to:
@@ -51,7 +57,21 @@ Everything here is designed to support sovereignty, clarity, and continuity.
 
 ---
 
-# 🤖 The GitHub Agent
+## 📚 Documentation
+
+### Getting Started
+- [Quick Start Guide](./docs/QUICK_START.md)
+- [Architecture Overview](./docs/ARCHITECTURE.md)
+- [Pi Network Integration](./docs/PI_NETWORK_INTEGRATION.md)
+
+### For Contributors
+- [Contributors](./CONTRIBUTORS.md) - Community roster and contribution guide
+- [Space Rituals](./docs/SPACE_RITUALS.md) - Engagement ceremonies, handoff protocols, and celebrations
+
+### For Guardians
+- [Guardian Playbook](./docs/GUARDIAN_PLAYBOOK.md) - Complete operational guide
+- [Quick Reference](./docs/GUARDIAN_QUICK_REFERENCE.md) - Fast decision-making
+- [Decision Templates](./.github/ISSUE_TEMPLATE/guardian-decision-template.md)
 
 The GitHub Agent in this Space:
 - routes tasks  
@@ -92,6 +112,102 @@ If you're new:
 4. Ask the GitHub Agent for guidance  
 
 You are welcome here.
+
+---
+
+# 🚀 Deployment & Infrastructure
+
+## About This Repository
+
+**This is a coordination and documentation hub, NOT a deployable frontend application.**
+
+This repository serves as:
+- **Governance center** for the Quantum Pi Forge constellation
+- **Documentation hub** for ecosystem-wide information
+- **Coordination space** for multi-repo workflows
+- **GitHub Agent home base** for task routing
+
+### What This Repo Does NOT Provide:
+- ❌ Deployable frontend application
+- ❌ Production web service
+- ❌ User-facing interface
+
+### What IS Deployed:
+
+#### 1. Public-Facing Site (GitHub Pages)
+- **URL**: https://onenoly1010.github.io/quantum-pi-forge-site/
+- **Repository**: `quantum-pi-forge-site`
+- **Purpose**: External communication and manifesto
+
+#### 2. Backend API (Railway)
+- **URL**: https://pi-forge-quantum-genesis.railway.app
+- **Service**: FastAPI Quantum Conduit
+- **Health Check**: `/health`
+
+#### 3. Resonance Engine (Vercel)
+- **URL**: https://quantum-resonance-clean.vercel.app
+- **Repository**: `quantum-resonance-clean`
+- **Purpose**: Harmonic ledger backend
+
+### Vercel Configuration Note
+
+This repository includes a `vercel.json` file that:
+- Builds static documentation pages from the coordination hub
+- Serves minimal HTML interfaces for demonstration purposes
+- Routes API calls to the Railway backend
+- **Is NOT intended as a production deployment**
+
+**If you connected this repo to Vercel by mistake**, you can safely disconnect it:
+1. Go to Vercel Dashboard → Project Settings
+2. Select this project (`pi-forge-quantum-genesis`)
+3. Navigate to "General" settings
+4. Scroll to "Delete Project" and remove the deployment
+
+The Vercel configuration exists primarily for:
+- Build verification in CI/CD
+- Optional static documentation hosting
+- Development preview environments
+
+For production deployments, refer to the appropriate service repositories listed above.
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment documentation.
+
+---
+
+# 🛡️ Operational Team
+
+The **Prelaunch Operational Team** coordinates handoffs, closures, and operational excellence:
+
+- **Lead Guardian**: @onenoly1010 — Owner, escalation point, sign-off authority
+- **Autonomous AI Agents** — System-level operations, self-healing, monitoring
+- **Future Guardians** — Technical, community, economic, and compliance roles
+
+**Responsibilities**:
+- Oversee handoff and closure activities
+- Primary human escalation for AI agent decisions
+- Sign off on prelaunch checklist items
+- Maintain Canon of Closure alignment
+- Debug AI agent workflows
+
+📋 **[View Full Operational Team Documentation](./docs/OPERATIONAL_TEAM.md)**
+
+**Related**:
+- [Canon of Closure Handoff Package - Issue #95](https://github.com/onenoly1010/pi-forge-quantum-genesis/issues/95)
+- [Autonomous Handover - PR #92](https://github.com/onenoly1010/pi-forge-quantum-genesis/pull/92)
+- [Guardian Playbook](./docs/GUARDIAN_PLAYBOOK.md)
+
+---
+
+## Frontend Architecture
+
+Pi Forge Quantum Genesis uses a **distributed frontend architecture**:
+
+- **Static Landing Pages:** `index.html`, `ceremonial_interface.html`, etc. (root directory)
+- **Serverless API Functions:** `api/` directory (deployed to Vercel)
+- **Backend Services:** `server/` directory (deployed to Render)
+- **Build Process:** `scripts/build.js` packages for Vercel deployment
+
+**Note:** There is no standalone `frontend/` directory. Frontend code is distributed across static HTML and serverless functions.
 
 ---
 

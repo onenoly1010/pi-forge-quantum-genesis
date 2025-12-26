@@ -181,26 +181,6 @@ def check_health_endpoints():
 
     return True
 
-def check_production_backend():
-    """Test production backend (Vercel) health"""
-    print("\n🌐 Testing Production Backend...")
-
-    # Production Vercel URL
-    production_url = "https://pi-forge-quantum-genesis.vercel.app"
-
-    try:
-        response = requests.get(production_url, timeout=10)
-        if response.status_code == 200:
-            print(f"✅ Vercel Backend: {production_url}")
-            return True
-        else:
-            print(f"⚠️  Vercel Backend: {production_url} (status: {response.status_code})")
-            return True  # Non-blocking for local verification
-    except requests.exceptions.RequestException as e:
-        print(f"⚠️  Vercel Backend: {production_url} (not reachable: {e})")
-        print("ℹ️  Production endpoint not reachable (deploy first)")
-        return True  # Non-blocking for local verification
-
 def generate_deployment_report():
     """Generate comprehensive deployment report"""
     print("\n📊 PRODUCTION DEPLOYMENT VERIFICATION REPORT")
@@ -213,7 +193,6 @@ def generate_deployment_report():
         ("Python Syntax", check_code_syntax()),
         ("Tracing System", check_tracing_system()),
         ("Health Endpoints", check_health_endpoints()),
-        ("Production Backend", check_production_backend()),
     ]
 
     passed_checks = sum(1 for _, passed in checks if passed)
