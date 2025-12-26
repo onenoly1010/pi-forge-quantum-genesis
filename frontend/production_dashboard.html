@@ -457,12 +457,14 @@
                 console.warn('⚠️ Treasury contract address not configured. Please update TREASURY_CONTRACT_ADDRESS in the code.');
                 console.warn('📖 See docs/WEB3_TREASURY_CONFIGURATION.md for setup instructions.');
                 displayFallbackMetrics();
-                return;
-            }
+            // Fallback metrics configuration
+            const TREASURY_FALLBACK_METRICS = {
+                tvl: 12456789,
+                available: 4567890
+            };
 
             // Fallback values if blockchain is unavailable
             const fallback = TREASURY_FALLBACK_METRICS;
-
             let web3;
             let contract;
             
