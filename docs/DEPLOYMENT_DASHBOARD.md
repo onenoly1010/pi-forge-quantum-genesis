@@ -780,18 +780,6 @@ Your deployment is successful when ALL of these are true:
 
 ---
 
-## 🔧 Troubleshooting
-
-*[Truncated for length - Full troubleshooting section would continue with the 7 common issues detailed in the problem statement]*
-
----
-
-## 🔄 Maintenance & Monitoring
-
-*[Truncated for length - Full maintenance section would continue with daily/weekly/monthly tasks]*
-
----
-
 ## 📚 Additional Resources
 
 ### Official Documentation
@@ -939,19 +927,8 @@ Your deployment is successful when ALL of these criteria are met:
 
 **Congratulations!** 🎉 If all criteria are met, your Quantum Pi Forge deployment is live and operational!
 
----
-
-## 🔗 Navigation
-
-- [🏠 Back to README](../README.md)
-- [📖 Start Here](./QUICK_START.md)
-- [🏗️ Architecture](./ARCHITECTURE.md)
-- [🔐 Security](./VERIFICATION.md)
-- [🤖 API Reference](./API.md)
 
 ---
-
-**Remember**: This dashboard is a living document. As you discover issues or improvements, update this guide to help future deployments. Sovereignty through shared knowledge! 🌌✨
 
 ## 🔧 Troubleshooting
 
@@ -1108,9 +1085,7 @@ This section covers the most common deployment issues and their solutions.
 2. **Verify webhook URL is public:**
    ```bash
    # Test webhook endpoint is accessible
-   curl -X POST https://your-app.railway.app/api/pi-webhooks/payment \
-     -H "Content-Type: application/json" \
-     -d '{"test": true}'
+   curl -X POST https://your-app.railway.app/api/pi-webhooks/payment      -H "Content-Type: application/json"      -d '{"test": true}'
    
    # Expected: Response (even if verification fails, endpoint should respond)
    ```
@@ -1147,10 +1122,7 @@ This section covers the most common deployment issues and their solutions.
    "
    
    # Use signature in request
-   curl -X POST https://your-app.railway.app/api/pi-webhooks/payment \
-     -H "Content-Type: application/json" \
-     -H "X-Pi-Signature: $signature" \
-     -d '{"test": true}'
+   curl -X POST https://your-app.railway.app/api/pi-webhooks/payment      -H "Content-Type: application/json"      -H "X-Pi-Signature: $signature"      -d '{"test": true}'
    ```
 
 #### Issue 4: Vercel Serverless Function Timeout
@@ -1247,11 +1219,7 @@ This section covers the most common deployment issues and their solutions.
 
 3. **Test CORS with curl:**
    ```bash
-   curl -H "Origin: https://your-project.vercel.app" \
-     -H "Access-Control-Request-Method: POST" \
-     -H "Access-Control-Request-Headers: Content-Type" \
-     -X OPTIONS \
-     https://your-app.railway.app/api/test
+   curl -H "Origin: https://your-project.vercel.app"      -H "Access-Control-Request-Method: POST"      -H "Access-Control-Request-Headers: Content-Type"      -X OPTIONS      https://your-app.railway.app/api/test
    
    # Should return:
    # Access-Control-Allow-Origin: https://your-project.vercel.app
@@ -1406,9 +1374,7 @@ This section covers the most common deployment issues and their solutions.
 2. **Generate new token:**
    ```bash
    # Request new token from auth endpoint
-   curl -X POST https://your-app.railway.app/token \
-     -H "Content-Type: application/json" \
-     -d '{"username": "user", "password": "pass"}'
+   curl -X POST https://your-app.railway.app/token      -H "Content-Type: application/json"      -d '{"username": "user", "password": "pass"}'
    ```
 
 3. **Increase token expiration (if appropriate):**
@@ -1547,10 +1513,7 @@ If you're still stuck:
 - [ ] Test full payment flow (testnet)
   ```bash
   # Test payment approval
-  curl -X POST https://your-app.railway.app/api/payments/approve \
-    -H "Content-Type: application/json" \
-    -H "Authorization: Bearer YOUR_JWT" \
-    -d '{"payment_id": "test_123", "amount": 0.15}'
+  curl -X POST https://your-app.railway.app/api/payments/approve     -H "Content-Type: application/json"     -H "Authorization: Bearer YOUR_JWT"     -d '{"payment_id": "test_123", "amount": 0.15}'
   ```
 - [ ] Review deployment logs
   - Railway: Check for warnings
@@ -1708,11 +1671,7 @@ Guardian alerts will notify you of:
 **Manual Backup:**
 ```bash
 # Export database to SQL file
-pg_dump -h db.your-project.supabase.co \
-  -U postgres \
-  -d postgres \
-  --clean --if-exists \
-  > backup_$(date +%Y%m%d).sql
+pg_dump -h db.your-project.supabase.co   -U postgres   -d postgres   --clean --if-exists   > backup_$(date +%Y%m%d).sql
 
 # Or use Supabase CLI
 supabase db dump -f backup_$(date +%Y%m%d).sql
@@ -1721,10 +1680,7 @@ supabase db dump -f backup_$(date +%Y%m%d).sql
 **Test Restore:**
 ```bash
 # Restore from backup (on test database!)
-psql -h db.your-test-project.supabase.co \
-  -U postgres \
-  -d postgres \
-  < backup_20241221.sql
+psql -h db.your-test-project.supabase.co   -U postgres   -d postgres   < backup_20241221.sql
 
 # Or use Supabase CLI
 supabase db push --dry-run
@@ -1755,3 +1711,17 @@ railway variables > railway_vars_backup_$(date +%Y%m%d).txt
 - [ ] Recovery time objective (RTO): < 1 hour
 - [ ] Recovery point objective (RPO): < 24 hours
 
+
+---
+
+## 🔗 Navigation
+
+- [🏠 Back to README](../README.md)
+- [📖 Start Here](./QUICK_START.md)
+- [🏗️ Architecture](./ARCHITECTURE.md)
+- [🔐 Security](./VERIFICATION.md)
+- [🤖 API Reference](./API.md)
+
+---
+
+**Remember**: This dashboard is a living document. As you discover issues or improvements, update this guide to help future deployments. Sovereignty through shared knowledge! 🌌✨

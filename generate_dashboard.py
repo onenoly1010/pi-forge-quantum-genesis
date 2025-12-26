@@ -3,6 +3,7 @@
 Generate the Unified Deployment Dashboard
 This script creates the comprehensive DEPLOYMENT_DASHBOARD.md file
 """
+import os
 
 def generate_dashboard():
     """Generate the complete deployment dashboard content"""
@@ -792,18 +793,6 @@ Your deployment is successful when ALL of these are true:
 
 ---
 
-## 🔧 Troubleshooting
-
-*[Truncated for length - Full troubleshooting section would continue with the 7 common issues detailed in the problem statement]*
-
----
-
-## 🔄 Maintenance & Monitoring
-
-*[Truncated for length - Full maintenance section would continue with daily/weekly/monthly tasks]*
-
----
-
 ## 📚 Additional Resources
 
 ### Official Documentation
@@ -951,6 +940,812 @@ Your deployment is successful when ALL of these criteria are met:
 
 **Congratulations!** 🎉 If all criteria are met, your Quantum Pi Forge deployment is live and operational!
 
+
+---
+
+## 🔧 Troubleshooting
+
+This section covers the most common deployment issues and their solutions.
+
+### Common Issues & Solutions
+
+#### Issue 1: Railway Build Fails
+
+**Symptoms:**
+```
+❌ Build failed: Dockerfile not found
+❌ ERROR: failed to solve: failed to read dockerfile
+```
+
+**Root Causes:**
+- `Dockerfile` missing from repository root
+- `railway.toml` pointing to wrong Dockerfile path
+- Railway not configured to use Dockerfile builder
+
+**Solutions:**
+
+1. **Verify Dockerfile exists:**
+   ```bash
+   ls -la Dockerfile
+   
+   # Should show: -rw-r--r-- 1 user user 1638 Dec 21 00:00 Dockerfile
+   ```
+
+2. **Check railway.toml configuration:**
+   ```bash
+   cat railway.toml
+   
+   # Should contain:
+   # [build]
+   # builder = "DOCKERFILE"
+   # dockerfilePath = "Dockerfile"
+   ```
+
+3. **Verify Railway dashboard settings:**
+   - Go to Railway Dashboard → Settings → Build
+   - Ensure "Builder" is set to "Dockerfile"
+   - Check "Dockerfile Path" is "Dockerfile"
+
+4. **Check Railway logs for specific error:**
+   ```bash
+   railway logs --tail 100
+   ```
+
+5. **Rebuild from scratch:**
+   ```bash
+   # Remove Railway service
+   railway service delete fastapi-server
+   
+   # Recreate service
+   railway up --service fastapi-server
+   ```
+
+#### Issue 2: Supabase Connection Failed
+
+**Symptoms:**
+```
+❌ Database connection error: Invalid credentials
+❌ supabase_connected: false
+❌ HTTPError: 401 Unauthorized
+```
+
+**Root Causes:**
+- Incorrect `SUPABASE_URL` or `SUPABASE_KEY`
+- Supabase project paused (free tier inactivity)
+- RLS policies blocking connection
+- Network/firewall issues
+
+**Solutions:**
+
+1. **Verify credentials in Railway:**
+   ```bash
+   railway variables
+   
+   # Check SUPABASE_URL and SUPABASE_KEY are set correctly
+   ```
+
+2. **Get fresh credentials from Supabase:**
+   - Go to Supabase Dashboard → Settings → API
+   - Copy "Project URL" → Update `SUPABASE_URL`
+   - Copy "anon/public" key → Update `SUPABASE_KEY`
+   - Update Railway variables
+
+3. **Check Supabase project status:**
+   - Go to Supabase Dashboard → Home
+   - If paused, click "Restore project"
+
+4. **Test credentials locally:**
+   ```bash
+   python -c "
+   from supabase import create_client
+   import os
+   
+   url = 'https://your-project.supabase.co'
+   key = 'your-anon-key'
+   
+   try:
+       client = create_client(url, key)
+       result = client.table('payments').select('*').limit(1).execute()
+       print('✅ Connection successful')
+       print(result)
+   except Exception as e:
+       print(f'❌ Connection failed: {e}')
+   "
+   ```
+
+5. **Check RLS policies:**
+   ```sql
+   -- In Supabase SQL Editor, check RLS status
+   SELECT tablename, rowsecurity 
+   FROM pg_tables 
+   WHERE schemaname = 'public';
+   
+   -- Temporarily disable RLS for testing (re-enable after!)
+   ALTER TABLE payments DISABLE ROW LEVEL SECURITY;
+   ```
+
+6. **Restart Railway service:**
+   ```bash
+   railway service restart fastapi-server
+   ```
+
+#### Issue 3: Pi Network Webhook Fails
+
+**Symptoms:**
+```
+❌ Webhook verification failed
+❌ Invalid signature
+❌ 403 Forbidden on webhook endpoint
+```
+
+**Root Causes:**
+- `PI_NETWORK_WEBHOOK_SECRET` doesn't match Pi Developer Portal
+- Webhook URL not publicly accessible
+- HTTPS not enabled
+- Signature verification logic incorrect
+
+**Solutions:**
+
+1. **Verify webhook secret matches:**
+   - Go to Pi Developer Portal → Your App → Settings
+   - Copy webhook secret EXACTLY (no extra spaces)
+   - Update `PI_NETWORK_WEBHOOK_SECRET` in Railway
+   ```bash
+   railway variables set PI_NETWORK_WEBHOOK_SECRET=your-exact-secret
+   railway service restart fastapi-server
+   ```
+
+2. **Verify webhook URL is public:**
+   ```bash
+   # Test webhook endpoint is accessible
+   curl -X POST https://your-app.railway.app/api/pi-webhooks/payment \
+     -H "Content-Type: application/json" \
+     -d '{"test": true}'
+   
+   # Expected: Response (even if verification fails, endpoint should respond)
+   ```
+
+3. **Check Pi Developer Portal configuration:**
+   - Go to Pi Developer Portal → Your App → Settings
+   - Verify webhook URL: `https://your-app.railway.app/api/pi-webhooks/payment`
+   - Must be HTTPS (Railway provides this automatically)
+   - Click "Test Webhook" to send test event
+
+4. **Check Railway logs for details:**
+   ```bash
+   railway logs --tail 100 | grep -i webhook
+   
+   # Look for:
+   # - "Webhook received: ..."
+   # - Signature comparison details
+   # - Verification errors
+   ```
+
+5. **Test webhook manually:**
+   ```bash
+   # Generate test webhook signature (if you have the secret)
+   python -c "
+   import hmac
+   import hashlib
+   import json
+   
+   secret = 'your-webhook-secret'
+   payload = json.dumps({'test': True})
+   signature = hmac.new(secret.encode(), payload.encode(), hashlib.sha256).hexdigest()
+   
+   print(f'Signature: {signature}')
+   "
+   
+   # Use signature in request
+   curl -X POST https://your-app.railway.app/api/pi-webhooks/payment \
+     -H "Content-Type: application/json" \
+     -H "X-Pi-Signature: $signature" \
+     -d '{"test": true}'
+   ```
+
+#### Issue 4: Vercel Serverless Function Timeout
+
+**Symptoms:**
+```
+❌ Function execution timed out (10s on Hobby, 60s on Pro)
+❌ 504 Gateway Timeout
+```
+
+**Root Causes:**
+- Function execution exceeds time limit
+- Slow database queries
+- External API calls taking too long
+- Cold start overhead
+
+**Solutions:**
+
+1. **Optimize function code:**
+   - Reduce database queries
+   - Use connection pooling
+   - Cache external API responses
+   - Minimize dependencies
+
+2. **Check Vercel plan limits:**
+   - Hobby plan: 10 second timeout
+   - Pro plan: 60 second timeout
+   - Upgrade if needed: [vercel.com/pricing](https://vercel.com/pricing)
+
+3. **Add timeout handling:**
+   ```javascript
+   export default async function handler(req, res) {
+     const timeout = setTimeout(() => {
+       res.status(504).json({ error: 'Function timeout' });
+     }, 9000); // 9s for Hobby plan buffer
+     
+     try {
+       // Your function logic
+       const result = await yourFunction();
+       clearTimeout(timeout);
+       res.status(200).json(result);
+     } catch (error) {
+       clearTimeout(timeout);
+       res.status(500).json({ error: error.message });
+     }
+   }
+   ```
+
+4. **Move heavy processing to Railway:**
+   - Vercel: Lightweight API routes only
+   - Railway: Heavy processing, long-running tasks
+
+5. **Check Vercel function logs:**
+   - Go to Vercel Dashboard → Deployments → Functions
+   - Click function name → View logs
+   - Look for slow operations
+
+#### Issue 5: CORS Errors
+
+**Symptoms:**
+```
+❌ Access to fetch blocked by CORS policy
+❌ No 'Access-Control-Allow-Origin' header present
+❌ CORS error in browser console
+```
+
+**Root Causes:**
+- Railway backend not configured to allow Vercel domain
+- `CORS_ORIGINS` not set or incorrect format
+- Preflight OPTIONS request failing
+- Mixed HTTP/HTTPS
+
+**Solutions:**
+
+1. **Set CORS_ORIGINS in Railway:**
+   ```bash
+   railway variables set CORS_ORIGINS=https://your-project.vercel.app,https://www.yourdomain.com
+   railway service restart fastapi-server
+   ```
+
+2. **Verify CORS configuration in code:**
+   Check `server/main.py` has CORS middleware:
+   ```python
+   from fastapi.middleware.cors import CORSMiddleware
+   
+   app.add_middleware(
+       CORSMiddleware,
+       allow_origins=os.getenv("CORS_ORIGINS", "*").split(","),
+       allow_credentials=True,
+       allow_methods=["*"],
+       allow_headers=["*"],
+   )
+   ```
+
+3. **Test CORS with curl:**
+   ```bash
+   curl -H "Origin: https://your-project.vercel.app" \
+     -H "Access-Control-Request-Method: POST" \
+     -H "Access-Control-Request-Headers: Content-Type" \
+     -X OPTIONS \
+     https://your-app.railway.app/api/test
+   
+   # Should return:
+   # Access-Control-Allow-Origin: https://your-project.vercel.app
+   # Access-Control-Allow-Methods: POST
+   ```
+
+4. **Check browser console:**
+   - Open browser DevTools (F12)
+   - Go to Network tab
+   - Look for failed OPTIONS requests (preflight)
+   - Check response headers
+
+5. **Temporary wildcard (testing only):**
+   ```bash
+   # For testing only, DO NOT use in production
+   railway variables set CORS_ORIGINS=*
+   railway service restart fastapi-server
+   ```
+
+6. **Ensure HTTPS on both ends:**
+   - Vercel: Always HTTPS (automatic)
+   - Railway: Always HTTPS (automatic)
+   - Do NOT mix HTTP and HTTPS
+
+#### Issue 6: Port Conflicts (Local Development)
+
+**Symptoms:**
+```
+❌ Address already in use: 0.0.0.0:8000
+❌ OSError: [Errno 48] Address already in use
+```
+
+**Solutions:**
+
+1. **Find process using port:**
+   ```bash
+   # On Linux/Mac
+   lsof -i :8000
+   
+   # On Windows
+   netstat -ano | findstr :8000
+   ```
+
+2. **Kill process:**
+   ```bash
+   # On Linux/Mac
+   kill -9 <PID>
+   
+   # On Windows
+   taskkill /PID <PID> /F
+   ```
+
+3. **Use different port:**
+   ```bash
+   # Run on different port
+   uvicorn server.main:app --port 8001
+   
+   # Or set PORT environment variable
+   PORT=8001 uvicorn server.main:app
+   ```
+
+#### Issue 7: Database Migration Failures
+
+**Symptoms:**
+```
+❌ relation "payments" does not exist
+❌ column "payment_id" does not exist
+❌ syntax error at or near "CREATE"
+```
+
+**Solutions:**
+
+1. **Verify migration file exists:**
+   ```bash
+   ls -la supabase_migrations/001_payments_schema.sql
+   ```
+
+2. **Run migration in Supabase SQL Editor:**
+   - Copy entire contents of `supabase_migrations/001_payments_schema.sql`
+   - Paste into Supabase SQL Editor
+   - Click "Run"
+   - Check for errors in output
+
+3. **Check if tables already exist:**
+   ```sql
+   -- In Supabase SQL Editor
+   SELECT table_name 
+   FROM information_schema.tables 
+   WHERE table_schema = 'public'
+   ORDER BY table_name;
+   ```
+
+4. **Drop and recreate (CAUTION: Deletes data!):**
+   ```sql
+   -- Only use in development/testnet!
+   DROP TABLE IF EXISTS payments CASCADE;
+   DROP TABLE IF EXISTS transactions CASCADE;
+   DROP TABLE IF EXISTS logical_accounts CASCADE;
+   
+   -- Then re-run migration
+   ```
+
+5. **Check Supabase logs:**
+   - Go to Supabase Dashboard → Database → Logs
+   - Look for migration errors
+
+#### Issue 8: Environment Variable Not Found
+
+**Symptoms:**
+```
+❌ KeyError: 'SUPABASE_URL'
+❌ Environment variable not set
+```
+
+**Solutions:**
+
+1. **List all Railway variables:**
+   ```bash
+   railway variables
+   ```
+
+2. **Set missing variable:**
+   ```bash
+   railway variables set VARIABLE_NAME=value
+   ```
+
+3. **Check variable in Railway Dashboard:**
+   - Go to Railway Dashboard → Variables tab
+   - Verify all required variables are set
+
+4. **Restart service after adding variables:**
+   ```bash
+   railway service restart fastapi-server
+   ```
+
+#### Issue 9: JWT Token Expired
+
+**Symptoms:**
+```
+❌ 401 Unauthorized
+❌ Token has expired
+```
+
+**Solutions:**
+
+1. **Check JWT expiration time:**
+   ```python
+   # Default is 30 minutes in most configurations
+   JWT_ACCESS_TOKEN_EXPIRE_MINUTES=30
+   ```
+
+2. **Generate new token:**
+   ```bash
+   # Request new token from auth endpoint
+   curl -X POST https://your-app.railway.app/token \
+     -H "Content-Type: application/json" \
+     -d '{"username": "user", "password": "pass"}'
+   ```
+
+3. **Increase token expiration (if appropriate):**
+   ```bash
+   railway variables set JWT_ACCESS_TOKEN_EXPIRE_MINUTES=60
+   ```
+
+#### Issue 10: SSL/TLS Certificate Errors
+
+**Symptoms:**
+```
+❌ SSL certificate verify failed
+❌ Certificate has expired
+```
+
+**Solutions:**
+
+1. **Check Railway SSL status:**
+   - Railway provides automatic SSL certificates
+   - Check Railway Dashboard → Settings → Domains
+
+2. **Verify domain configuration:**
+   ```bash
+   # Check SSL certificate
+   openssl s_client -connect your-app.railway.app:443 -servername your-app.railway.app
+   ```
+
+3. **Clear DNS cache:**
+   ```bash
+   # On Mac
+   sudo dscacheutil -flushcache
+
+   # On Linux
+   sudo systemd-resolve --flush-caches
+   
+   # On Windows
+   ipconfig /flushdns
+   ```
+
+4. **Wait for DNS propagation:**
+   - DNS changes can take 24-48 hours to fully propagate
+   - Check DNS status: https://whatsmydns.net
+
+### Debug Commands
+
+Quick reference for debugging:
+
+```bash
+# Railway logs
+railway logs --tail 100
+railway logs --follow
+
+# Railway environment variables
+railway variables
+
+# Railway service status
+railway status
+
+# Test Railway locally with same environment
+railway run python -m uvicorn server.main:app --host 0.0.0.0 --port 8000
+
+# Vercel logs
+vercel logs
+vercel logs --follow
+
+# Vercel deployment info
+vercel ls
+vercel inspect
+
+# Test Railway health endpoint
+curl https://your-app.railway.app/health | jq
+
+# Test with verbose output
+curl -v https://your-app.railway.app/health
+
+# Check SSL certificate
+openssl s_client -connect your-app.railway.app:443 -servername your-app.railway.app
+
+# Test WebSocket connection
+wscat -c wss://your-app.railway.app/ws/collective-insight
+
+# Check DNS resolution
+nslookup your-app.railway.app
+dig your-app.railway.app
+
+# Test from different network
+curl --interface 0.0.0.0 https://your-app.railway.app/health
+```
+
+### Getting Help
+
+If you're still stuck:
+
+1. **Search existing issues**: [github.com/onenoly1010/pi-forge-quantum-genesis/issues](https://github.com/onenoly1010/pi-forge-quantum-genesis/issues)
+2. **Check platform status**:
+   - Railway: [status.railway.app](https://status.railway.app)
+   - Vercel: [vercel-status.com](https://www.vercel-status.com)
+   - Supabase: [status.supabase.com](https://status.supabase.com)
+3. **Review documentation**:
+   - Railway Docs: [docs.railway.app](https://docs.railway.app)
+   - Vercel Docs: [vercel.com/docs](https://vercel.com/docs)
+   - Supabase Docs: [supabase.com/docs](https://supabase.com/docs)
+   - Pi Network Docs: [developers.minepi.com](https://developers.minepi.com)
+4. **Open a new issue**: Provide logs, error messages, and steps to reproduce
+
+---
+
+## 🔄 Maintenance & Monitoring
+
+### Regular Maintenance Tasks
+
+#### Daily
+
+- [ ] Check Railway logs for errors
+  ```bash
+  railway logs --tail 100 | grep -i error
+  ```
+- [ ] Monitor Pi Network payment webhooks
+  ```bash
+  railway logs | grep -i "webhook received"
+  ```
+- [ ] Verify health endpoints responding
+  ```bash
+  curl https://your-app.railway.app/health
+  curl https://your-project.vercel.app
+  ```
+
+#### Weekly
+
+- [ ] Review Supabase usage metrics
+  - Go to Supabase Dashboard → Settings → Usage
+  - Check database size, bandwidth, API requests
+- [ ] Check Railway credit usage
+  - Go to Railway Dashboard → Usage
+  - Monitor monthly spend
+- [ ] Test full payment flow (testnet)
+  ```bash
+  # Test payment approval
+  curl -X POST https://your-app.railway.app/api/payments/approve \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer YOUR_JWT" \
+    -d '{"payment_id": "test_123", "amount": 0.15}'
+  ```
+- [ ] Review deployment logs
+  - Railway: Check for warnings
+  - Vercel: Check build performance
+
+#### Monthly
+
+- [ ] Update dependencies
+  ```bash
+  # Check outdated packages
+  npm audit
+  pip list --outdated
+  
+  # Update and test
+  npm update
+  pip install --upgrade -r server/requirements.txt
+  ```
+- [ ] Review and rotate secrets
+  ```bash
+  # Generate new JWT_SECRET
+  openssl rand -hex 32
+  
+  # Update in Railway
+  railway variables set JWT_SECRET=new-secret
+  ```
+- [ ] Test disaster recovery procedures
+  - Backup Supabase database
+  - Test restoring from backup
+  - Document recovery time
+- [ ] Review database backups
+  - Go to Supabase Dashboard → Database → Backups
+  - Verify automatic backups enabled
+  - Test restore process
+
+### Monitoring Endpoints
+
+#### Health Checks
+
+```bash
+# Railway health
+curl https://your-app.railway.app/health
+
+# Expected response:
+{
+  "status": "healthy",
+  "service": "FastAPI Quantum Conduit",
+  "port": 8000,
+  "supabase_connected": true,
+  "pi_network_mode": "mainnet",
+  "timestamp": 1734739200.123
+}
+```
+
+#### Detailed Status
+
+```bash
+# Railway detailed status
+curl https://your-app.railway.app/api/status
+
+# Expected response:
+{
+  "service": "FastAPI Quantum Conduit",
+  "version": "1.0.0",
+  "status": "operational",
+  "uptime_seconds": 3600,
+  "database": {
+    "connected": true,
+    "response_time_ms": 15
+  },
+  "pi_network": {
+    "mode": "mainnet",
+    "api_accessible": true
+  }
+}
+```
+
+#### Database Health
+
+```bash
+# Test database connection
+curl https://your-app.railway.app/api/db/health
+
+# Expected response:
+{
+  "status": "connected",
+  "pool_size": 10,
+  "available_connections": 8
+}
+```
+
+#### Pi Network Status
+
+```bash
+# Check Pi Network integration
+curl https://your-app.railway.app/api/pi-network/status
+
+# Expected response:
+{
+  "mode": "mainnet",
+  "connected": true,
+  "app_id": "your-app-id",
+  "api_configured": true,
+  "webhook_configured": true,
+  "mainnet_ready": true
+}
+```
+
+### Setting Up Alerts
+
+#### Railway Alerts
+
+1. Go to Railway Dashboard → Project → Settings → Notifications
+2. Enable deployment notifications:
+   - Deploy started
+   - Deploy succeeded
+   - Deploy failed
+   - Service crashed
+3. Add notification channels:
+   - Email
+   - Slack webhook
+   - Discord webhook
+
+#### Supabase Alerts
+
+1. Go to Supabase Dashboard → Database → Webhooks
+2. Create webhook for critical events:
+   - Database approaching storage limit
+   - High CPU usage
+   - Failed queries spike
+3. Configure webhook URL (can point to Railway backend)
+
+#### Custom Guardian Alerts
+
+Configure Guardian alerts in Railway:
+
+```bash
+railway variables set GUARDIAN_SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL
+```
+
+Guardian alerts will notify you of:
+- Payment processing errors
+- Database connection failures
+- Pi Network API issues
+- High error rates
+
+### Backup Procedures
+
+#### Database Backups (Supabase)
+
+**Automatic Backups:**
+1. Go to Supabase Dashboard → Database → Backups
+2. Enable automatic daily backups (included in Pro plan)
+3. Set retention period (7 days, 14 days, 30 days)
+
+**Manual Backup:**
+```bash
+# Export database to SQL file
+pg_dump -h db.your-project.supabase.co \
+  -U postgres \
+  -d postgres \
+  --clean --if-exists \
+  > backup_$(date +%Y%m%d).sql
+
+# Or use Supabase CLI
+supabase db dump -f backup_$(date +%Y%m%d).sql
+```
+
+**Test Restore:**
+```bash
+# Restore from backup (on test database!)
+psql -h db.your-test-project.supabase.co \
+  -U postgres \
+  -d postgres \
+  < backup_20241221.sql
+
+# Or use Supabase CLI
+supabase db push --dry-run
+```
+
+#### Configuration Backups
+
+All configuration is version-controlled in Git:
+
+```bash
+# Backup configuration files
+git pull origin main
+
+# Export Railway environment variables
+railway variables > railway_vars_backup_$(date +%Y%m%d).txt
+
+# IMPORTANT: Do not commit railway_vars_backup.txt!
+# Store securely offline
+```
+
+#### Disaster Recovery Checklist
+
+- [ ] Supabase database backup tested monthly
+- [ ] Railway environment variables documented
+- [ ] Vercel project configuration documented
+- [ ] Pi Developer Portal credentials stored securely
+- [ ] Recovery procedure documented and tested
+- [ ] Recovery time objective (RTO): < 1 hour
+- [ ] Recovery point objective (RPO): < 24 hours
+
+
 ---
 
 ## 🔗 Navigation
@@ -971,6 +1766,9 @@ Your deployment is successful when ALL of these criteria are met:
 if __name__ == "__main__":
     print("Generating Deployment Dashboard...")
     content = generate_dashboard()
+    
+    # Ensure the docs directory exists
+    os.makedirs('docs', exist_ok=True)
     
     with open('docs/DEPLOYMENT_DASHBOARD.md', 'w', encoding='utf-8') as f:
         f.write(content)
