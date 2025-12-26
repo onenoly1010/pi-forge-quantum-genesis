@@ -86,11 +86,12 @@ class TestGenesisReferences:
         
         assert "GENESIS.md" in content, "docs/ARCHITECTURE.md does not reference GENESIS.md"
         
-        # Check that ../GENESIS.md is referenced in a proper markdown link format: [text](../GENESIS.md)
-        markdown_link_pattern = r'\[[^\]]+\]\(\.\./GENESIS\.md\)'
+        # Check that ../GENESIS.md is referenced in a proper markdown link format, with an optional section anchor:
+        # e.g., [text](../GENESIS.md) or [text](../GENESIS.md#section)
+        markdown_link_pattern = r'\[[^\]]+\]\(\.\./GENESIS\.md(?:#[^\)]*)?\)'
         matches = re.search(markdown_link_pattern, content)
         assert matches is not None, \
-            "docs/ARCHITECTURE.md does not contain a proper markdown link to ../GENESIS.md (format: [text](../GENESIS.md))"
+            "docs/ARCHITECTURE.md does not contain a proper markdown link to ../GENESIS.md (e.g., [text](../GENESIS.md) or [text](../GENESIS.md#section))"
 
     def test_genesis_content_has_oinio_seal(self):
         """Verify GENESIS.md contains OINIO Seal content."""
