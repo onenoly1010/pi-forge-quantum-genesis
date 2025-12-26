@@ -60,17 +60,20 @@ All contributions should reinforce:
 
 ### Explore the Platform
 
+> **Deployment Status:** See [DEPLOYMENT_STATUS.md](./DEPLOYMENT_STATUS.md) for current endpoint status.
+
 #### 1. View System Status
 
+**Production API (Railway):** ✅ Live (Verified: Dec 21, 2025)
 ```bash
 # Check overall health
-curl https://[deployment-url]/api/health
+curl https://pi-forge-quantum-genesis.railway.app/api/health
 
 # View guardian dashboard
-curl https://[deployment-url]/api/guardian/dashboard | jq .
+curl https://pi-forge-quantum-genesis.railway.app/api/guardian/dashboard | jq .
 
 # Check Pi Network integration
-curl https://[deployment-url]/api/pi-network/status | jq .
+curl https://pi-forge-quantum-genesis.railway.app/api/pi-network/status | jq .
 ```
 
 #### 2. Access Dashboards
@@ -102,12 +105,12 @@ curl https://[deployment-url]/api/pi-network/status | jq .
 1. **Register/Login**
    ```bash
    # Register new account
-   curl -X POST https://[url]/api/register \
+   curl -X POST https://pi-forge-quantum-genesis.railway.app/api/register \
      -H "Content-Type: application/json" \
      -d '{"email": "user@example.com", "password": "secure_password"}'
 
    # Login
-   curl -X POST https://[url]/api/login \
+   curl -X POST https://pi-forge-quantum-genesis.railway.app/api/login \
      -H "Content-Type: application/json" \
      -d '{"email": "user@example.com", "password": "secure_password"}'
    ```
@@ -135,7 +138,7 @@ curl https://[deployment-url]/api/pi-network/status | jq .
 3. **View Transaction**
    ```bash
    # Check payment status
-   curl https://[url]/api/payments/{payment_id}
+   curl https://pi-forge-quantum-genesis.railway.app/api/payments/{payment_id}
    ```
 
 ### Need Help?
@@ -535,7 +538,7 @@ curl http://localhost:8000/api/guardian/dashboard | jq .
 
 **Production**:
 ```bash
-curl https://[deployment-url]/api/guardian/dashboard | jq .
+curl https://pi-forge-quantum-genesis.railway.app/api/guardian/dashboard | jq .
 ```
 
 **Dashboard Contents**:
@@ -564,13 +567,13 @@ curl https://[deployment-url]/api/guardian/dashboard | jq .
 **Via API**:
 ```bash
 # Approve decision
-curl -X POST https://[url]/api/guardian/approve/{decision_id} \
+curl -X POST https://pi-forge-quantum-genesis.railway.app/api/guardian/approve/{decision_id} \
   -H "Authorization: Bearer <guardian-token>" \
   -H "Content-Type: application/json" \
   -d '{"approved": true, "comments": "Looks good"}'
 
 # Reject decision
-curl -X POST https://[url]/api/guardian/approve/{decision_id} \
+curl -X POST https://pi-forge-quantum-genesis.railway.app/api/guardian/approve/{decision_id} \
   -H "Authorization: Bearer <guardian-token>" \
   -H "Content-Type: application/json" \
   -d '{"approved": false, "comments": "Needs more investigation"}'
@@ -587,7 +590,7 @@ curl -X POST https://[url]/api/guardian/approve/{decision_id} \
 
 1. **Check Dashboard**
    ```bash
-   curl https://[url]/api/guardian/dashboard | jq .
+   curl https://pi-forge-quantum-genesis.railway.app/api/guardian/dashboard | jq .
    ```
 
 2. **Review Health Report**
@@ -610,11 +613,11 @@ curl -X POST https://[url]/api/guardian/approve/{decision_id} \
 1. **Final Dashboard Check**
 2. **Review Day's Decisions**
    ```bash
-   curl https://[url]/api/autonomous/decision-history?limit=50 | jq .
+   curl https://pi-forge-quantum-genesis.railway.app/api/autonomous/decision-history?limit=50 | jq .
    ```
 3. **Check Metrics**
    ```bash
-   curl https://[url]/api/autonomous/metrics | jq .
+   curl https://pi-forge-quantum-genesis.railway.app/api/autonomous/metrics | jq .
    ```
 
 ### Emergency Procedures
@@ -650,7 +653,7 @@ curl -X POST https://[url]/api/guardian/approve/{decision_id} \
 2. **Emergency stop** (if needed):
    ```bash
    # Stop all autonomous operations
-   curl -X POST https://[url]/api/guardian/emergency-stop \
+   curl -X POST https://pi-forge-quantum-genesis.railway.app/api/guardian/emergency-stop \
      -H "Authorization: Bearer <guardian-token>"
    ```
 3. **Trigger rollback** (if needed):

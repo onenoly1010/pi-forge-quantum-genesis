@@ -82,27 +82,33 @@ class TestRollbackTargetSelection:
         ]
         
         # With only one tag, head -2 | tail -1 would return the same tag
-        if len(deployment_tags) >= 2:
-            rollback_target = deployment_tags[1]
+        # Simulating: head -2 gets 1 tag, tail -1 returns that tag
+        tags_head_2 = deployment_tags[:2]  # Gets only 1 tag if only 1 exists
+        if tags_head_2:
+            rollback_target = tags_head_2[-1]  # tail -1 returns last element
         else:
-            # In practice, would get the same tag or use main as fallback
-            rollback_target = deployment_tags[0] if deployment_tags else "main"
+            rollback_target = None
         
+        # With a single tag, the workflow returns that same tag
+        # This isn't ideal (rolling back to current version), but matches workflow behavior
         assert rollback_target == "deploy-20241210-120000-abc1234"
     
     def test_rollback_target_no_tags(self):
         """Test rollback target when no deployment tags exist."""
         deployment_tags = []
         
-        # Logic from workflow: fallback to "main" if no tags
+        # Logic from workflow: no rollback target if no tags (graceful skip)
+        # Updated behavior: returns None/empty and exits gracefully
         if len(deployment_tags) >= 2:
             rollback_target = deployment_tags[1]
         elif len(deployment_tags) == 1:
             rollback_target = deployment_tags[0]
         else:
-            rollback_target = "main"
+            # No rollback target available - should skip rollback gracefully
+            rollback_target = None
         
-        assert rollback_target == "main"
+        # With updated workflow, rollback is skipped when no tags exist
+        assert rollback_target is None, "No rollback should occur when no tags exist"
     
     def test_manual_rollback_version_override(self):
         """Test that manual rollback version takes precedence."""
