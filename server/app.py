@@ -2,18 +2,23 @@
 import random
 import time
 from contextlib import contextmanager
-from typing import Any, Callable, Dict, Generator, List
+from typing import Any, Callable, Dict, List
 
 from flask import Flask, Response, jsonify
 from flask_cors import CORS
 
 # Sacred Trinity Enhanced Tracing System
 try:
-    from tracing_system import (trace_flask_operation,
-                                trace_quantum_dashboard_data,
-                                trace_svg_cascade_generation)
+    from tracing_system import \
+        trace_flask_operation  # type: ignore[assignment]
+    from tracing_system import \
+        trace_quantum_dashboard_data  # type: ignore[assignment]
+    from tracing_system import \
+        trace_svg_cascade_generation  # type: ignore[assignment]
     tracing_enabled = True
-    print("✅ Flask Glyph Weaver enhanced tracing enabled with Agent Framework support")
+    print(
+        "✅ Flask Glyph Weaver enhanced tracing enabled with Agent Framework"
+    )
 except ImportError as e:
     print(f"⚠️ Tracing system not available: {e}")
 
@@ -31,19 +36,20 @@ except ImportError as e:
     @contextmanager
     def trace_quantum_dashboard_data(  # type: ignore
         *args: Any, **kwargs: Any
-    ) -> Generator[Any, None, None]:
+    ) -> Any:
         yield DummySpan()
 
     @contextmanager
     def trace_svg_cascade_generation(  # type: ignore
         tx_hash: str, phase_count: int = 4
-    ) -> Generator[Any, None, None]:
+    ) -> Any:
         yield DummySpan()
 
     tracing_enabled = False
 
 app = Flask(__name__)
 CORS(app)
+
 
 # Quantum Engine Simulation for visualization and dashboard data
 class QuantumEngine:
@@ -55,7 +61,9 @@ class QuantumEngine:
             'sage': ['wisdom_cascade_1', 'insight_pattern_2'],
             'explorer': ['discovery_flow_1', 'adventure_spiral_1'],
             'creator': ['innovation_burst_1', 'artistic_resonance_1'],
-            'guardian': ['protection_shield_1', 'ethical_anchor_1']
+            'guardian': [
+                'protection_shield_1', 'ethical_anchor_1'
+            
         }
 
     def process_pioneer_engagement(self, engagement: Dict[str, Any]) -> Dict[str, Any]:
@@ -98,7 +106,7 @@ class VeiledVowEngine:
         """Process engagement with ethical considerations"""
         cascade: Dict[str, Any] = {
             'timestamp': time.time(),
-            'query': engagement.get('query', 'Quantum resonance query'),
+            'query': engagement.get('query', 'Quantum query'),
             'resonance': random.uniform(0.6, 0.95),
             'archetype': random.choice([
                 'sage', 'explorer', 'creator', 'guardian'
@@ -123,7 +131,9 @@ class VeiledVowEngine:
             'total_entries': len(self.ledger_entries),
             'coherence_score': self.coherence_score,
             'total_coherence': self.total_coherence,
-            'recent_entries': self.ledger_entries[-5:] if self.ledger_entries else []
+            'recent_entries': (
+                self.ledger_entries[-5:] if self.ledger_entries else []
+            )
         }
 
     def add_ledger_entry(self, entry: Dict[str, Any]) -> Dict[str, Any]:
@@ -131,13 +141,17 @@ class VeiledVowEngine:
         entry['timestamp'] = time.time()
         entry['hash'] = hashlib.sha256(str(entry).encode()).hexdigest()[:12]
         self.ledger_entries.append(entry)
-        self.coherence_score = min(1000, self.coherence_score + random.randint(1, 5))
+        self.coherence_score = min(
+            1000, self.coherence_score + random.randint(1, 5)
+        )
         self.total_coherence += random.randint(100, 500)
         return entry
+
 
 # Initialize engines
 quantum_engine = QuantumEngine()
 veiled_vow_engine = VeiledVowEngine()
+
 
 @app.route('/health')
 @trace_flask_operation("health_check")
@@ -187,10 +201,12 @@ def resonance_dashboard() -> Response:
         archetype_data = veiled_vow_engine.distribute_archetypal_wisdom()
 
         dashboard_span.set_attribute(
-            "quantum.archetype.count", len(archetype_data)
+            "quantum.archetype.count",
+            len(archetype_data)
         )
         dashboard_span.set_attribute(
-            "quantum.resonance.level", quantum_result.get('resonance', 0)
+            "quantum.resonance.level",
+            quantum_result.get('resonance', 0)
         )
 
         dashboard_data: Dict[str, Any] = {
@@ -215,6 +231,7 @@ def resonance_dashboard() -> Response:
         dashboard_span.set_attribute("quantum.dashboard.success", True)
 
         return jsonify(dashboard_data)
+
 
 @app.route('/api/visualization/resonance/<tx_hash>')
 @trace_flask_operation("resonance_visualization")
@@ -248,6 +265,7 @@ def resonance_visualization(tx_hash: str) -> Response:
             'ethical_score': round(random.uniform(0.85, 0.98), 3),
             'timestamp': time.time()
         })
+
 
 
 @app.route('/api/archetype-distribution')
@@ -296,8 +314,8 @@ def svg_cascade(tx_hash: str) -> Response:
         # Generate SVG content
         svg_content = (
             '<?xml version="1.0" encoding="UTF-8"?>\n'
-            '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" '
-            'viewBox="0 0 300 300">\n'
+            '<svg xmlns="http://www.w3.org/2000/svg" ' \
+            'width="300" height="300" viewBox="0 0 300 300">\n'
             '    <style>\n'
             '        @keyframes resonate-0 { \n'
             '            0% { transform: scale(1) rotate(0deg); opacity: 1; }\n'
@@ -321,17 +339,17 @@ def svg_cascade(tx_hash: str) -> Response:
             '        }\n'
             '    </style>\n'
             '    <g transform="translate(150,150)">\n'
-            '        <circle r="50" fill="none" stroke="hsl(0, 100%, 50%)" '
+            '        <circle r="50" fill="none" stroke="hsl(0, 100%, 50%)" ' \
             'stroke-width="2" style="animation: resonate-0 2s linear infinite"/>\n'
-            '        <circle r="80" fill="none" stroke="hsl(90, 100%, 50%)" '
+            '        <circle r="80" fill="none" stroke="hsl(90, 100%, 50%)" ' \
             'stroke-width="2" style="animation: resonate-1 3s linear infinite"/>\n'
-            '        <circle r="110" fill="none" stroke="hsl(180, 100%, 50%)" '
+            '        <circle r="110" fill="none" stroke="hsl(180, 100%, 50%)" ' \
             'stroke-width="2" style="animation: resonate-2 4s linear infinite"/>\n'
-            '        <circle r="140" fill="none" stroke="hsl(270, 100%, 50%)" '
+            '        <circle r="140" fill="none" stroke="hsl(270, 100%, 50%)" ' \
             'stroke-width="2" style="animation: resonate-3 5s linear infinite"/>\n'
             '    </g>\n'
-            f'    <text x="150" y="290" text-anchor="middle" fill="#DDA0DD" '
-            f'font-size="10">TX: {tx_hash[:12]}...</text>\n'
+            f'    <text x="150" y="290" text-anchor="middle" ' \
+            f'fill="#DDA0DD" font-size="10">TX: {tx_hash[:12]}...</text>\n'
             '</svg>'
         )
 
@@ -339,6 +357,7 @@ def svg_cascade(tx_hash: str) -> Response:
 
         from flask import Response
         return Response(svg_content, mimetype='image/svg+xml')
+
 
 if __name__ == '__main__':
     print("🎨 Flask Glyph Weaver starting - Mainnet Visualization Engine")

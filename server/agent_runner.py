@@ -16,6 +16,16 @@ from typing import Any, Dict, List, Optional, Type, cast
 
 import aiohttp
 
+# Import tracing system
+try:
+    from tracing_system import (get_tracing_system, trace_fastapi_operation,
+                                trace_flask_operation, trace_gradio_operation)
+    tracing_enabled = True
+    tracing_system = get_tracing_system()
+except ImportError:
+    tracing_enabled = False
+    tracing_system = None
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -46,6 +56,17 @@ class QuantumAgentRunner:
 
     async def run_quantum_queries(self, queries_file: str) -> str:
         """Execute quantum lattice with test queries and collect responses"""
+        if tracing_enabled and tracing_system:
+            with tracing_system.create_quantum_span(
+                tracing_system.get_tracer("agent-runner"),
+                "run_quantum_queries",
+                {"queries_file": queries_file}
+            ) as span:
+                return await self._run_quantum_queries_impl(queries_file)
+        else:
+            return await self._run_quantum_queries_impl(queries_file)
+
+    async def _run_quantum_queries_impl(self, queries_file: str) -> str:
         logger.info(
             "🌌 Quantum Agent Runner - Collecting Sacred Trinity Responses"
         )
@@ -109,6 +130,22 @@ class QuantumAgentRunner:
     ) -> Dict[str, Any]:
         """Execute query against appropriate Sacred Trinity component"""
         component = query_data["component"]
+        
+        if tracing_enabled and tracing_system:
+            with tracing_system.create_quantum_span(
+                tracing_system.get_tracer("agent-runner"),
+                "execute_query",
+                {"component": component, "query": query_data.get("query", "")}
+            ) as span:
+                return await self._execute_query_impl(query_data)
+        else:
+            return await self._execute_query_impl(query_data)
+
+    async def _execute_query_impl(
+        self, query_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Execute query against appropriate Sacred Trinity component"""
+        component = query_data["component"]
         query = query_data["query"]
 
         start_time = datetime.now(timezone.utc)
@@ -140,6 +177,19 @@ class QuantumAgentRunner:
         self, query: str, query_data: Dict[str, Any]
     ) -> str:
         """Query FastAPI Quantum Conduit"""
+        if tracing_enabled and tracing_system:
+            with tracing_system.create_quantum_span(
+                tracing_system.get_tracer("fastapi-client"),
+                "query_fastapi",
+                {"query": query}
+            ) as span:
+                return await self._query_fastapi_impl(query, query_data)
+        else:
+            return await self._query_fastapi_impl(query, query_data)
+
+    async def _query_fastapi_impl(
+        self, query: str, query_data: Dict[str, Any]
+    ) -> str:
         if not self.session:
             raise RuntimeError("Session not initialized")
 
@@ -169,6 +219,19 @@ class QuantumAgentRunner:
         self, query: str, query_data: Dict[str, Any]
     ) -> str:
         """Query Flask Glyph Weaver"""
+        if tracing_enabled and tracing_system:
+            with tracing_system.create_quantum_span(
+                tracing_system.get_tracer("flask-client"),
+                "query_flask",
+                {"query": query}
+            ) as span:
+                return await self._query_flask_impl(query, query_data)
+        else:
+            return await self._query_flask_impl(query, query_data)
+
+    async def _query_flask_impl(
+        self, query: str, query_data: Dict[str, Any]
+    ) -> str:
         if not self.session:
             raise RuntimeError("Session not initialized")
 
@@ -200,6 +263,20 @@ class QuantumAgentRunner:
                 return f"Flask glyph weaver operational: {msg}"
 
     async def _query_gradio(
+        self, query: str, query_data: Dict[str, Any]
+    ) -> str:
+        """Query Gradio Truth Mirror"""
+        if tracing_enabled and tracing_system:
+            with tracing_system.create_quantum_span(
+                tracing_system.get_tracer("gradio-client"),
+                "query_gradio",
+                {"query": query}
+            ) as span:
+                return self._query_gradio_impl(query, query_data)
+        else:
+            return self._query_gradio_impl(query, query_data)
+
+    def _query_gradio_impl(
         self, query: str, query_data: Dict[str, Any]
     ) -> str:
         """Query Gradio Truth Mirror"""
