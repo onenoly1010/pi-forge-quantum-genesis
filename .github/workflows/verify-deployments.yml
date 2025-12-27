@@ -109,21 +109,24 @@ jobs:
               
               const status = summary.summary.failed === 0 ? '✅ PASSED' : '❌ FAILED';
               const emoji = summary.summary.failed === 0 ? '🎉' : '⚠️';
+              const network = '${{ inputs.network }}';
+              const repository = '${{ github.repository }}';
+              const runId = '${{ github.run_id }}';
               
-              const comment = `## ${emoji} Deployment Verification Report
-              
-**Status:** ${status}
-**Network:** ${{ inputs.network }}
+              const comment = `## \${emoji} Deployment Verification Report
 
-### Summary
-- **Total Verifications:** ${summary.summary.total}
-- **Successful:** ${summary.summary.successful} ✓
-- **Failed:** ${summary.summary.failed} ✗
+            **Status:** \${status}
+            **Network:** \${network}
 
-**Timestamp:** ${summary.timestamp}
+            ### Summary
+            - **Total Verifications:** \${summary.summary.total}
+            - **Successful:** \${summary.summary.successful} ✓
+            - **Failed:** \${summary.summary.failed} ✗
 
-[View detailed reports in artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-              `;
+            **Timestamp:** \${summary.timestamp}
+
+            [View detailed reports in artifacts](https://github.com/\${repository}/actions/runs/\${runId})
+            `;
               
               github.rest.issues.createComment({
                 owner: context.repo.owner,
