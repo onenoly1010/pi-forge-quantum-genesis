@@ -1085,7 +1085,9 @@ This section covers the most common deployment issues and their solutions.
 2. **Verify webhook URL is public:**
    ```bash
    # Test webhook endpoint is accessible
-   curl -X POST https://your-app.railway.app/api/pi-webhooks/payment      -H "Content-Type: application/json"      -d '{"test": true}'
+   curl -X POST https://your-app.railway.app/api/pi-webhooks/payment \
+     -H "Content-Type: application/json" \
+     -d '{"test": true}'
    
    # Expected: Response (even if verification fails, endpoint should respond)
    ```
