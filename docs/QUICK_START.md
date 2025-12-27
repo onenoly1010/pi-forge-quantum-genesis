@@ -2,6 +2,8 @@
 
 Welcome to Pi Forge Quantum Genesis! This guide will help you get started based on your role.
 
+> **Note**: This is the comprehensive platform guide. For Pi Network Mainnet deployment specifically, see [QUICK_START.md](../QUICK_START.md) in the root directory.
+
 ---
 
 ## 👥 Choose Your Path

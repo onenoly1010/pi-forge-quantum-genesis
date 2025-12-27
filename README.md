@@ -1,5 +1,5 @@
-# 🌐 Quantum Pi Forge — Coordination Space  
-### A Sovereign Hub for the Autonomous Multi‑Agent Constellation
+# 🌐 Quantum Pi Forge — Coordination Space
+## A Sovereign Hub for the Autonomous Multi‑Agent Constellation
 
 Welcome to the **Quantum Pi Forge Space** — the central coordination hub for the entire constellation of repositories, services, and agents that make up the Quantum Pi Forge ecosystem.
 

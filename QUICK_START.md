@@ -1,5 +1,7 @@
 # 🚀 Pi Network Mainnet - Quick Start Guide
 
+> **Note**: This guide focuses on Pi Network Mainnet deployment. For a comprehensive platform usage guide covering all features, see [docs/QUICK_START.md](docs/QUICK_START.md).
+
 ## ⚡ 5-Minute Setup
 
 ### 1. Install Dependencies
