@@ -14,7 +14,7 @@ from datetime import datetime
 from typing import Dict, Any, Optional
 from decimal import Decimal
 
-from fastapi import APIRouter, HTTPException, Request, status, Depends
+from fastapi import APIRouter, HTTPException, Request, status
 from pydantic import BaseModel, Field
 
 from pi_network import (
@@ -39,6 +39,53 @@ SACRED_FEES = {
     "phi": Decimal("1.618"),       # Golden ratio
     "euler": Decimal("2.718")      # Natural growth
 }
+
+# Cached Supabase client
+_supabase_client = None
+_supabase_available = None
+
+
+def _get_supabase_client():
+    """
+    Get cached Supabase client instance
+    
+    Returns:
+        Supabase client instance or None if unavailable
+    """
+    global _supabase_client, _supabase_available
+    
+    # Return cached result if already checked
+    if _supabase_available is False:
+        return None
+    
+    if _supabase_client is not None:
+        return _supabase_client
+    
+    # Try to initialize Supabase client
+    try:
+        import importlib
+        supabase_module = importlib.import_module('supabase')
+        supabase_url = os.environ.get("SUPABASE_URL")
+        supabase_service_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+        
+        if not supabase_url or not supabase_service_key:
+            logger.debug("Supabase not configured")
+            _supabase_available = False
+            return None
+        
+        _supabase_client = supabase_module.create_client(supabase_url, supabase_service_key)
+        _supabase_available = True
+        logger.info("✅ Supabase client initialized for Genesis Bridge")
+        return _supabase_client
+        
+    except ImportError:
+        logger.debug("Supabase module not available")
+        _supabase_available = False
+        return None
+    except Exception as e:
+        logger.warning(f"Failed to initialize Supabase client: {e}")
+        _supabase_available = False
+        return None
 
 
 # --- REQUEST/RESPONSE MODELS ---
@@ -191,10 +238,17 @@ async def genesis_webhook_handler(payload: GenesisWebhookPayload, request: Reque
     """
     try:
         # Verify webhook authenticity (if webhook secret is configured)
+        # SECURITY NOTE: In production, webhook signature verification MUST be implemented
+        # to prevent unauthorized webhook calls. Use HMAC-SHA256 to verify the signature
+        # from Pi Network using the webhook secret from the developer portal.
         webhook_secret = os.environ.get("PI_NETWORK_WEBHOOK_SECRET")
         if webhook_secret:
             # TODO: Implement webhook signature verification
-            # This should verify the webhook came from Pi Network
+            # Example: Verify signature from request headers using HMAC-SHA256
+            # signature = request.headers.get("X-Pi-Signature")
+            # expected_signature = hmac.new(webhook_secret.encode(), request.body, hashlib.sha256).hexdigest()
+            # if not hmac.compare_digest(signature, expected_signature):
+            #     raise HTTPException(status_code=401, detail="Invalid webhook signature")
             pass
         
         logger.info(
@@ -319,18 +373,10 @@ async def _record_genesis_fee_transaction(
     If Supabase is not available, it logs a warning and continues.
     """
     try:
-        # Check if Supabase is available (import from main.py context)
-        import importlib
-        
-        supabase_module = importlib.import_module('supabase')
-        supabase_url = os.environ.get("SUPABASE_URL")
-        supabase_service_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
-        
-        if not supabase_url or not supabase_service_key:
+        supabase = _get_supabase_client()
+        if not supabase:
             logger.debug("Supabase not configured for Genesis Fee recording")
             return
-        
-        supabase = supabase_module.create_client(supabase_url, supabase_service_key)
         
         # Insert into genesis_fee_transactions table
         supabase.table("genesis_fee_transactions").insert({
@@ -345,7 +391,7 @@ async def _record_genesis_fee_transaction(
         
         logger.debug(f"Genesis Fee transaction recorded: {payment_id}")
         
-    except ImportError:
+    except Exception as e:
         logger.debug("Supabase not available for Genesis Fee recording")
     except Exception as e:
         logger.warning(f"Failed to record Genesis Fee transaction: {e}")
@@ -360,16 +406,9 @@ async def _update_genesis_fee_transaction(
 ) -> None:
     """Update Genesis Fee transaction status"""
     try:
-        import importlib
-        
-        supabase_module = importlib.import_module('supabase')
-        supabase_url = os.environ.get("SUPABASE_URL")
-        supabase_service_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
-        
-        if not supabase_url or not supabase_service_key:
+        supabase = _get_supabase_client()
+        if not supabase:
             return
-        
-        supabase = supabase_module.create_client(supabase_url, supabase_service_key)
         
         update_data = {
             "status": status,
@@ -405,17 +444,10 @@ async def _initialize_genesis_pioneer(
     3. Records NFT mint log entry
     """
     try:
-        import importlib
-        
-        supabase_module = importlib.import_module('supabase')
-        supabase_url = os.environ.get("SUPABASE_URL")
-        supabase_service_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
-        
-        if not supabase_url or not supabase_service_key:
+        supabase = _get_supabase_client()
+        if not supabase:
             logger.warning("Supabase not configured - cannot initialize Genesis Pioneer")
             return
-        
-        supabase = supabase_module.create_client(supabase_url, supabase_service_key)
         
         # Update user metadata
         supabase.table("user_metadata").upsert({
@@ -441,9 +473,12 @@ async def _initialize_genesis_pioneer(
         # Log NFT mint event (if configured)
         nft_collection_id = os.environ.get("NFT_COLLECTION_ID")
         if nft_collection_id:
+            # Use payment_id and user_id for unique NFT token ID to prevent collisions
+            nft_token_id = f"genesis_{payment_id}_{user_id}"
+            
             supabase.table("nft_mint_logs").insert({
                 "user_id": user_id,
-                "nft_token_id": f"genesis_{user_id}_{int(datetime.utcnow().timestamp())}",
+                "nft_token_id": nft_token_id,
                 "nft_collection_id": nft_collection_id,
                 "mint_transaction_hash": tx_hash,
                 "mint_status": "pending",
@@ -470,20 +505,13 @@ async def _initialize_genesis_pioneer(
 async def _get_pioneer_status(user_id: str) -> Dict[str, Any]:
     """Get Genesis Pioneer status from database"""
     try:
-        import importlib
-        
-        supabase_module = importlib.import_module('supabase')
-        supabase_url = os.environ.get("SUPABASE_URL")
-        supabase_service_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
-        
-        if not supabase_url or not supabase_service_key:
+        supabase = _get_supabase_client()
+        if not supabase:
             return {
                 "is_genesis_pioneer": False,
                 "genesis_fee_paid": False,
                 "resonance_initialized": False
             }
-        
-        supabase = supabase_module.create_client(supabase_url, supabase_service_key)
         
         # Query user metadata
         metadata_result = supabase.table("user_metadata").select("*").eq(
