@@ -610,6 +610,17 @@ except ImportError as e:
     pi_network_available = False
     pi_network_router = None
 
+# Import and include Genesis Bridge router
+try:
+    from genesis_bridge import router as genesis_bridge_router
+    genesis_bridge_available = True
+    app.include_router(genesis_bridge_router)
+    logging.info("✅ Genesis Bridge router loaded")
+except ImportError as e:
+    logging.warning(f"⚠️ Genesis Bridge router import failed: {e}")
+    genesis_bridge_available = False
+    genesis_bridge_router = None
+
 # Add CORS middleware for cross-origin requests
 # In production, CORS_ORIGINS env var should be set to specific domains
 cors_origins = os.environ.get("CORS_ORIGINS", "http://localhost:3000,http://localhost:5000,http://localhost:7860")
