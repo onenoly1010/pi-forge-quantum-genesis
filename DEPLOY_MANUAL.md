@@ -1,6 +1,6 @@
 # 🚀 Manual Deployment Guide - Railway Web Dashboard
 
-> **📌 Note**: This document is part of the deployment documentation suite.  
+> **📌 Note**: This document is part of the deployment documentation suite.
 > For the complete deployment guide, see the **[Deployment Dashboard](docs/DEPLOYMENT_DASHBOARD.md)**.
 
 ## Quick Deploy (No CLI Required)

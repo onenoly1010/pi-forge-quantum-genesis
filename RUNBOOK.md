@@ -1,6 +1,6 @@
 # 🧾 RUNBOOK: Pi-Forge Quantum Genesis
 
-This runbook provides **step-by-step operational commands** for maintaining, testing, releasing, and recovering the system.  
+This runbook provides **step-by-step operational commands** for maintaining, testing, releasing, and recovering the system.
 It complements `HANDOFF.md` by offering executable instructions.
 
 ---

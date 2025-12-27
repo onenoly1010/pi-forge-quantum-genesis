@@ -42,7 +42,7 @@ async def metrics_endpoint():
     """Prometheus-compatible metrics endpoint"""
     connection_metrics = connection_tracker.get_metrics()
     guardian_status = guardian.get_status()
-    
+
     return {
         "service": "pi-forge-quantum-genesis",
         "version": "3.3.0",
@@ -85,7 +85,7 @@ Updated `server/tracing_system.py`:
 ```python
 def __init__(self, service_name: str = "quantum-resonance-lattice"):
     self.telemetry_enabled = os.environ.get("ENABLE_TELEMETRY", "true").lower() == "true"
-    
+
     if self.telemetry_enabled:
         self.setup_tracing()
     else:
