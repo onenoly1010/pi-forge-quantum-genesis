@@ -392,8 +392,6 @@ async def _record_genesis_fee_transaction(
         logger.debug(f"Genesis Fee transaction recorded: {payment_id}")
         
     except Exception as e:
-        logger.debug("Supabase not available for Genesis Fee recording")
-    except Exception as e:
         logger.warning(f"Failed to record Genesis Fee transaction: {e}")
         # Don't raise - this is non-critical
 
