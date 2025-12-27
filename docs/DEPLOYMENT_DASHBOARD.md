@@ -1223,7 +1223,11 @@ This section covers the most common deployment issues and their solutions.
 
 3. **Test CORS with curl:**
    ```bash
-   curl -H "Origin: https://your-project.vercel.app"      -H "Access-Control-Request-Method: POST"      -H "Access-Control-Request-Headers: Content-Type"      -X OPTIONS      https://your-app.railway.app/api/test
+   curl -H "Origin: https://your-project.vercel.app" \
+     -H "Access-Control-Request-Method: POST" \
+     -H "Access-Control-Request-Headers: Content-Type" \
+     -X OPTIONS \
+     https://your-app.railway.app/api/test
    
    # Should return:
    # Access-Control-Allow-Origin: https://your-project.vercel.app
