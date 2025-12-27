@@ -3,8 +3,9 @@
 import os
 import sys
 
-# Add current directory to Python path
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# Add parent directory (repo root) to Python path to import generate_dashboard
+repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, repo_root)
 
 def test_dashboard_generation_in_repo():
     """Test that the dashboard generates correctly in the actual repository"""
@@ -38,7 +39,8 @@ def test_dashboard_generation_in_repo():
     assert '## 🌐 Platform Overview' in content, "Platform Overview section should exist"
     
     # Verify directory creation code exists in the script
-    with open('generate_dashboard.py', 'r') as f:
+    script_path = os.path.join(repo_root, 'generate_dashboard.py')
+    with open(script_path, 'r') as f:
         script_content = f.read()
     
     assert "os.makedirs('docs', exist_ok=True)" in script_content, "Script should have directory creation code"
@@ -50,23 +52,25 @@ def test_dashboard_generation_in_repo():
     print(f"   - Navigation properly located at line {nav_line}: PASS")
     print(f"   - Directory creation code exists: PASS")
     print(f"   - Key sections present: PASS")
-    return True
 
 def test_actual_file_generation():
     """Test that the dashboard file can be generated and exists"""
     
-    # Run the script
+    # Run the script from repo root
     import subprocess
-    result = subprocess.run(['python3', 'generate_dashboard.py'], 
+    script_path = os.path.join(repo_root, 'generate_dashboard.py')
+    result = subprocess.run(['python3', script_path], 
+                          cwd=repo_root,
                           capture_output=True, text=True)
     
     assert result.returncode == 0, f"Script should run successfully: {result.stderr}"
     
     # Verify the file was created
-    assert os.path.exists('docs/DEPLOYMENT_DASHBOARD.md'), "Dashboard file should be created"
+    dashboard_file = os.path.join(repo_root, 'docs/DEPLOYMENT_DASHBOARD.md')
+    assert os.path.exists(dashboard_file), "Dashboard file should be created"
     
     # Verify the file has content
-    with open('docs/DEPLOYMENT_DASHBOARD.md', 'r') as f:
+    with open(dashboard_file, 'r') as f:
         file_content = f.read()
     
     assert len(file_content) > 1000, "Generated file should have substantial content"
@@ -75,8 +79,6 @@ def test_actual_file_generation():
     print(f"   - Script executed successfully: PASS")
     print(f"   - Dashboard file created: PASS")
     print(f"   - File has {len(file_content)} characters: PASS")
-    
-    return True
 
 if __name__ == '__main__':
     try:
