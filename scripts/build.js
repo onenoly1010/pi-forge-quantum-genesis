@@ -83,8 +83,8 @@ function build() {
     version: 3,
     routes: [
       { handle: "filesystem" },
-      { src: "/api/(.*)", dest: "https://pi-forge-quantum-genesis-production-4fc8.up.railway.app/api/$1" },
-      { src: "/health", dest: "https://pi-forge-quantum-genesis-production-4fc8.up.railway.app/health" },
+      { src: "/api/(.*)", dest: "https://pi-forge-quantum-genesis-1.onrender.com/api/$1" },
+      { src: "/health", dest: "https://pi-forge-quantum-genesis-1.onrender.com/health" },
       { src: "/(.*)", dest: "/index.html" }
     ]
   };

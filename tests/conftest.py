@@ -1,12 +1,12 @@
 """
-Pytest configuration for Pi Forge Quantum Genesis tests.
-Sets up proper module paths for importing server modules.
+Pytest configuration for pi-forge-quantum-genesis test suite.
+Ensures the server package is discoverable during test execution.
 """
 
 import sys
 import os
 
-# Add server directory to path for test imports
-SERVER_DIR = os.path.join(os.path.dirname(__file__), '..', 'server')
-if SERVER_DIR not in sys.path:
-    sys.path.insert(0, SERVER_DIR)
+# Add the parent directory (repo root) to Python path
+# This makes 'server' package importable
+repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, repo_root)
