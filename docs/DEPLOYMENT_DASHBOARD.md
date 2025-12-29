@@ -1085,9 +1085,7 @@ This section covers the most common deployment issues and their solutions.
 2. **Verify webhook URL is public:**
    ```bash
    # Test webhook endpoint is accessible
-   curl -X POST https://your-app.railway.app/api/pi-webhooks/payment \
-     -H "Content-Type: application/json" \
-     -d '{"test": true}'
+   curl -X POST https://your-app.railway.app/api/pi-webhooks/payment      -H "Content-Type: application/json"      -d '{"test": true}'
    
    # Expected: Response (even if verification fails, endpoint should respond)
    ```
@@ -1124,11 +1122,7 @@ This section covers the most common deployment issues and their solutions.
    "
    
    # Use signature in request
-   curl -X POST \
-     https://your-app.railway.app/api/pi-webhooks/payment \
-     -H "Content-Type: application/json" \
-     -H "X-Pi-Signature: $signature" \
-     -d '{"test": true}'
+   curl -X POST https://your-app.railway.app/api/pi-webhooks/payment      -H "Content-Type: application/json"      -H "X-Pi-Signature: $signature"      -d '{"test": true}'
    ```
 
 #### Issue 4: Vercel Serverless Function Timeout
@@ -1225,11 +1219,7 @@ This section covers the most common deployment issues and their solutions.
 
 3. **Test CORS with curl:**
    ```bash
-   curl -H "Origin: https://your-project.vercel.app" \
-     -H "Access-Control-Request-Method: POST" \
-     -H "Access-Control-Request-Headers: Content-Type" \
-     -X OPTIONS \
-     https://your-app.railway.app/api/test
+   curl -H "Origin: https://your-project.vercel.app"      -H "Access-Control-Request-Method: POST"      -H "Access-Control-Request-Headers: Content-Type"      -X OPTIONS      https://your-app.railway.app/api/test
    
    # Should return:
    # Access-Control-Allow-Origin: https://your-project.vercel.app
@@ -1384,9 +1374,7 @@ This section covers the most common deployment issues and their solutions.
 2. **Generate new token:**
    ```bash
    # Request new token from auth endpoint
-   curl -X POST https://your-app.railway.app/token \
-     -H "Content-Type: application/json" \
-     -d '{"username": "user", "password": "pass"}'
+   curl -X POST https://your-app.railway.app/token      -H "Content-Type: application/json"      -d '{"username": "user", "password": "pass"}'
    ```
 
 3. **Increase token expiration (if appropriate):**
@@ -1525,10 +1513,7 @@ If you're still stuck:
 - [ ] Test full payment flow (testnet)
   ```bash
   # Test payment approval
-  curl -X POST https://your-app.railway.app/api/payments/approve \
-    -H "Content-Type: application/json" \
-    -H "Authorization: Bearer YOUR_JWT" \
-    -d '{"payment_id": "test_123", "amount": 0.15}'
+  curl -X POST https://your-app.railway.app/api/payments/approve     -H "Content-Type: application/json"     -H "Authorization: Bearer YOUR_JWT"     -d '{"payment_id": "test_123", "amount": 0.15}'
   ```
 - [ ] Review deployment logs
   - Railway: Check for warnings
