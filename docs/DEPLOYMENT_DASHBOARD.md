@@ -1513,7 +1513,7 @@ If you're still stuck:
 - [ ] Test full payment flow (testnet)
   ```bash
   # Test payment approval
-  curl -X POST https://your-app.railway.app/api/payments/approve     -H "Content-Type: application/json"     -H "Authorization: Bearer YOUR_JWT"     -d '{"payment_id": "test_123", "amount": 0.15}'
+  curl -X POST https://your-app.railway.app/api/payments/approve      -H "Content-Type: application/json"      -H "Authorization: Bearer YOUR_JWT"      -d '{"payment_id": "test_123", "amount": 0.15}'
   ```
 - [ ] Review deployment logs
   - Railway: Check for warnings
