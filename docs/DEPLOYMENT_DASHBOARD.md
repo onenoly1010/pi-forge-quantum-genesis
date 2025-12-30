@@ -1122,7 +1122,10 @@ This section covers the most common deployment issues and their solutions.
    "
    
    # Use signature in request
-   curl -X POST https://your-app.railway.app/api/pi-webhooks/payment      -H "Content-Type: application/json"      -H "X-Pi-Signature: $signature"      -d '{"test": true}'
+   curl -X POST https://your-app.railway.app/api/pi-webhooks/payment \
+     -H "Content-Type: application/json" \
+     -H "X-Pi-Signature: $signature" \
+     -d '{"test": true}'
    ```
 
 #### Issue 4: Vercel Serverless Function Timeout
