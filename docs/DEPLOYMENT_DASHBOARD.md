@@ -1378,7 +1378,10 @@ This section covers the most common deployment issues and their solutions.
 2. **Generate new token:**
    ```bash
    # Request new token from auth endpoint
-   curl -X POST https://your-app.railway.app/token      -H "Content-Type: application/json"      -d '{"username": "user", "password": "pass"}'
+   curl -X POST \
+     https://your-app.railway.app/token \
+     -H "Content-Type: application/json" \
+     -d '{"username": "user", "password": "pass"}'
    ```
 
 3. **Increase token expiration (if appropriate):**
