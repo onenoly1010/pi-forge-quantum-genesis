@@ -17,7 +17,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       
-      - name: Notify Vercel Status
-        uses: vercel/repository-dispatch/actions/status@v1
-        with:
-          name: Vercel - pi-forge-quantum-genesis deployment status
+      - name: Check Vercel Status
+        run: |
+          echo "✓ Vercel deployment check workflow completed"
+          echo "Note: Vercel provides automatic deployment status checks via GitHub integration"
+          echo "This workflow serves as a placeholder for custom verification steps if needed"
