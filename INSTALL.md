@@ -75,7 +75,7 @@ EOF
 #### Step 5: Start the Application
 
 ```bash
-python app.py
+python server/app.py
 ```
 
 The application will be available at `http://localhost:5000`
@@ -255,7 +255,7 @@ pip install -r server/requirements.txt
 ```bash
 # Change port
 export PORT=5001
-python app.py
+python server/app.py
 
 # Or kill process on Linux/macOS
 lsof -ti:5000 | xargs kill -9
