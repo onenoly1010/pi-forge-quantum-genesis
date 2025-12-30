@@ -69,7 +69,7 @@ except ImportError as e:
         return decorator
     
     # Context managers for payment tracing
-    def trace_payment_processing(payment_id: str, amount: float = 0.0):
+    def trace_payment_processing(payment_id: str, amount: float):
         return nullcontext()
     
     def trace_payment_visualization_flow(payment_id: str, tx_hash: str = None):
