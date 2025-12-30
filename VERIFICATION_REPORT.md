@@ -6,7 +6,7 @@ This report documents the verification of the fix implemented in commit `8f49576
 
 **Date**: 2025-12-27  
 **Task**: Resolve and verify fix for deployment dashboard  
-**Commit Reference**: https://github.com/onenoly1010/pi-forge-quantum-genesis/commit/8f49576cf1a0a41cba992b89cc200f76d688f6c0
+**Commit Reference**: [https://github.com/onenoly1010/pi-forge-quantum-genesis/commit/8f49576cf1a0a41cba992b89cc200f76d688f6c0](https://github.com/onenoly1010/pi-forge-quantum-genesis/commit/8f49576cf1a0a41cba992b89cc200f76d688f6c0)
 
 ## Fixes Implemented
 
