@@ -244,6 +244,41 @@ git merge feature/new-feature
 git branch -d feature/new-feature
 ```
 
+### Version Control Best Practices
+
+**Build Artifacts:**
+- ❌ **Never commit** build artifacts, generated files, or deployment outputs
+- ✅ **Always use** `.gitignore` to exclude build directories
+- ✅ The `.vercel/` directory is excluded and contains:
+  - Build output generated during deployment
+  - Deployment configuration snapshots
+  - Cache and temporary build files
+
+**What to exclude:**
+```bash
+# Examples of directories to exclude via .gitignore
+.vercel/          # Vercel build output
+node_modules/     # Node.js dependencies
+dist/             # Distribution/build files
+build/            # Build artifacts
+__pycache__/      # Python cache
+*.pyc             # Python bytecode
+.env              # Environment variables
+```
+
+**Why exclude build artifacts:**
+- Reduces repository size
+- Prevents merge conflicts on generated files
+- Keeps history clean and focused on source code
+- Build outputs are regenerated during deployment
+
+**What to commit:**
+- Source code
+- Configuration files (without secrets)
+- Documentation
+- Tests
+- Package manifests (package.json, requirements.txt)
+
 ---
 
 ## 📊 Observability

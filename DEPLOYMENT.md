@@ -28,6 +28,22 @@ Set these in your Vercel project settings:
 API endpoints in the `api/` directory are automatically deployed as Vercel serverless functions:
 - `/api/pi-identify` - Pi Network authentication endpoint
 
+### Build Artifacts
+
+**Important**: Vercel build artifacts should **not** be committed to the repository. 
+
+The `.vercel/` directory contains:
+- Build output generated during deployment
+- Deployment configuration snapshots
+- Cache and temporary build files
+
+These files are:
+- Automatically generated during Vercel deployment
+- Excluded via `.gitignore`
+- Not needed in version control
+
+If you see `.vercel/output/` or similar directories, they should be removed and added to `.gitignore`.
+
 ### Local Testing
 
 To test the build locally:
