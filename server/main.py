@@ -56,25 +56,24 @@ except ImportError as e:
     tracing_enabled = False
     get_tracing_system = None
     
-    # No-op context manager for trace_consciousness_stream
+    # No-op context managers and decorators
     from contextlib import nullcontext
+    
+    # Context manager for trace_consciousness_stream
     trace_consciousness_stream = lambda *args, **kwargs: nullcontext()
     
-    # No-op decorator factories that return pass-through decorators
+    # Decorator factory for trace_fastapi_operation
     def trace_fastapi_operation(operation: str):
         def decorator(func):
             return func
         return decorator
     
-    def trace_payment_processing(payment_id: str):
-        def decorator(func):
-            return func
-        return decorator
+    # Context managers for payment tracing
+    def trace_payment_processing(payment_id: str, amount: float = 0.0):
+        return nullcontext()
     
-    def trace_payment_visualization_flow(flow: str):
-        def decorator(func):
-            return func
-        return decorator
+    def trace_payment_visualization_flow(payment_id: str, tx_hash: str = None):
+        return nullcontext()
 
 # Import autonomous decision tools
 try:
