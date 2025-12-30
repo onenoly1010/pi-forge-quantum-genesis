@@ -1,5 +1,13 @@
 # 🏗️ Pi Forge Quantum Genesis - System Architecture
 
+## Foundation
+
+This architecture is built upon the principles established in **[GENESIS.md](../GENESIS.md)** — the Eternal Archive containing the OINIO Seal Declaration minted on Winter Solstice 2025.
+
+For ecosystem-level overview, see **[ECOSYSTEM_OVERVIEW.md](../ECOSYSTEM_OVERVIEW.md)**.
+
+---
+
 ## Overview
 
 Pi Forge Quantum Genesis is a production-ready autonomous AI platform built on Pi Network. The system combines autonomous decision-making, human guardian oversight, self-healing infrastructure, and ethical AI governance to create a truly self-sustaining ecosystem.

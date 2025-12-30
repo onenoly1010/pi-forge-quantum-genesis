@@ -40,8 +40,8 @@ FROM base as production
 COPY server/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code ONLY (no frontend for Railway)
-COPY server/ ./server/
+# Copy application code to /app root (not /app/server)
+COPY server/ ./
 
 # Create non-root user
 RUN useradd --create-home --shell /bin/bash app \
@@ -54,4 +54,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 
 # Production command - Railway provides $PORT dynamically
 # Use shell form to allow environment variable expansion
-CMD sh -c "python -m uvicorn server.main:app --host 0.0.0.0 --port ${PORT:-8000}"
+CMD sh -c "python -m uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"

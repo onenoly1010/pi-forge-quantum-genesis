@@ -26,6 +26,8 @@ jobs:
   gate1-classification:
     name: "Gate 1: PR Classification"
     runs-on: ubuntu-latest
+    # Skip if check_suite event without associated PRs (e.g., on main branch after merge)
+    if: github.event_name != 'check_suite' || (github.event.check_suite.pull_requests && github.event.check_suite.pull_requests.length > 0)
     outputs:
       is_canon_pr: ${{ steps.classify.outputs.is_canon_pr }}
       artifact_type: ${{ steps.classify.outputs.artifact_type }}
