@@ -9,6 +9,7 @@ name: Vercel Deployment Status Check
 
 permissions:
   contents: read
+  statuses: write
 
 jobs:
   vercel-check:
