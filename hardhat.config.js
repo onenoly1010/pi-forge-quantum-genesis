@@ -37,12 +37,14 @@ module.exports = {
     ],
   },
   networks: {
+    // 0G Aristotle Testnet
     aristotle: {
       url: process.env.ZEROG_RPC_URL || "https://evmrpc-testnet.0g.ai",
       chainId: 42069,
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
       timeout: 60000,
     },
+    // 0G Aristotle Mainnet
     aristotleMainnet: {
       url: process.env.ZEROG_RPC_URL || "https://evmrpc.0g.ai",
       chainId: 16661,

@@ -23,6 +23,7 @@ contract UniswapV2Router02Slim {
     error IdenticalAddresses();
     error ZeroAddress();
     error InsufficientLiquidity();
+    error TransferFromFailed();
 
     modifier ensure(uint deadline) {
         if (deadline < block.timestamp) revert Expired();
@@ -30,6 +31,9 @@ contract UniswapV2Router02Slim {
     }
 
     constructor(address _factory, address _WETH, bytes32 _initCodeHash) {
+        if (_factory == address(0)) revert ZeroAddress();
+        if (_WETH == address(0)) revert ZeroAddress();
+        if (_initCodeHash == bytes32(0)) revert ZeroAddress();
         factory = _factory;
         WETH = _WETH;
         initCodeHash = _initCodeHash;
@@ -59,12 +63,18 @@ contract UniswapV2Router02Slim {
         (reserveA, reserveB) = tokenA == token0 ? (reserve0, reserve1) : (reserve1, reserve0);
     }
 
+    /// @notice Calculates quote for token amounts
+    /// @dev Uses simple proportion: amountB = amountA * reserveB / reserveA
+    /// Note: Large values may cause overflow. Solidity 0.8.19 will revert on overflow.
     function quote(uint amountA, uint reserveA, uint reserveB) internal pure returns (uint amountB) {
         if (amountA == 0) revert InsufficientAAmount();
         if (reserveA == 0 || reserveB == 0) revert InsufficientLiquidity();
         amountB = (amountA * reserveB) / reserveA;
     }
 
+    /// @notice Calculates output amount for exact input swap
+    /// @dev Applies 0.3% fee: amountOut = (amountIn * 997 * reserveOut) / (reserveIn * 1000 + amountIn * 997)
+    /// Note: Large reserve values may cause overflow. Solidity 0.8.19 will revert on overflow.
     function getAmountOut(uint amountIn, uint reserveIn, uint reserveOut) internal pure returns (uint amountOut) {
         if (amountIn == 0) revert InsufficientAAmount();
         if (reserveIn == 0 || reserveOut == 0) revert InsufficientLiquidity();
@@ -74,6 +84,9 @@ contract UniswapV2Router02Slim {
         amountOut = numerator / denominator;
     }
 
+    /// @notice Calculates input amount required for exact output swap
+    /// @dev Applies 0.3% fee: amountIn = (reserveIn * amountOut * 1000) / ((reserveOut - amountOut) * 997) + 1
+    /// Note: Large reserve values may cause overflow. Solidity 0.8.19 will revert on overflow.
     function getAmountIn(uint amountOut, uint reserveIn, uint reserveOut) internal pure returns (uint amountIn) {
         if (amountOut == 0) revert InsufficientOutputAmount();
         if (reserveIn == 0 || reserveOut == 0) revert InsufficientLiquidity();
@@ -217,7 +230,7 @@ contract UniswapV2Router02Slim {
             abi.encodeWithSelector(IERC20.transferFrom.selector, from, to, value)
         );
         if (!success || (data.length != 0 && !abi.decode(data, (bool)))) {
-            revert("TransferFrom failed");
+            revert TransferFromFailed();
         }
     }
 }

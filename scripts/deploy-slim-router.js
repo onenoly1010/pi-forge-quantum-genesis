@@ -6,7 +6,10 @@ async function main() {
   console.log("🚀 Deploying Slim Router to 0G Aristotle Mainnet...");
   
   const [deployer] = await hre.ethers.getSigners();
+  const network = await hre.ethers.provider.getNetwork();
+  
   console.log(`👤 Deployer: ${deployer.address}`);
+  console.log(`🌐 Network: ${hre.network.name} (ChainID: ${network.chainId})`);
   
   // Existing deployment addresses
   const FACTORY_ADDRESS = "0x307bFaA937768a073D41a2EbFBD952Be8E38BF91";
@@ -67,8 +70,8 @@ async function main() {
   
   // Create deployment summary
   const summary = {
-    network: "0G Aristotle Mainnet",
-    chainId: 42069,
+    network: hre.network.name,
+    chainId: Number(network.chainId),
     timestamp: new Date().toISOString(),
     contracts: {
       router: routerAddress,

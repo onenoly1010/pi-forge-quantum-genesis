@@ -3,8 +3,6 @@ const hre = require("hardhat");
 async function main() {
   console.log("🔑 Calculating INIT_CODE_HASH for deployed Factory...");
   
-  const FACTORY_ADDRESS = "0x307bFaA937768a073D41a2EbFBD952Be8E38BF91";
-  
   // Get pair creation bytecode
   const PairFactory = await hre.ethers.getContractFactory("UniswapV2Pair");
   const pairBytecode = PairFactory.bytecode;

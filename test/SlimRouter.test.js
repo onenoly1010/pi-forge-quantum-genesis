@@ -13,7 +13,6 @@ describe("UniswapV2Router02Slim", function () {
   let initCodeHash;
 
   const TOTAL_SUPPLY = ethers.parseEther("10000");
-  const LIQUIDITY_AMOUNT = ethers.parseEther("100");
 
   beforeEach(async function () {
     [owner, user] = await ethers.getSigners();
