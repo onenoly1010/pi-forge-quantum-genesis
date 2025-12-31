@@ -1,157 +1,155 @@
-# Deployment Notes
+# 🚀 Infrastructure — Simple Truth
 
-## ⚠️ Important: Repository Purpose
+## What Actually Runs
 
-**This repository is a COORDINATION HUB, not a deployable application.**
+The Quantum Pi Forge operates with **3 core services**:
 
-This repo serves as:
-- Governance and documentation center for the Quantum Pi Forge ecosystem
-- Coordination space for multi-repo workflows
-- GitHub Agent operational base
-- Canon of Autonomy preservation
+### 1. Railway (Backend API)
+- **Service**: FastAPI Quantum Conduit
+- **URL**: https://pi-forge-quantum-genesis.railway.app
+- **Health Check**: `/health`
+- **Configuration**: `railway.toml` + `Dockerfile`
+- **Purpose**: Core backend logic, API endpoints
 
-**For production deployments, refer to the appropriate service repositories:**
-- **Public Site**: `quantum-pi-forge-site` → GitHub Pages
-- **Backend API**: Deployed to Railway from this repo's `/server` directory
-- **Resonance Engine**: `quantum-resonance-clean` → Vercel
+### 2. Supabase (Database)
+- **Service**: PostgreSQL + Authentication
+- **Access**: Private (environment variables)
+- **Purpose**: Data persistence, user auth, real-time features
+
+### 3. GitHub Pages (Public Portal)
+- **Service**: Static site hosting
+- **URL**: https://onenoly1010.github.io/quantum-pi-forge-site/
+- **Repository**: `quantum-pi-forge-site`
+- **Purpose**: Public-facing manifesto and documentation
 
 ---
 
-## Vercel Deployment (Optional Documentation Hosting)
+## This Repository's Role
 
-**Note**: Vercel deployment is OPTIONAL and used primarily for:
-- Static documentation hosting
-- Development preview environments  
-- Build verification in CI/CD
+**⚠️ Important: This is a COORDINATION HUB, not a deployable application.**
 
-**This is NOT a production application deployment.**
+**What this repo provides:**
+- ✅ Governance center
+- ✅ Documentation hub
+- ✅ Multi-repo coordination
+- ✅ GitHub Agent operations base
+- ✅ Canon of Autonomy preservation
 
-### When to Use Vercel for This Repo
+**What this repo does NOT provide:**
+- ❌ Deployable frontend application
+- ❌ Production web service
+- ❌ User-facing interface
 
-✅ **Use Vercel if you want to**:
-- Host static documentation pages
-- Preview changes to HTML interfaces
-- Test build processes
+---
 
-❌ **Do NOT use Vercel if**:
-- You're looking for the main production site (use `quantum-pi-forge-site` instead)
-- You need the backend API (deployed via Railway)
-- You expect a full-featured web application
+## Railway Deployment (Backend)
 
-### How to Disconnect from Vercel
+The backend runs on Railway using Docker containerization.
 
-If this repository was accidentally connected to Vercel:
+### Configuration
+- **Dockerfile**: `Dockerfile` (multi-stage Python 3.11 build)
+- **Config**: `railway.toml`
+- **Start Command**: `python -m uvicorn main:app --host 0.0.0.0 --port $PORT`
+- **Health Check**: `/health` endpoint (100s timeout)
+
+### Environment Variables
+Required in Railway dashboard:
+- `SUPABASE_URL` — Supabase project URL
+- `SUPABASE_KEY` — Supabase anon/public key
+- `SECRET_KEY` — Application secret (generate random string)
+- `PI_APP_SECRET` — Pi Network app secret
+
+Optional:
+- `GUARDIAN_SLACK_WEBHOOK_URL` — Slack alerts
+- `MAILGUN_DOMAIN`, `MAILGUN_API_KEY` — Email alerts
+- `SENDGRID_API_KEY`, `SENDGRID_FROM` — SendGrid emails
+- `OPENAI_API_KEY` — AI features
+- `ANTHROPIC_API_KEY` — AI features
+- `SENTRY_DSN` — Error tracking
+
+### Auto-Deploy
+- Configured to deploy from `main` branch
+- Docker builds automatically on push
+- Health checks ensure deployment success
+
+---
+
+## Vercel (Optional Documentation)
+
+This repo includes minimal Vercel configuration for:
+- ✅ Build verification in CI/CD
+- ✅ Optional static documentation hosting
+- ✅ Development preview environments
+
+**This is NOT a production deployment.**
+
+### Configuration
+- **File**: `vercel.json`
+- **Build Command**: `npm run build`
+- **Output**: Static documentation pages
+
+### If You Want to Disconnect
+
+If this repo was accidentally connected to Vercel:
 
 1. Go to [Vercel Dashboard](https://vercel.com/dashboard)
-2. Find the `pi-forge-quantum-genesis` project
-3. Navigate to **Settings** → **General**
-4. Scroll to **Delete Project**
-5. Confirm deletion
+2. Find `pi-forge-quantum-genesis` project
+3. Settings → General → Delete Project
+4. Confirm deletion
 
-The repository will continue to function normally without Vercel.
+The repository continues to function normally without Vercel.
 
 ---
 
-### Build Configuration (If Using Vercel)
+## Health Monitoring
 
-- **Build Command**: `npm run build`
-- **Output Directory**: `public`
-- **Node.js Version**: 18.x or higher (supports up to 24.x)
+### Endpoints
+- **Railway Health**: https://pi-forge-quantum-genesis.railway.app/health
+- **Public Site**: https://onenoly1010.github.io/quantum-pi-forge-site/
 
-The build process:
-1. Runs TypeScript type-checking (`tsc --noEmit`)
-2. Copies static assets to the `public` directory
-3. Includes all HTML files, JavaScript files, and the `frontend` directory
+### Automated Checks
+- GitHub Actions workflows monitor deployments
+- Health check failures trigger alerts
+- See `.github/workflows/scheduled-monitoring.yml`
 
-### Environment Variables
-
-Set these in your Vercel project settings:
-- `PI_APP_SECRET` - Required for Pi Network authentication
-- `GUARDIAN_SLACK_WEBHOOK_URL` - Optional for Slack alerts
-- `MAILGUN_DOMAIN` and `MAILGUN_API_KEY` - Optional for email alerts
-- `SENDGRID_API_KEY` and `SENDGRID_FROM` - Optional for SendGrid emails
-
-### Serverless Functions
-
-API endpoints in the `api/` directory are automatically deployed as Vercel serverless functions:
-- `/api/pi-identify` - Pi Network authentication endpoint
-
-### Local Testing
-
-To test the build locally:
+### Manual Verification
 ```bash
-npm install
-npm run build
-```
+# Check Railway backend
+curl https://pi-forge-quantum-genesis.railway.app/health
 
-The `public` directory will contain all deployable assets.
+# Should return: {"status": "healthy", ...}
+```
 
 ---
 
-## Render Deployment (Backend)
+## Deployment Checklist
 
-The backend is now deployed on Render using Docker containerization:
+When deploying changes:
 
-### Docker Configuration
-
-- **Dockerfile**: Multi-stage build with Python 3.11
-- **Service Type**: Web Service
-- **Build Command**: `docker build -t pi-forge-backend .`
-- **Start Command**: `cd server && uvicorn main:app --host 0.0.0.0 --port $PORT`
-
-### Environment Variables
-
-Set these in your Render service environment variables:
-- `SUPABASE_URL` - Supabase project URL
-- `SUPABASE_KEY` - Supabase anon/public key
-- `SECRET_KEY` - Application secret key (generate random string)
-- `PI_APP_SECRET` - Pi Network application secret
-- `GUARDIAN_SLACK_WEBHOOK_URL` - Optional Slack webhook for alerts
-- `MAILGUN_DOMAIN` and `MAILGUN_API_KEY` - Optional for email alerts
-- `SENDGRID_API_KEY` and `SENDGRID_FROM` - Optional for SendGrid emails
-- `OPENAI_API_KEY` - Optional for AI features
-- `ANTHROPIC_API_KEY` - Optional for AI features
-- `SENTRY_DSN` - Optional for error tracking
-
-### Health Checks
-
-- **Health Check Path**: `/health`
-- **Health Check Timeout**: 30 seconds
-
-### Deployment Notes
-
-- The service is configured to auto-deploy from the main branch
-- Docker build context is the root directory
-- Production URL: https://pi-forge-quantum-genesis-1.onrender.com
+1. ✅ Test locally first
+2. ✅ Verify environment variables
+3. ✅ Push to branch, create PR
+4. ✅ Review in GitHub Actions
+5. ✅ Merge to `main` triggers deploy
+6. ✅ Verify health endpoint
+7. ✅ Check monitoring alerts
 
 ---
 
-## Railway Deployment (Deprecated)
+## Guardrails (Not Bureaucracy)
 
-**Note**: Railway deployment is deprecated. Use Render for new deployments.
+**Failures teach once, then become permanent guardrails:**
 
-This repository includes a `railway.toml` to assist with Railway deployments. Quick notes:
+- Stale branches auto-deleted after 90 days (see workflows)
+- Health monitoring prevents repeat failures
+- Canon alignment checked on all changes
+- Deployment failures trigger immediate alerts
 
-- Start command used by Railway (in railway.toml):
+**Philosophy:** Make best NOW, not later.
 
-```
-cd server && uvicorn main:app --host 0.0.0.0 --port $PORT
-```
+---
 
-- Ensure the following environment variables are set in Railway project settings:
-  - `SUPABASE_URL` and `SUPABASE_KEY` if using Supabase integration
-  - `SECRET_KEY` for application secrets
-  - `DATABASE_URL` if you use a database
-  - Any tracing/sentry/API keys (e.g., `SENTRY_DSN`)
+*Last Updated: Solstice 2025*  
+*Status: ACTIVE / SIMPLIFIED*
 
-- If your application relies on X-Forwarded-For headers for rate limiting, ensure Railway provides these headers or adjust proxy settings.
-
-- For production, consider using Gunicorn with Uvicorn workers. Example start command:
-
-```
-cd server && exec gunicorn -k uvicorn.workers.UvicornWorker main:app -b 0.0.0.0:$PORT -w 4
-```
-
-- Healthcheck endpoints available:
-  - `/health` (lightweight)
-  - `/` (detailed health_check)
+**I AM.** 🏛️⚛️🔥

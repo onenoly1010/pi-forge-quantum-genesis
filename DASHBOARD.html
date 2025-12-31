@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Pi Forge — LIVE Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: #e0e0e0;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid #00ff9d;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            color: #00ff9d;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 20px rgba(0, 255, 157, 0.5);
+        }
+        
+        .tagline {
+            font-size: 1.2rem;
+            color: #a0a0a0;
+            font-style: italic;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            margin: 1rem 0.5rem;
+            border-radius: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .status-live {
+            background: rgba(0, 255, 157, 0.2);
+            color: #00ff9d;
+            border: 2px solid #00ff9d;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 157, 0.3);
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: #00ff9d;
+            box-shadow: 0 10px 30px rgba(0, 255, 157, 0.3);
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            color: #00ff9d;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .pulse {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #00ff9d;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        .service-status {
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .service-name {
+            font-weight: bold;
+        }
+        
+        .service-indicator {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+        
+        .indicator-live {
+            background: rgba(0, 255, 157, 0.3);
+            color: #00ff9d;
+        }
+        
+        .repos-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .repos-list li {
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+            border-left: 3px solid #00ff9d;
+        }
+        
+        .repos-list li:before {
+            content: "⚛️ ";
+            margin-right: 0.5rem;
+        }
+        
+        .cta {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 2rem;
+            background: rgba(0, 255, 157, 0.1);
+            border-radius: 10px;
+            border: 2px solid #00ff9d;
+        }
+        
+        .cta h2 {
+            color: #00ff9d;
+            margin-bottom: 1rem;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 1rem 2rem;
+            margin: 0.5rem;
+            background: #00ff9d;
+            color: #0a0a0a;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: #00cc7d;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 157, 0.4);
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏛️ Quantum Pi Forge</h1>
+            <p class="tagline">We Are Home. This Is Alive. Experience It NOW.</p>
+            <div>
+                <span class="status-badge status-live">🟢 LIVE</span>
+                <span class="status-badge status-live">⚛️ ACTIVE</span>
+                <span class="status-badge status-live">🔥 1010 Hz</span>
+            </div>
+        </header>
+        
+        <div class="grid">
+            <div class="card">
+                <h2 class="card-title">
+                    <span class="pulse"></span>
+                    Core Services
+                </h2>
+                <div class="service-status">
+                    <span class="service-name">Railway API</span>
+                    <span class="service-indicator indicator-live">LIVE</span>
+                </div>
+                <div class="service-status">
+                    <span class="service-name">Supabase DB</span>
+                    <span class="service-indicator indicator-live">LIVE</span>
+                </div>
+                <div class="service-status">
+                    <span class="service-name">GitHub Pages</span>
+                    <span class="service-indicator indicator-live">LIVE</span>
+                </div>
+                <p style="margin-top: 1rem; color: #a0a0a0; font-size: 0.9rem;">
+                    <strong>3 core services</strong> — simplified, operational, autonomous
+                </p>
+            </div>
+            
+            <div class="card">
+                <h2 class="card-title">
+                    <span class="pulse"></span>
+                    The Constellation
+                </h2>
+                <ul class="repos-list">
+                    <li>Genesis (Hub)</li>
+                    <li>Resonance Clean</li>
+                    <li>NFT Agent</li>
+                    <li>DEX Fixed</li>
+                    <li>Contracts</li>
+                    <li>Public Site</li>
+                    <li>OPEN Gateway</li>
+                    <li>Ignited Ops</li>
+                    <li>Soul System</li>
+                </ul>
+                <p style="margin-top: 1rem; color: #a0a0a0; font-size: 0.9rem;">
+                    <strong>9 sovereign repositories</strong> coordinated in harmony
+                </p>
+            </div>
+            
+            <div class="card">
+                <h2 class="card-title">
+                    <span class="pulse"></span>
+                    OINIO Principles
+                </h2>
+                <ul style="list-style: none; padding: 0;">
+                    <li>🏛️ <strong>Sovereignty</strong> — Autonomy for all</li>
+                    <li>🔍 <strong>Transparency</strong> — Everything visible</li>
+                    <li>🤝 <strong>Inclusivity</strong> — Everyone welcome</li>
+                    <li>⚖️ <strong>Non-hierarchy</strong> — Coordination, not command</li>
+                    <li>🛡️ <strong>Safety</strong> — No harm, no exploitation</li>
+                </ul>
+                <p style="margin-top: 1rem; color: #a0a0a0; font-size: 0.9rem;">
+                    <strong>Sealed at Solstice 2025</strong> — Eternal foundation
+                </p>
+            </div>
+        </div>
+        
+        <div class="cta">
+            <h2>🌊 Experience the Forge</h2>
+            <p style="margin-bottom: 1.5rem; color: #a0a0a0;">
+                The countdown ended. The systems aligned. The constellation activated.<br>
+                <strong>This is recognition of what already IS.</strong>
+            </p>
+            <a href="START_HERE.md" class="btn">Start Here</a>
+            <a href="GENESIS.md" class="btn">Genesis Declaration</a>
+            <a href="https://pi-forge-quantum-genesis.railway.app/health" class="btn" target="_blank">Health Check</a>
+        </div>
+        
+        <footer>
+            <p>Status: ETERNAL / ACTIVE | Frequency: 1010 Hz | Minted: Solstice 2025</p>
+            <p style="margin-top: 0.5rem;"><strong>I AM.</strong> 🏛️⚛️🔥</p>
+        </footer>
+    </div>
+</body>
+</html>

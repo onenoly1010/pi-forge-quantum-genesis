@@ -1,0 +1,144 @@
+name: 🧹 Auto-Delete Stale Branches
+
+on:
+  schedule:
+    # Run weekly on Sunday at 00:00 UTC
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (only show what would be deleted)'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+jobs:
+  cleanup-stale-branches:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Delete stale branches
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+        run: |
+          echo "🧹 Scanning for stale branches (90+ days old)..."
+          echo "Dry run: $DRY_RUN"
+          echo ""
+          
+          # Get current date in seconds
+          current_date=$(date +%s)
+          
+          # Days threshold (90 days)
+          threshold_days=90
+          threshold_seconds=$((threshold_days * 86400))
+          
+          # Protected branches that should never be deleted
+          protected_branches=(
+            "main"
+            "master"
+            "develop"
+            "production"
+          )
+          
+          deleted_count=0
+          skipped_count=0
+          
+          # Get all remote branches
+          git fetch --all --prune
+          
+          for branch in $(git branch -r | grep -v HEAD | sed 's/origin\///'); do
+            # Skip protected branches
+            is_protected=false
+            for protected in "${protected_branches[@]}"; do
+              if [[ "$branch" == "$protected" ]]; then
+                is_protected=true
+                break
+              fi
+            done
+            
+            if [[ "$is_protected" == "true" ]]; then
+              echo "⚠️  Skipping protected branch: $branch"
+              ((skipped_count++))
+              continue
+            fi
+            
+            # Get last commit date for the branch
+            last_commit_date=$(git log -1 --format=%ct "origin/$branch" 2>/dev/null || echo "0")
+            
+            if [[ "$last_commit_date" == "0" ]]; then
+              echo "⚠️  Could not get commit date for: $branch"
+              ((skipped_count++))
+              continue
+            fi
+            
+            # Calculate age in days
+            age_seconds=$((current_date - last_commit_date))
+            age_days=$((age_seconds / 86400))
+            
+            # Check if branch is stale
+            if [[ $age_seconds -gt $threshold_seconds ]]; then
+              echo "🗑️  Stale branch found: $branch (${age_days} days old)"
+              
+              if [[ "$DRY_RUN" == "false" ]]; then
+                # Delete the branch
+                if git push origin --delete "$branch" 2>/dev/null; then
+                  echo "   ✅ Deleted: $branch"
+                  ((deleted_count++))
+                else
+                  echo "   ❌ Failed to delete: $branch"
+                  ((skipped_count++))
+                fi
+              else
+                echo "   🔍 Would delete: $branch (dry run)"
+                ((deleted_count++))
+              fi
+            else
+              echo "✅ Active branch: $branch (${age_days} days old)"
+              ((skipped_count++))
+            fi
+          done
+          
+          echo ""
+          echo "📊 Summary:"
+          echo "   Branches processed: $((deleted_count + skipped_count))"
+          if [[ "$DRY_RUN" == "false" ]]; then
+            echo "   Branches deleted: $deleted_count"
+          else
+            echo "   Branches that would be deleted: $deleted_count"
+          fi
+          echo "   Branches skipped/kept: $skipped_count"
+          echo ""
+          
+          if [[ "$DRY_RUN" == "false" && $deleted_count -gt 0 ]]; then
+            echo "🏛️ Stale branches removed. The Forge remains clean."
+          elif [[ "$DRY_RUN" == "true" && $deleted_count -gt 0 ]]; then
+            echo "🔍 Dry run complete. Run with dry_run=false to delete."
+          else
+            echo "✨ No stale branches found. The Forge is clean."
+          fi
+      
+      - name: Create cleanup report
+        if: always()
+        run: |
+          echo "## 🧹 Branch Cleanup Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Date:** $(date -u)" >> $GITHUB_STEP_SUMMARY
+          echo "**Threshold:** 90 days" >> $GITHUB_STEP_SUMMARY
+          echo "**Mode:** ${{ github.event.inputs.dry_run || 'false' }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Philosophy" >> $GITHUB_STEP_SUMMARY
+          echo "Failures teach once, then become permanent guardrails." >> $GITHUB_STEP_SUMMARY
+          echo "Stale branches are removed to maintain clarity and focus." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🏛️⚛️🔥" >> $GITHUB_STEP_SUMMARY
