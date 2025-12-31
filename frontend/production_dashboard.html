@@ -6,7 +6,6 @@
     <title>Pi Forge Quantum Genesis - Production Dashboard</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"
-            integrity="sha384-4qkGJFU6+hgoAAJ1JLLzIGHJN3+sNhbLzLJLLxJLLzIGHJN3+sNhbLzLJLLxJLLz"
             crossorigin="anonymous"></script>
     <script defer src="/_vercel/insights/script.js"></script>
     <style>
@@ -418,8 +417,8 @@
             const RPC_URL = 'https://rpc.mainnet.pi.network'; // Pi Network Mainnet RPC
             
             // TODO: Replace with your deployed treasury contract address BEFORE production.
-            // NOTE: This is a valid-format, non-zero placeholder address to satisfy basic validation.
-            const TREASURY_CONTRACT_ADDRESS = '0x0000000000000000000000000000000000000001';
+            // NOTE: This is a descriptive placeholder - replace with actual deployed contract address
+            const TREASURY_CONTRACT_ADDRESS = '0xYOUR_TREASURY_CONTRACT_ADDRESS_HERE';
             
             // Fallback metrics configuration
             const TREASURY_FALLBACK_METRICS = {
@@ -461,12 +460,11 @@
 
             // Check if contract address is still placeholder
             if (TREASURY_CONTRACT_ADDRESS === '0xYOUR_TREASURY_CONTRACT_ADDRESS_HERE' || 
-                TREASURY_CONTRACT_ADDRESS === '0x0000000000000000000000000000000000000000') {
+                TREASURY_CONTRACT_ADDRESS === '0x0000000000000000000000000000000000000000' ||
+                TREASURY_CONTRACT_ADDRESS === '0x0000000000000000000000000000000000000001') {
                 console.warn('⚠️ Treasury contract address not configured. Please update TREASURY_CONTRACT_ADDRESS in the code.');
                 console.warn('📖 See docs/WEB3_TREASURY_CONFIGURATION.md for setup instructions.');
                 displayFallbackMetrics();
-                return;
-            }
                 return;
             }
             let web3;
