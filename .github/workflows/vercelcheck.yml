@@ -1,10 +1,10 @@
 name: Vercel Deployment Status Check
 
 "on":
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  repository_dispatch:
+    types:
+      - vercel.deployment.ready
+      - vercel.deployment.success
   workflow_dispatch:
 
 permissions:
