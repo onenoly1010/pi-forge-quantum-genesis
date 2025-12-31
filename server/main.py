@@ -55,10 +55,30 @@ except ImportError as e:
     logging.warning(f"⚠️ Tracing system import failed: {e}")
     tracing_enabled = False
     get_tracing_system = None
-    trace_consciousness_stream = lambda *args, **kwargs: None
-    trace_fastapi_operation = lambda *args, **kwargs: None
-    trace_payment_processing = lambda *args, **kwargs: None
-    trace_payment_visualization_flow = lambda *args, **kwargs: None
+    
+    # No-op context manager for trace_consciousness_stream
+    from contextlib import contextmanager
+    @contextmanager
+    def trace_consciousness_stream(*args, **kwargs):
+        yield
+    
+    # No-op decorator factory for trace_fastapi_operation
+    def trace_fastapi_operation(*args, **kwargs):
+        def decorator(func):
+            return func
+        return decorator
+    
+    # No-op decorator for trace_payment_processing
+    def trace_payment_processing(*args, **kwargs):
+        def decorator(func):
+            return func
+        return decorator
+    
+    # No-op decorator for trace_payment_visualization_flow
+    def trace_payment_visualization_flow(*args, **kwargs):
+        def decorator(func):
+            return func
+        return decorator
 
 # Import autonomous decision tools
 try:
