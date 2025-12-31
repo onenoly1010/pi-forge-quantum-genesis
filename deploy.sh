@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# ⚠️  DEPRECATED: This script is for Railway deployment
+# 🚀 RECOMMENDED: Use Render instead for better reliability and scaling
+# 📖 See docs/RENDER_SETUP.md for Render deployment instructions
+# 🛠️  Run ./deploy_render.sh for quick deployment guide
+
 # 🚀 Pi Forge Quantum Genesis - Live Deployment Script
 # Deploys to Railway with full Pi Network mainnet integration
 
