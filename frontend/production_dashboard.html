@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pi Forge Quantum Genesis - Production Dashboard</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <!-- Web3.js v1.10.0 for on-chain treasury metrics -->
+    <!-- NOTE: SRI hash omitted as CDN hash not available; users should verify in production -->
     <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"
             crossorigin="anonymous"></script>
     <script defer src="/_vercel/insights/script.js"></script>
@@ -529,8 +531,8 @@
                     console.log('✅ Treasury metrics updated from blockchain');
                 } catch (error) {
                     // Distinguish between different error types for better debugging
-                    const message = (error && error.message) ? String(error.message) : '';
-                    const code = (error && error.code) ? String(error.code) : '';
+                    const message = error?.message || '';
+                    const code = error?.code || '';
 
                     if (message.includes('timeout')) {
                         console.warn("⏱️ Contract call timeout - network may be slow:", error);
@@ -570,8 +572,8 @@
             // Initial update
             updateMetrics();
 
-            // Refresh every configured interval
-            setInterval(updateMetrics, TREASURY_METRICS_REFRESH_INTERVAL_MS);
+            // Refresh every configured interval (store interval ID for potential cleanup)
+            const refreshIntervalId = setInterval(updateMetrics, TREASURY_METRICS_REFRESH_INTERVAL_MS);
         }
 
         function initializeWebSocket() {
