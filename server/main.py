@@ -11,6 +11,7 @@ import os
 import random
 import time
 from collections import defaultdict
+from contextlib import contextmanager
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
@@ -57,28 +58,20 @@ except ImportError as e:
     get_tracing_system = None
     
     # No-op context manager for trace_consciousness_stream
-    from contextlib import contextmanager
     @contextmanager
     def trace_consciousness_stream(*args, **kwargs):
         yield
     
-    # No-op decorator factory for trace_fastapi_operation
-    def trace_fastapi_operation(*args, **kwargs):
+    # Helper function to create no-op decorator factories
+    def _create_noop_decorator(*args, **kwargs):
         def decorator(func):
             return func
         return decorator
     
-    # No-op decorator for trace_payment_processing
-    def trace_payment_processing(*args, **kwargs):
-        def decorator(func):
-            return func
-        return decorator
-    
-    # No-op decorator for trace_payment_visualization_flow
-    def trace_payment_visualization_flow(*args, **kwargs):
-        def decorator(func):
-            return func
-        return decorator
+    # No-op decorator factories for tracing operations
+    trace_fastapi_operation = _create_noop_decorator
+    trace_payment_processing = _create_noop_decorator
+    trace_payment_visualization_flow = _create_noop_decorator
 
 # Import autonomous decision tools
 try:
