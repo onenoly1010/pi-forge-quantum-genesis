@@ -77,6 +77,7 @@ contract UniswapV2Router02Slim {
     function getAmountIn(uint amountOut, uint reserveIn, uint reserveOut) internal pure returns (uint amountIn) {
         if (amountOut == 0) revert InsufficientOutputAmount();
         if (reserveIn == 0 || reserveOut == 0) revert InsufficientLiquidity();
+        if (amountOut >= reserveOut) revert InsufficientLiquidity();
         uint numerator = reserveIn * amountOut * 1000;
         uint denominator = (reserveOut - amountOut) * 997;
         amountIn = (numerator / denominator) + 1;
