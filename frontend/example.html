@@ -105,7 +105,7 @@
             try {
                 await PiForge.initialize({
                     network: 'testnet',
-                    debug: true,
+                    debug: true, // Set to false in production to avoid logging sensitive data
                     apiBase: window.location.origin
                 });
                 

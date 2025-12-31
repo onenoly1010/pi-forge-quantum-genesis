@@ -24,13 +24,16 @@
             this.config = {
                 network: 'testnet',
                 debug: false,
-                apiBase: 'http://localhost:8000',
+                apiBase: typeof window !== 'undefined' && window.location.protocol === 'https:' 
+                    ? 'https://localhost:8000' 
+                    : 'http://localhost:8000',
                 apiPath: '/api/pi-network'
             };
             this.initialized = false;
             this.sessionId = null;
             this.user = null;
             this.Pi = null;
+            this.BOOST_COST_PER_PERCENT = 0.01; // Cost in Pi per 1% boost
         }
 
         /**
@@ -49,7 +52,7 @@
 
             // Check if Pi SDK is loaded
             if (typeof window.Pi === 'undefined') {
-                throw new Error('Pi SDK not loaded. Include https://sdk.minepi.com/pi-sdk.js before pi-forge-integration.js');
+                throw new Error('Pi SDK not loaded. Please ensure the Pi SDK is included before this script. See documentation for the current SDK URL.');
             }
 
             this.Pi = window.Pi;
@@ -388,8 +391,8 @@
         }
 
         _calculateBoostCost(boostPercent) {
-            // Simple cost calculation: 0.01 Pi per 1% boost
-            return Math.round(boostPercent * 0.01 * 100) / 100;
+            // Cost calculation using configured rate
+            return Math.round(boostPercent * this.BOOST_COST_PER_PERCENT * 100) / 100;
         }
     }
 

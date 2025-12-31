@@ -89,6 +89,7 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  color: var(--pi-forge-primary); /* Fallback for accessibility/high contrast mode */
 }
 
 /* Payment Status Badge */
