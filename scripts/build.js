@@ -19,7 +19,9 @@ const staticFiles = [
   'ceremonial_interface.html',
   'resonance_dashboard.html',
   'spectral_command_shell.html',
-  'pi-forge-integration.js'
+  'pi-forge-integration.js',
+  'START_HERE.md',
+  'DASHBOARD.html'
 ];
 
 // Directories to copy from root to public directory
@@ -104,9 +106,11 @@ function build() {
     const srcPath = path.join(rootDir, dir);
     const destPath = path.join(publicDir, dir);
     
-    if (fs.existsSync(srcPath)) {
+    if (fs.existsSync(srcPath) && fs.statSync(srcPath).isDirectory()) {
       copyDir(srcPath, destPath);
       console.log(`✓ Copied ${dir}/`);
+    } else if (fs.existsSync(srcPath)) {
+      console.warn(`⚠ Skipping ${dir} - not a directory`);
     } else {
       console.warn(`⚠ Directory not found: ${dir}`);
     }
