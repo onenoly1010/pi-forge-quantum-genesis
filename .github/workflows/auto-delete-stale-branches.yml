@@ -30,7 +30,7 @@ jobs:
       - name: Delete stale branches
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'true' }}
         run: |
           echo "🧹 Scanning for stale branches (90+ days old)..."
           echo "Dry run: $DRY_RUN"

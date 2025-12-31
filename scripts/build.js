@@ -26,7 +26,8 @@ const staticFiles = [
 
 // Directories to copy from root to public directory
 const staticDirs = [
-  'frontend'
+  // Note: 'frontend' is not a directory in this repo
+  // Frontend code is distributed across static HTML and serverless functions
 ];
 
 /**
