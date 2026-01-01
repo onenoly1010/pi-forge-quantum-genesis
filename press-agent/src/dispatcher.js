@@ -121,18 +121,23 @@ class CommunicationDispatcher {
      * @private
      */
     async _dispatchToDiscord(type, data) {
-        switch (type) {
-            case 'launch':
-                return this.discord.sendLaunchAnnouncement(data);
-            case 'update':
-                return this.discord.sendFeatureUpdate(data);
-            case 'milestone':
-                return this.discord.sendMilestoneAchievement(data);
-            case 'deployment':
-                return this.discord.sendDeploymentSuccess(data);
-            default:
-                logger.warn('Unknown message type for Discord', { type });
-                return false;
+        try {
+            switch (type) {
+                case 'launch':
+                    return await this.discord.sendLaunchAnnouncement(data);
+                case 'update':
+                    return await this.discord.sendFeatureUpdate(data);
+                case 'milestone':
+                    return await this.discord.sendMilestoneAchievement(data);
+                case 'deployment':
+                    return await this.discord.sendDeploymentSuccess(data);
+                default:
+                    logger.warn('Unknown message type for Discord', { type });
+                    return false;
+            }
+        } catch (error) {
+            logger.error('Discord dispatch error', { error: error.message });
+            return false;
         }
     }
 
@@ -141,18 +146,23 @@ class CommunicationDispatcher {
      * @private
      */
     async _dispatchToTwitter(type, data) {
-        switch (type) {
-            case 'launch':
-                return this.twitter.postLaunchAnnouncement(data);
-            case 'update':
-                return this.twitter.postFeatureUpdate(data);
-            case 'milestone':
-                return this.twitter.postMilestoneAchievement(data);
-            case 'deployment':
-                return this.twitter.postDeploymentSuccess(data);
-            default:
-                logger.warn('Unknown message type for Twitter', { type });
-                return false;
+        try {
+            switch (type) {
+                case 'launch':
+                    return await this.twitter.postLaunchAnnouncement(data);
+                case 'update':
+                    return await this.twitter.postFeatureUpdate(data);
+                case 'milestone':
+                    return await this.twitter.postMilestoneAchievement(data);
+                case 'deployment':
+                    return await this.twitter.postDeploymentSuccess(data);
+                default:
+                    logger.warn('Unknown message type for Twitter', { type });
+                    return false;
+            }
+        } catch (error) {
+            logger.error('Twitter dispatch error', { error: error.message });
+            return false;
         }
     }
 
@@ -161,18 +171,23 @@ class CommunicationDispatcher {
      * @private
      */
     async _dispatchToTelegram(type, data) {
-        switch (type) {
-            case 'launch':
-                return this.telegram.sendLaunchAnnouncement(data);
-            case 'update':
-                return this.telegram.sendFeatureUpdate(data);
-            case 'milestone':
-                return this.telegram.sendMilestoneAchievement(data);
-            case 'deployment':
-                return this.telegram.sendDeploymentSuccess(data);
-            default:
-                logger.warn('Unknown message type for Telegram', { type });
-                return false;
+        try {
+            switch (type) {
+                case 'launch':
+                    return await this.telegram.sendLaunchAnnouncement(data);
+                case 'update':
+                    return await this.telegram.sendFeatureUpdate(data);
+                case 'milestone':
+                    return await this.telegram.sendMilestoneAchievement(data);
+                case 'deployment':
+                    return await this.telegram.sendDeploymentSuccess(data);
+                default:
+                    logger.warn('Unknown message type for Telegram', { type });
+                    return false;
+            }
+        } catch (error) {
+            logger.error('Telegram dispatch error', { error: error.message });
+            return false;
         }
     }
 

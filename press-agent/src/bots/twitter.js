@@ -41,9 +41,17 @@ class TwitterBot {
             // In production, you would use the Twitter API client library
             logger.info('Twitter post prepared', { length: tweetText.length });
             
-            // For now, we'll log the tweet instead of actually posting
-            // to avoid requiring Twitter API credentials in development
-            logger.info('Tweet content (would be posted):', { tweet: tweetText });
+            // Development mode: Log tweet instead of posting
+            // Production mode: Requires Twitter API v2 client implementation
+            // To enable actual posting:
+            // 1. Set NODE_ENV=production
+            // 2. Install twitter-api-v2: npm install twitter-api-v2
+            // 3. Implement actual API call with proper OAuth
+            if (process.env.NODE_ENV === 'production') {
+                logger.warn('Production Twitter posting not yet implemented - requires twitter-api-v2 client');
+            } else {
+                logger.info('Tweet content (development mode - would be posted in production):', { tweet: tweetText });
+            }
             
             return true;
         } catch (error) {

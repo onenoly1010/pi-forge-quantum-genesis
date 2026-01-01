@@ -165,6 +165,15 @@ ${deployment.url ? `🔗 Live URL: ${deployment.url}` : ''}
 
     /**
      * Internal method to send Telegram API request
+     * 
+     * Note: Uses native https module to minimize dependencies.
+     * For production with high-volume broadcasting, consider using
+     * a more robust HTTP client like axios or node-fetch for:
+     * - Automatic retries on transient failures
+     * - Better timeout handling
+     * - Request/response interceptors
+     * - Built-in rate limiting
+     * 
      * @private
      */
     async _sendApiRequest(method, payload) {
@@ -179,7 +188,8 @@ ${deployment.url ? `🔗 Live URL: ${deployment.url}` : ''}
                 headers: {
                     'Content-Type': 'application/json',
                     'Content-Length': data.length
-                }
+                },
+                timeout: 10000 // 10 second timeout
             };
 
             const req = https.request(options, (res) => {
@@ -209,6 +219,11 @@ ${deployment.url ? `🔗 Live URL: ${deployment.url}` : ''}
 
             req.on('error', (error) => {
                 reject(error);
+            });
+
+            req.on('timeout', () => {
+                req.destroy();
+                reject(new Error('Telegram API request timed out'));
             });
 
             req.write(data);

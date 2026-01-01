@@ -221,6 +221,15 @@ class DiscordBot {
 
     /**
      * Internal method to send webhook request
+     * 
+     * Note: Uses native https module to minimize dependencies.
+     * For production with high-volume broadcasting, consider using
+     * a more robust HTTP client like axios or node-fetch for:
+     * - Automatic retries
+     * - Better timeout handling
+     * - Request/response interceptors
+     * - Built-in rate limiting
+     * 
      * @private
      */
     async _sendWebhook(payload) {
@@ -235,7 +244,8 @@ class DiscordBot {
                 headers: {
                     'Content-Type': 'application/json',
                     'Content-Length': data.length
-                }
+                },
+                timeout: 10000 // 10 second timeout
             };
 
             const req = https.request(options, (res) => {
@@ -256,6 +266,11 @@ class DiscordBot {
 
             req.on('error', (error) => {
                 reject(error);
+            });
+
+            req.on('timeout', () => {
+                req.destroy();
+                reject(new Error('Discord webhook request timed out'));
             });
 
             req.write(data);
