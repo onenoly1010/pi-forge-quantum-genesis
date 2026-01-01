@@ -1,0 +1,310 @@
+name: Stale PR Management
+
+on:
+  schedule:
+    # Run daily at 2:00 AM UTC to check for stale PRs
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run mode (no actions taken, only report)'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  pull-requests: write
+  issues: write
+
+jobs:
+  manage-stale-prs:
+    name: Manage Stale Pull Requests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Manage stale PRs
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const dryRun = context.payload.inputs?.dry_run === 'true' || context.payload.inputs?.dry_run === true;
+            
+            if (dryRun) {
+              console.log('🔍 Running in DRY RUN mode - no actions will be taken');
+            }
+            
+            // Configuration
+            const INACTIVE_DAYS_FIRST_REMINDER = 7;
+            const INACTIVE_DAYS_STALE_LABEL = 14;
+            const INACTIVE_DAYS_AUTO_CLOSE = 30;
+            const STALE_LABEL = 'stale';
+            
+            // Get all open PRs
+            const { data: pullRequests } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100
+            });
+            
+            console.log(`Found ${pullRequests.length} open pull request(s)`);
+            
+            const now = new Date();
+            let processedCount = 0;
+            let remindedCount = 0;
+            let staleLabeled = 0;
+            let closedCount = 0;
+            
+            for (const pr of pullRequests) {
+              try {
+                console.log(`\n--- Processing PR #${pr.number}: ${pr.title} ---`);
+                
+                // Get PR details including timeline
+                const { data: prDetails } = await github.rest.pulls.get({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: pr.number
+                });
+                
+                // Get all events (comments, commits, reviews) for the PR
+                const [comments, reviews, commits] = await Promise.all([
+                  github.rest.issues.listComments({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: pr.number,
+                    per_page: 100
+                  }),
+                  github.rest.pulls.listReviews({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    pull_number: pr.number,
+                    per_page: 100
+                  }),
+                  github.rest.pulls.listCommits({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    pull_number: pr.number,
+                    per_page: 100
+                  })
+                ]);
+                
+                // Find the most recent activity
+                const dates = [
+                  new Date(prDetails.created_at),
+                  new Date(prDetails.updated_at)
+                ];
+                
+                // Add comment dates
+                comments.data.forEach(c => {
+                  // Skip bot comments for activity tracking
+                  if (!c.user.login.includes('[bot]')) {
+                    dates.push(new Date(c.created_at));
+                  }
+                });
+                
+                // Add review dates
+                reviews.data.forEach(r => dates.push(new Date(r.submitted_at)));
+                
+                // Add commit dates
+                commits.data.forEach(c => {
+                  if (c.commit.author.date) {
+                    dates.push(new Date(c.commit.author.date));
+                  }
+                });
+                
+                // Get the most recent activity date
+                const lastActivity = new Date(Math.max(...dates));
+                const daysSinceActivity = Math.floor((now - lastActivity) / (1000 * 60 * 60 * 24));
+                
+                console.log(`Last activity: ${lastActivity.toISOString()}`);
+                console.log(`Days since activity: ${daysSinceActivity}`);
+                
+                // Check if PR has stale label
+                const hasStaleLabel = pr.labels.some(label => label.name === STALE_LABEL);
+                
+                // Check if we've already sent the first reminder
+                const botComments = comments.data.filter(c => 
+                  c.user.login.includes('[bot]') && 
+                  c.body.includes('This pull request has been inactive')
+                );
+                const hasFirstReminder = botComments.length > 0;
+                
+                // Action 1: Send first reminder after 7 days
+                if (daysSinceActivity >= INACTIVE_DAYS_FIRST_REMINDER && !hasFirstReminder && daysSinceActivity < INACTIVE_DAYS_AUTO_CLOSE) {
+                  console.log(`⏰ PR is inactive for ${daysSinceActivity} days - sending first reminder`);
+                  
+                  const assignees = prDetails.assignees.map(a => `@${a.login}`).join(' ');
+                  const reviewers = prDetails.requested_reviewers.map(r => `@${r.login}`).join(' ');
+                  const mentions = [assignees, reviewers].filter(m => m).join(' ');
+                  
+                  let commentBody = '👋 **Inactivity Notice**\n\n';
+                  commentBody += `This pull request has been inactive for **${daysSinceActivity} days**. `;
+                  if (mentions) {
+                    commentBody += `${mentions} - `;
+                  }
+                  commentBody += 'Please review and provide an update.\n\n';
+                  commentBody += '**Timeline:**\n';
+                  commentBody += '- ⏰ **Day 7**: First reminder (this notice)\n';
+                  commentBody += `- 🏷️ **Day 14**: PR will be labeled as \`${STALE_LABEL}\`\n`;
+                  commentBody += '- 🔒 **Day 30**: PR will be automatically closed (can be reopened)\n\n';
+                  commentBody += 'To keep this PR active, please:\n';
+                  commentBody += '- Add a comment with an update\n';
+                  commentBody += '- Push new commits\n';
+                  commentBody += '- Request or complete a review\n\n';
+                  commentBody += '_This is an automated message from the Stale PR Management workflow._';
+                  
+                  if (!dryRun) {
+                    await github.rest.issues.createComment({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      issue_number: pr.number,
+                      body: commentBody
+                    });
+                    console.log('✅ First reminder comment posted');
+                    remindedCount++;
+                  } else {
+                    console.log('🔍 DRY RUN: Would post first reminder comment');
+                  }
+                }
+                
+                // Action 2: Add stale label after 14 days
+                if (daysSinceActivity >= INACTIVE_DAYS_STALE_LABEL && !hasStaleLabel && daysSinceActivity < INACTIVE_DAYS_AUTO_CLOSE) {
+                  console.log(`🏷️ PR is inactive for ${daysSinceActivity} days - adding stale label`);
+                  
+                  if (!dryRun) {
+                    // Create stale label if it doesn't exist
+                    try {
+                      await github.rest.issues.getLabel({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        name: STALE_LABEL
+                      });
+                    } catch (error) {
+                      if (error.status === 404) {
+                        await github.rest.issues.createLabel({
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          name: STALE_LABEL,
+                          color: 'ededed',
+                          description: 'This PR has been inactive for an extended period'
+                        });
+                        console.log('Created stale label');
+                      }
+                    }
+                    
+                    await github.rest.issues.addLabels({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      issue_number: pr.number,
+                      labels: [STALE_LABEL]
+                    });
+                    
+                    await github.rest.issues.createComment({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      issue_number: pr.number,
+                      body: '🏷️ **Stale PR Notice**\n\n' +
+                            `This pull request has been labeled as \`${STALE_LABEL}\` due to **${daysSinceActivity} days** of inactivity.\n\n` +
+                            '**⏰ Day 30**: If no activity occurs, this PR will be automatically closed (but can be reopened).\n\n' +
+                            'To remove the stale label and keep this PR active:\n' +
+                            '- Add a comment with an update\n' +
+                            '- Push new commits\n' +
+                            '- Request or complete a review\n\n' +
+                            '_This is an automated message from the Stale PR Management workflow._'
+                    });
+                    console.log('✅ Stale label added and comment posted');
+                    staleLabeled++;
+                  } else {
+                    console.log('🔍 DRY RUN: Would add stale label and post comment');
+                  }
+                }
+                
+                // Action 3: Auto-close after 30 days
+                if (daysSinceActivity >= INACTIVE_DAYS_AUTO_CLOSE) {
+                  console.log(`🔒 PR is inactive for ${daysSinceActivity} days - closing PR`);
+                  
+                  if (!dryRun) {
+                    await github.rest.issues.createComment({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      issue_number: pr.number,
+                      body: '🔒 **Auto-Closed Due to Inactivity**\n\n' +
+                            `This pull request has been automatically closed due to **${daysSinceActivity} days** of inactivity.\n\n` +
+                            '**This PR can be reopened** if work resumes. Simply:\n' +
+                            '1. Reopen the PR\n' +
+                            '2. Add a comment explaining the plan\n' +
+                            '3. Push new commits or request reviews\n\n' +
+                            'Thank you for your contribution! If you need assistance, please reach out to the maintainers.\n\n' +
+                            '_This is an automated message from the Stale PR Management workflow._'
+                    });
+                    
+                    await github.rest.pulls.update({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      pull_number: pr.number,
+                      state: 'closed'
+                    });
+                    console.log('✅ PR closed with comment');
+                    closedCount++;
+                  } else {
+                    console.log('🔍 DRY RUN: Would close PR with comment');
+                  }
+                }
+                
+                // Remove stale label if there's recent activity
+                if (daysSinceActivity < INACTIVE_DAYS_STALE_LABEL && hasStaleLabel) {
+                  console.log(`🎉 PR has recent activity - removing stale label`);
+                  
+                  if (!dryRun) {
+                    await github.rest.issues.removeLabel({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      issue_number: pr.number,
+                      name: STALE_LABEL
+                    });
+                    
+                    await github.rest.issues.createComment({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      issue_number: pr.number,
+                      body: '🎉 **Stale Label Removed**\n\n' +
+                            'This pull request is no longer considered stale due to recent activity. Thank you for the update!\n\n' +
+                            '_This is an automated message from the Stale PR Management workflow._'
+                    });
+                    console.log('✅ Stale label removed and comment posted');
+                  } else {
+                    console.log('🔍 DRY RUN: Would remove stale label and post comment');
+                  }
+                }
+                
+                processedCount++;
+                
+              } catch (error) {
+                console.error(`Error processing PR #${pr.number}: ${error.message}`);
+              }
+            }
+            
+            // Summary
+            console.log('\n=== Summary ===');
+            console.log(`Processed: ${processedCount} PR(s)`);
+            console.log(`First reminders sent: ${remindedCount}`);
+            console.log(`Stale labels added: ${staleLabeled}`);
+            console.log(`PRs closed: ${closedCount}`);
+            
+            if (dryRun) {
+              console.log('\n🔍 DRY RUN MODE - No actual changes were made');
+            }
+            
+            // Create workflow summary
+            core.summary
+              .addHeading('Stale PR Management Summary')
+              .addTable([
+                [{data: 'Metric', header: true}, {data: 'Count', header: true}],
+                ['PRs Processed', processedCount.toString()],
+                ['First Reminders Sent', remindedCount.toString()],
+                ['Stale Labels Added', staleLabeled.toString()],
+                ['PRs Closed', closedCount.toString()]
+              ])
+              .addRaw(dryRun ? '\n> 🔍 **Dry Run Mode** - No actual changes were made' : '')
+              .write();
