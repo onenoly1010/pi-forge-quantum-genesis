@@ -39,14 +39,26 @@ jobs:
             const INACTIVE_DAYS_STALE_LABEL = 14;
             const INACTIVE_DAYS_AUTO_CLOSE = 30;
             const STALE_LABEL = 'stale';
+            const BOT_MESSAGE_MARKER = '<!-- stale-pr-management-bot -->';
             
-            // Get all open PRs
-            const { data: pullRequests } = await github.rest.pulls.list({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: 'open',
-              per_page: 100
-            });
+            // Get all open PRs with pagination
+            let pullRequests = [];
+            let page = 1;
+            let hasMore = true;
+            
+            while (hasMore) {
+              const { data: prs } = await github.rest.pulls.list({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'open',
+                per_page: 100,
+                page: page
+              });
+              
+              pullRequests = pullRequests.concat(prs);
+              hasMore = prs.length === 100;
+              page++;
+            }
             
             console.log(`Found ${pullRequests.length} open pull request(s)`);
             
@@ -123,10 +135,9 @@ jobs:
                 // Check if PR has stale label
                 const hasStaleLabel = pr.labels.some(label => label.name === STALE_LABEL);
                 
-                // Check if we've already sent the first reminder
+                // Check if we've already sent the first reminder using unique marker
                 const botComments = comments.data.filter(c => 
-                  c.user.login.includes('[bot]') && 
-                  c.body.includes('This pull request has been inactive')
+                  c.body.includes(BOT_MESSAGE_MARKER)
                 );
                 const hasFirstReminder = botComments.length > 0;
                 
@@ -138,7 +149,8 @@ jobs:
                   const reviewers = prDetails.requested_reviewers.map(r => `@${r.login}`).join(' ');
                   const mentions = [assignees, reviewers].filter(m => m).join(' ');
                   
-                  let commentBody = '👋 **Inactivity Notice**\n\n';
+                  let commentBody = BOT_MESSAGE_MARKER + '\n';
+                  commentBody += '👋 **Inactivity Notice**\n\n';
                   commentBody += `This pull request has been inactive for **${daysSinceActivity} days**. `;
                   if (mentions) {
                     commentBody += `${mentions} - `;
@@ -204,7 +216,8 @@ jobs:
                       owner: context.repo.owner,
                       repo: context.repo.repo,
                       issue_number: pr.number,
-                      body: '🏷️ **Stale PR Notice**\n\n' +
+                      body: BOT_MESSAGE_MARKER + '\n' +
+                            '🏷️ **Stale PR Notice**\n\n' +
                             `This pull request has been labeled as \`${STALE_LABEL}\` due to **${daysSinceActivity} days** of inactivity.\n\n` +
                             '**⏰ Day 30**: If no activity occurs, this PR will be automatically closed (but can be reopened).\n\n' +
                             'To remove the stale label and keep this PR active:\n' +
@@ -229,7 +242,8 @@ jobs:
                       owner: context.repo.owner,
                       repo: context.repo.repo,
                       issue_number: pr.number,
-                      body: '🔒 **Auto-Closed Due to Inactivity**\n\n' +
+                      body: BOT_MESSAGE_MARKER + '\n' +
+                            '🔒 **Auto-Closed Due to Inactivity**\n\n' +
                             `This pull request has been automatically closed due to **${daysSinceActivity} days** of inactivity.\n\n` +
                             '**This PR can be reopened** if work resumes. Simply:\n' +
                             '1. Reopen the PR\n' +
@@ -268,7 +282,8 @@ jobs:
                       owner: context.repo.owner,
                       repo: context.repo.repo,
                       issue_number: pr.number,
-                      body: '🎉 **Stale Label Removed**\n\n' +
+                      body: BOT_MESSAGE_MARKER + '\n' +
+                            '🎉 **Stale Label Removed**\n\n' +
                             'This pull request is no longer considered stale due to recent activity. Thank you for the update!\n\n' +
                             '_This is an automated message from the Stale PR Management workflow._'
                     });
