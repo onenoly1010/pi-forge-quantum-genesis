@@ -144,7 +144,7 @@ jobs:
           PUBLIC_SITE_RESPONSE: ${{ steps.health_check.outputs.public_site_response }}
           BACKEND_STATUS: ${{ steps.health_check.outputs.backend_status }}
           BACKEND_RESPONSE: ${{ steps.health_check.outputs.backend_response }}
-          RESONANCE_STATUS: ${{ steps.health_check.outputs.resonance_status }}
+          RESONANCE_STATUS: ${{ steps.resonance_status }}
           RESONANCE_RESPONSE: ${{ steps.health_check.outputs.resonance_response }}
           OPEN_ISSUES: ${{ steps.repo_metrics.outputs.open_issues }}
           CLOSED_ISSUES: ${{ steps.repo_metrics.outputs.closed_issues }}
@@ -161,42 +161,45 @@ jobs:
           CURRENT_TIME=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
           NEXT_UPDATE=$(date -u -d '+6 hours' +"%Y-%m-%d %H:%M:%S UTC")
           
-          # Update the health metrics section in CLEANUP_STATUS_DASHBOARD.md
-          sed -i "s|Last Updated\*\*:.*|Last Updated**: $CURRENT_TIME|" CLEANUP_STATUS_DASHBOARD.md
+          # Create a simple sed script to update key values
+          sed -i "s|^**Last Updated**:.*|**Last Updated**: $CURRENT_TIME|" CLEANUP_STATUS_DASHBOARD.md
+          sed -i "s|^**Last Updated**:.*|**Last Updated**: $CURRENT_TIME|" DEPLOYMENT_CONSOLIDATION.md
           
-          # Create a temporary section with updated metrics
-          cat > /tmp/health_update.txt << EOF
-          | Service | Status | Last Check | Uptime | Response Time |
-          |---------|--------|------------|--------|---------------|
-          | Public Site (GitHub Pages) | $PUBLIC_SITE_STATUS | $CURRENT_TIME | 99.9% | $PUBLIC_SITE_RESPONSE |
-          | Backend API (Railway) | $BACKEND_STATUS | $CURRENT_TIME | 99.5% | $BACKEND_RESPONSE |
-          | Resonance Engine (Vercel) | $RESONANCE_STATUS | $CURRENT_TIME | 99.7% | $RESONANCE_RESPONSE |
-          EOF
-          
-          # Replace health table
-          awk '
-          /^\| Service \| Status \| Last Check/ {
-            print;
-            getline; print;
-            system("cat /tmp/health_update.txt | tail -n +2");
-            while (getline && /^\|/) {}
-            if (NF) print;
-            next;
-          }
-          {print}
-          ' CLEANUP_STATUS_DASHBOARD.md > /tmp/dashboard_updated.md
+          # Update health table using a temp file approach (more robust)
+          {
+            awk '
+              BEGIN { in_health_table = 0; table_header_found = 0 }
+              /^\| Service \| Status \| Last Check/ {
+                print;
+                getline; print;
+                in_health_table = 1;
+                table_header_found = 1;
+                next;
+              }
+              in_health_table && /^\|/ {
+                next;
+              }
+              in_health_table && !/^\|/ {
+                in_health_table = 0;
+                print "| Public Site (GitHub Pages) | '"$PUBLIC_SITE_STATUS"' | '"$CURRENT_TIME"' | 99.9% | '"$PUBLIC_SITE_RESPONSE"' |";
+                print "| Backend API (Railway) | '"$BACKEND_STATUS"' | '"$CURRENT_TIME"' | 99.5% | '"$BACKEND_RESPONSE"' |";
+                print "| Resonance Engine (Vercel) | '"$RESONANCE_STATUS"' | '"$CURRENT_TIME"' | 99.7% | '"$RESONANCE_RESPONSE"' |";
+              }
+              { print }
+            ' CLEANUP_STATUS_DASHBOARD.md
+          } > /tmp/dashboard_updated.md
           
           mv /tmp/dashboard_updated.md CLEANUP_STATUS_DASHBOARD.md
           
-          # Update repository activity
-          sed -i "s|Total Commits:.*|Total Commits: $COMMIT_COUNT|" CLEANUP_STATUS_DASHBOARD.md
+          # Update repository activity metrics
+          sed -i "s|Total Commits:.*|Total Commits: $COMMIT_COUNT (last 30 days)|" CLEANUP_STATUS_DASHBOARD.md
           sed -i "s|Open Issues:.*|Open Issues: $OPEN_ISSUES|" CLEANUP_STATUS_DASHBOARD.md
           sed -i "s|Open PRs:.*|Open PRs: $OPEN_PRS|" CLEANUP_STATUS_DASHBOARD.md
           sed -i "s|Closed Issues:.*|Closed Issues: $CLOSED_ISSUES (last 100)|" CLEANUP_STATUS_DASHBOARD.md
           sed -i "s|Closed PRs:.*|Closed PRs: $CLOSED_PRS (last 100)|" CLEANUP_STATUS_DASHBOARD.md
           
           # Update next update time
-          sed -i "s|Next Update\*\*:.*|Next Update**: $NEXT_UPDATE|" CLEANUP_STATUS_DASHBOARD.md
+          sed -i "s|^**Next Update**:.*|**Next Update**: $NEXT_UPDATE|" CLEANUP_STATUS_DASHBOARD.md
           
           echo "✅ Dashboard updated"
       

@@ -159,8 +159,11 @@ These are not aspirations — they are **requirements**.
 
 ### Production Services (ACTIVE)
 - **Public Site**: https://onenoly1010.github.io/quantum-pi-forge-site/
+  - User-facing portal with manifesto and ecosystem information
 - **Backend API**: https://pi-forge-quantum-genesis.railway.app
+  - FastAPI service handling payments, webhooks, and core business logic
 - **Resonance Engine**: https://quantum-resonance-clean.vercel.app
+  - Harmonic ledger backend for resonance-based operations
 
 ### Health Monitoring
 - **Status Dashboard**: See [CLEANUP_STATUS_DASHBOARD.md](./CLEANUP_STATUS_DASHBOARD.md)

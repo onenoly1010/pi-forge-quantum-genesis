@@ -53,8 +53,9 @@ jobs:
           # List all remote branches
           git fetch --all --prune
           
-          DELETED_COUNT=0
-          SKIPPED_COUNT=0
+          # Use temp files to track counts (avoid subshell variable issues)
+          echo "0" > /tmp/deleted_count.txt
+          echo "0" > /tmp/skipped_count.txt
           
           # Get all branches except protected ones
           for branch in $(git branch -r | grep -v HEAD | sed 's|origin/||' | grep -vE "^($PROTECTED_BRANCHES)$"); do
@@ -63,7 +64,7 @@ jobs:
             
             if [ "$PR_COUNT" -gt 0 ]; then
               echo "⏭️  Skipping $branch (has $PR_COUNT open PR(s))"
-              SKIPPED_COUNT=$((SKIPPED_COUNT + 1))
+              echo $(($(cat /tmp/skipped_count.txt) + 1)) > /tmp/skipped_count.txt
               continue
             fi
             
@@ -72,7 +73,7 @@ jobs:
             
             if [ "$LAST_COMMIT_DATE" -eq 0 ]; then
               echo "⚠️  Could not get commit date for $branch, skipping"
-              SKIPPED_COUNT=$((SKIPPED_COUNT + 1))
+              echo $(($(cat /tmp/skipped_count.txt) + 1)) > /tmp/skipped_count.txt
               continue
             fi
             
@@ -83,16 +84,20 @@ jobs:
             if [ "$AGE_DAYS" -ge 90 ]; then
               if [ "$DRY_RUN" = "true" ]; then
                 echo "🔍 [DRY RUN] Would delete: $branch (inactive for $AGE_DAYS days)"
-                DELETED_COUNT=$((DELETED_COUNT + 1))
+                echo $(($(cat /tmp/deleted_count.txt) + 1)) > /tmp/deleted_count.txt
               else
                 echo "🗑️  Deleting: $branch (inactive for $AGE_DAYS days)"
                 git push origin --delete "$branch" 2>/dev/null || echo "⚠️  Failed to delete $branch"
-                DELETED_COUNT=$((DELETED_COUNT + 1))
+                echo $(($(cat /tmp/deleted_count.txt) + 1)) > /tmp/deleted_count.txt
               fi
             else
               echo "✓ Keeping $branch (active $AGE_DAYS days ago)"
             fi
           done
+          
+          # Read final counts from temp files
+          DELETED_COUNT=$(cat /tmp/deleted_count.txt)
+          SKIPPED_COUNT=$(cat /tmp/skipped_count.txt)
           
           echo ""
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

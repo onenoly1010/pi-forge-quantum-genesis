@@ -1,6 +1,6 @@
 # 🚀 Deployment Consolidation — Canonical Live Services
 
-**Last Updated**: 2026-01-01  
+**Last Updated**: Auto-updated every 6 hours (see deployment-health-dashboard.yml workflow)  
 **Status**: ✅ ACTIVE & CONSOLIDATED
 
 ---

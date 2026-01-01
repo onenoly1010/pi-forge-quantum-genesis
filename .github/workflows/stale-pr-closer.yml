@@ -41,8 +41,9 @@ jobs:
           CURRENT_DATE=$(date +%s)
           THIRTY_DAYS_AGO=$((CURRENT_DATE - 30*24*60*60))
           
-          CLOSED_COUNT=0
-          SKIPPED_COUNT=0
+          # Use temp files to track counts (avoid subshell variable issues)
+          echo "0" > /tmp/closed_count.txt
+          echo "0" > /tmp/skipped_count.txt
           
           # Get all open PRs
           PR_DATA=$(gh pr list --state open --json number,updatedAt,labels,title,author --limit 1000)
@@ -57,7 +58,7 @@ jobs:
             # Check if PR has 'do-not-close' label
             if echo "$LABELS" | grep -qi "do-not-close"; then
               echo "⏭️  Skipping PR #$PR_NUMBER (has 'do-not-close' label)"
-              SKIPPED_COUNT=$((SKIPPED_COUNT + 1))
+              echo $(($(cat /tmp/skipped_count.txt) + 1)) > /tmp/skipped_count.txt
               continue
             fi
             
@@ -66,7 +67,7 @@ jobs:
             
             if [ "$UPDATED_SECONDS" -eq 0 ]; then
               echo "⚠️  Could not parse date for PR #$PR_NUMBER, skipping"
-              SKIPPED_COUNT=$((SKIPPED_COUNT + 1))
+              echo $(($(cat /tmp/skipped_count.txt) + 1)) > /tmp/skipped_count.txt
               continue
             fi
             
@@ -77,7 +78,7 @@ jobs:
             if [ "$AGE_DAYS" -ge 30 ]; then
               if [ "$DRY_RUN" = "true" ]; then
                 echo "🔍 [DRY RUN] Would close PR #$PR_NUMBER: \"$PR_TITLE\" (inactive for $AGE_DAYS days)"
-                CLOSED_COUNT=$((CLOSED_COUNT + 1))
+                echo $(($(cat /tmp/closed_count.txt) + 1)) > /tmp/closed_count.txt
               else
                 echo "🚪 Closing PR #$PR_NUMBER: \"$PR_TITLE\" (inactive for $AGE_DAYS days)"
                 
@@ -104,12 +105,16 @@ _Closed by: Automated Cleanup Protocol_"
                 # Close the PR
                 gh pr close "$PR_NUMBER" --comment "Automatically closed due to 30 days of inactivity. Can be reopened if work resumes."
                 
-                CLOSED_COUNT=$((CLOSED_COUNT + 1))
+                echo $(($(cat /tmp/closed_count.txt) + 1)) > /tmp/closed_count.txt
               fi
             else
               echo "✓ Keeping PR #$PR_NUMBER (active $AGE_DAYS days ago)"
             fi
           done
+          
+          # Read final counts from temp files
+          CLOSED_COUNT=$(cat /tmp/closed_count.txt)
+          SKIPPED_COUNT=$(cat /tmp/skipped_count.txt)
           
           echo ""
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
