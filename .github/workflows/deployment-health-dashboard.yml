@@ -212,9 +212,7 @@ jobs:
             echo "ℹ️  No changes to commit"
           else
             git add CLEANUP_STATUS_DASHBOARD.md
-            git commit -m "🤖 Auto-update deployment health dashboard
-
-[skip ci]"
+            git commit -m "🤖 Auto-update deployment health dashboard" -m "[skip ci]"
             git push
             echo "✅ Dashboard changes committed and pushed"
           fi

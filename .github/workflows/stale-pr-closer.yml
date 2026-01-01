@@ -80,27 +80,10 @@ jobs:
                 echo "🔍 [DRY RUN] Would close PR #$PR_NUMBER: \"$PR_TITLE\" (inactive for $AGE_DAYS days)"
                 echo $(($(cat /tmp/closed_count.txt) + 1)) > /tmp/closed_count.txt
               else
-                echo "🚪 Closing PR #$PR_NUMBER: \"$PR_TITLE\" (inactive for $AGE_DAYS days)"
+                echo "Closing PR #$PR_NUMBER: \"$PR_TITLE\" (inactive for $AGE_DAYS days)"
                 
                 # Add comment explaining the closure
-                gh pr comment "$PR_NUMBER" --body "🤖 **Automated Closure Notice**
-
-This pull request has been automatically closed due to inactivity (no updates for $AGE_DAYS days).
-
-**Why was this closed?**
-- PRs inactive for 30+ days are automatically closed to maintain a clean, active workspace
-- This is part of our autonomous cleanup protocol
-
-**What if I still need this PR?**
-- You can reopen this PR at any time
-- Add the \`do-not-close\` label to prevent future automatic closure
-- Update the PR with new commits or comments to reset the inactivity timer
-
-**Canon Alignment**: This closure follows the Quantum Pi Forge principle of continuity — anyone can resume work at any time.
-
-If you have questions, please open a new issue or comment here.
-
-_Closed by: Automated Cleanup Protocol_"
+                gh pr comment "$PR_NUMBER" --body "Automated Closure Notice - This pull request has been automatically closed due to inactivity. PRs inactive for 30+ days are automatically closed to maintain a clean workspace as part of our autonomous cleanup protocol. You can reopen this PR at any time or add the do-not-close label to prevent future automatic closure. This follows the Quantum Pi Forge principle of continuity. Closed by: Automated Cleanup Protocol"
                 
                 # Close the PR
                 gh pr close "$PR_NUMBER" --comment "Automatically closed due to 30 days of inactivity. Can be reopened if work resumes."
