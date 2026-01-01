@@ -1,0 +1,159 @@
+name: 🚪 Auto-Close Stale PRs
+
+on:
+  schedule:
+    # Run daily at 3:00 AM UTC
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run mode (do not close, only report)'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  close-stale-prs:
+    runs-on: ubuntu-latest
+    name: Close PRs Inactive for 30+ Days
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Find and close stale PRs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'true' }}
+        run: |
+          echo "🔍 Scanning for PRs inactive for 30+ days..."
+          echo "Dry run mode: $DRY_RUN"
+          
+          # Get current date in seconds
+          CURRENT_DATE=$(date +%s)
+          THIRTY_DAYS_AGO=$((CURRENT_DATE - 30*24*60*60))
+          
+          CLOSED_COUNT=0
+          SKIPPED_COUNT=0
+          
+          # Get all open PRs
+          PR_DATA=$(gh pr list --state open --json number,updatedAt,labels,title,author --limit 1000)
+          
+          echo "$PR_DATA" | jq -c '.[]' | while read -r pr; do
+            PR_NUMBER=$(echo "$pr" | jq -r '.number')
+            PR_TITLE=$(echo "$pr" | jq -r '.title')
+            PR_AUTHOR=$(echo "$pr" | jq -r '.author.login')
+            UPDATED_AT=$(echo "$pr" | jq -r '.updatedAt')
+            LABELS=$(echo "$pr" | jq -r '.labels[].name' | tr '\n' ',' | sed 's/,$//')
+            
+            # Check if PR has 'do-not-close' label
+            if echo "$LABELS" | grep -qi "do-not-close"; then
+              echo "⏭️  Skipping PR #$PR_NUMBER (has 'do-not-close' label)"
+              SKIPPED_COUNT=$((SKIPPED_COUNT + 1))
+              continue
+            fi
+            
+            # Convert updated_at to seconds
+            UPDATED_SECONDS=$(date -d "$UPDATED_AT" +%s 2>/dev/null || echo "0")
+            
+            if [ "$UPDATED_SECONDS" -eq 0 ]; then
+              echo "⚠️  Could not parse date for PR #$PR_NUMBER, skipping"
+              SKIPPED_COUNT=$((SKIPPED_COUNT + 1))
+              continue
+            fi
+            
+            # Calculate age in days
+            AGE_SECONDS=$((CURRENT_DATE - UPDATED_SECONDS))
+            AGE_DAYS=$((AGE_SECONDS / 86400))
+            
+            if [ "$AGE_DAYS" -ge 30 ]; then
+              if [ "$DRY_RUN" = "true" ]; then
+                echo "🔍 [DRY RUN] Would close PR #$PR_NUMBER: \"$PR_TITLE\" (inactive for $AGE_DAYS days)"
+                CLOSED_COUNT=$((CLOSED_COUNT + 1))
+              else
+                echo "🚪 Closing PR #$PR_NUMBER: \"$PR_TITLE\" (inactive for $AGE_DAYS days)"
+                
+                # Add comment explaining the closure
+                gh pr comment "$PR_NUMBER" --body "🤖 **Automated Closure Notice**
+
+This pull request has been automatically closed due to inactivity (no updates for $AGE_DAYS days).
+
+**Why was this closed?**
+- PRs inactive for 30+ days are automatically closed to maintain a clean, active workspace
+- This is part of our autonomous cleanup protocol
+
+**What if I still need this PR?**
+- You can reopen this PR at any time
+- Add the \`do-not-close\` label to prevent future automatic closure
+- Update the PR with new commits or comments to reset the inactivity timer
+
+**Canon Alignment**: This closure follows the Quantum Pi Forge principle of continuity — anyone can resume work at any time.
+
+If you have questions, please open a new issue or comment here.
+
+_Closed by: Automated Cleanup Protocol_"
+                
+                # Close the PR
+                gh pr close "$PR_NUMBER" --comment "Automatically closed due to 30 days of inactivity. Can be reopened if work resumes."
+                
+                CLOSED_COUNT=$((CLOSED_COUNT + 1))
+              fi
+            else
+              echo "✓ Keeping PR #$PR_NUMBER (active $AGE_DAYS days ago)"
+            fi
+          done
+          
+          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "📊 Summary:"
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "   PRs that would be closed: $CLOSED_COUNT"
+          else
+            echo "   PRs closed: $CLOSED_COUNT"
+          fi
+          echo "   PRs skipped: $SKIPPED_COUNT"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+      
+      - name: Create closure report
+        if: always()
+        run: |
+          mkdir -p reports
+          cat > reports/pr-closure-$(date +%Y%m%d-%H%M%S).txt << EOF
+          PR Closure Report
+          =================
+          Date: $(date -u)
+          Dry Run: ${{ github.event.inputs.dry_run || 'true' }}
+          
+          This automated workflow closes pull requests that have been
+          inactive for 30+ days (no commits, comments, or updates).
+          
+          PRs with the 'do-not-close' label are never automatically closed.
+          
+          Closed PRs can be reopened at any time by contributors.
+          EOF
+          
+          echo "✅ Closure report generated"
+      
+      - name: Post summary
+        if: always()
+        run: |
+          echo "### 🚪 PR Closure Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Dry Run**: ${{ github.event.inputs.dry_run || 'true' }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Date**: $(date -u)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "PRs inactive for 30+ days (without 'do-not-close' label) were processed." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Note**: Closed PRs can be reopened at any time." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "To prevent automatic closure, add the \`do-not-close\` label to a PR." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "See workflow logs for detailed information." >> $GITHUB_STEP_SUMMARY

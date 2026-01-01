@@ -2,6 +2,8 @@
 
 ## A Sovereign Hub for the Autonomous Multi‑Agent Constellation
 
+**🌟 [START HERE](./START_HERE.md)** — New to Quantum Pi Forge? Begin with the universal onboarding guide.
+
 **🌊 [Constellation Status: LIVE](./CONSTELLATION_ACTIVATION.md)** — The Quantum Pi Forge is activated and operational as of December 22, 2025.
 
 **📜 [Read the Genesis Declaration](./GENESIS.md)** — The foundational seal of the Quantum Pi Forge ecosystem, minted at Solstice 2025.
@@ -130,12 +132,16 @@ Each repo is sovereign, but all are aligned through this Space.
 
 ## 🌱 Start Here
 
-If you're new:
+**New to Quantum Pi Forge?**
 
-1. Visit the **Start Here** onboarding page
-2. Explore the **Ecosystem Overview**
-3. Learn the **Agent System**
-4. Ask the GitHub Agent for guidance
+👉 **[START_HERE.md](./START_HERE.md)** — Your universal onboarding entry point
+
+This comprehensive guide will help you:
+1. Understand the constellation structure
+2. Navigate the documentation
+3. Find the right resources for your interests
+4. Engage with the agent system
+5. Make your first contribution
 
 You are welcome here.
 
@@ -174,6 +180,8 @@ This repository serves as:
 - **URL**: https://quantum-resonance-clean.vercel.app
 - **Repository**: `quantum-resonance-clean`
 - **Purpose**: Harmonic ledger backend
+
+**📋 For complete deployment information, see [DEPLOYMENT_CONSOLIDATION.md](./DEPLOYMENT_CONSOLIDATION.md)**
 
 ### Vercel Configuration Note
 

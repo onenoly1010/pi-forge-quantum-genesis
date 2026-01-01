@@ -1,0 +1,139 @@
+name: 🧹 Automated Branch Cleanup
+
+on:
+  schedule:
+    # Run daily at 2:00 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run mode (do not delete, only report)'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  cleanup-stale-branches:
+    runs-on: ubuntu-latest
+    name: Delete Inactive Branches (90+ days)
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      
+      - name: Find and delete stale branches
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'true' }}
+        run: |
+          echo "🔍 Scanning for branches inactive for 90+ days..."
+          echo "Dry run mode: $DRY_RUN"
+          
+          # Protected branches that should never be deleted
+          PROTECTED_BRANCHES="main|master|develop|staging|production"
+          
+          # Get current date in seconds
+          CURRENT_DATE=$(date +%s)
+          NINETY_DAYS_AGO=$((CURRENT_DATE - 90*24*60*60))
+          
+          # List all remote branches
+          git fetch --all --prune
+          
+          DELETED_COUNT=0
+          SKIPPED_COUNT=0
+          
+          # Get all branches except protected ones
+          for branch in $(git branch -r | grep -v HEAD | sed 's|origin/||' | grep -vE "^($PROTECTED_BRANCHES)$"); do
+            # Skip if branch has open PRs
+            PR_COUNT=$(gh pr list --state open --head "$branch" --json number --jq 'length' 2>/dev/null || echo "0")
+            
+            if [ "$PR_COUNT" -gt 0 ]; then
+              echo "⏭️  Skipping $branch (has $PR_COUNT open PR(s))"
+              SKIPPED_COUNT=$((SKIPPED_COUNT + 1))
+              continue
+            fi
+            
+            # Get last commit date for the branch
+            LAST_COMMIT_DATE=$(git log -1 --format=%ct "origin/$branch" 2>/dev/null || echo "0")
+            
+            if [ "$LAST_COMMIT_DATE" -eq 0 ]; then
+              echo "⚠️  Could not get commit date for $branch, skipping"
+              SKIPPED_COUNT=$((SKIPPED_COUNT + 1))
+              continue
+            fi
+            
+            # Calculate age in days
+            AGE_SECONDS=$((CURRENT_DATE - LAST_COMMIT_DATE))
+            AGE_DAYS=$((AGE_SECONDS / 86400))
+            
+            if [ "$AGE_DAYS" -ge 90 ]; then
+              if [ "$DRY_RUN" = "true" ]; then
+                echo "🔍 [DRY RUN] Would delete: $branch (inactive for $AGE_DAYS days)"
+                DELETED_COUNT=$((DELETED_COUNT + 1))
+              else
+                echo "🗑️  Deleting: $branch (inactive for $AGE_DAYS days)"
+                git push origin --delete "$branch" 2>/dev/null || echo "⚠️  Failed to delete $branch"
+                DELETED_COUNT=$((DELETED_COUNT + 1))
+              fi
+            else
+              echo "✓ Keeping $branch (active $AGE_DAYS days ago)"
+            fi
+          done
+          
+          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "📊 Summary:"
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "   Branches that would be deleted: $DELETED_COUNT"
+          else
+            echo "   Branches deleted: $DELETED_COUNT"
+          fi
+          echo "   Branches skipped: $SKIPPED_COUNT"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+      
+      - name: Create cleanup report
+        if: always()
+        run: |
+          mkdir -p reports
+          cat > reports/branch-cleanup-$(date +%Y%m%d-%H%M%S).txt << EOF
+          Branch Cleanup Report
+          =====================
+          Date: $(date -u)
+          Dry Run: ${{ github.event.inputs.dry_run || 'true' }}
+          
+          This automated workflow cleans up branches that have been
+          inactive for 90+ days and have no open pull requests.
+          
+          Protected branches (never deleted):
+          - main, master, develop, staging, production
+          
+          Branches with open PRs are automatically skipped.
+          EOF
+          
+          echo "✅ Cleanup report generated"
+      
+      - name: Post summary
+        if: always()
+        run: |
+          echo "### 🧹 Branch Cleanup Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Dry Run**: ${{ github.event.inputs.dry_run || 'true' }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Date**: $(date -u)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Branches inactive for 90+ days (without open PRs) were processed." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "See workflow logs for detailed information." >> $GITHUB_STEP_SUMMARY
