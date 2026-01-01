@@ -1,0 +1,208 @@
+name: Press Agent - Automated Communications
+
+on:
+  release:
+    types: [published]
+  workflow_run:
+    workflows: ["Release on Merge", "Deploy Testnet"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      type:
+        description: 'Announcement type'
+        required: true
+        type: choice
+        options:
+          - launch
+          - update
+          - milestone
+          - deployment
+      title:
+        description: 'Announcement title'
+        required: true
+        type: string
+      description:
+        description: 'Announcement description'
+        required: true
+        type: string
+      version:
+        description: 'Version/tag (optional)'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  notify-release:
+    name: Notify Release
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Press Agent dependencies
+        run: |
+          cd press-agent
+          npm install
+
+      - name: Start Press Agent server
+        run: |
+          cd press-agent
+          npm start &
+          PRESS_AGENT_PID=$!
+          echo "PRESS_AGENT_PID=$PRESS_AGENT_PID" >> $GITHUB_ENV
+          sleep 5
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          TWITTER_BEARER_TOKEN: ${{ secrets.TWITTER_BEARER_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+      - name: Send release announcement
+        run: |
+          curl -X POST http://localhost:3001/api/communications/launch \
+            -H "Content-Type: application/json" \
+            -d '{
+              "title": "'"${{ github.event.release.name }}"'",
+              "description": "A new release of Quantum Pi Forge is now available!",
+              "version": "'"${{ github.event.release.tag_name }}"'",
+              "date": "'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'",
+              "url": "'"${{ github.event.release.html_url }}"'",
+              "features": [
+                "Production-ready release",
+                "Enhanced quantum resonance",
+                "Improved stability and performance"
+              ]
+            }'
+
+      - name: Stop Press Agent server
+        if: always()
+        run: |
+          if [ ! -z "$PRESS_AGENT_PID" ]; then
+            kill $PRESS_AGENT_PID || true
+          fi
+
+  notify-deployment:
+    name: Notify Deployment
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Press Agent dependencies
+        run: |
+          cd press-agent
+          npm install
+
+      - name: Start Press Agent server
+        run: |
+          cd press-agent
+          npm start &
+          PRESS_AGENT_PID=$!
+          echo "PRESS_AGENT_PID=$PRESS_AGENT_PID" >> $GITHUB_ENV
+          sleep 5
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          TWITTER_BEARER_TOKEN: ${{ secrets.TWITTER_BEARER_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+      - name: Determine environment
+        id: env
+        run: |
+          if [[ "${{ github.event.workflow_run.name }}" == *"Testnet"* ]]; then
+            echo "environment=testnet" >> $GITHUB_OUTPUT
+          else
+            echo "environment=production" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Send deployment notification
+        run: |
+          curl -X POST http://localhost:3001/api/communications/deployment \
+            -H "Content-Type: application/json" \
+            -d '{
+              "environment": "'"${{ steps.env.outputs.environment }}"'",
+              "version": "'"${{ github.sha }}"'",
+              "duration": "N/A",
+              "url": "https://pi-forge-quantum-genesis.up.railway.app"
+            }'
+
+      - name: Stop Press Agent server
+        if: always()
+        run: |
+          if [ ! -z "$PRESS_AGENT_PID" ]; then
+            kill $PRESS_AGENT_PID || true
+          fi
+
+  manual-announcement:
+    name: Manual Announcement
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Press Agent dependencies
+        run: |
+          cd press-agent
+          npm install
+
+      - name: Start Press Agent server
+        run: |
+          cd press-agent
+          npm start &
+          PRESS_AGENT_PID=$!
+          echo "PRESS_AGENT_PID=$PRESS_AGENT_PID" >> $GITHUB_ENV
+          sleep 5
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          TWITTER_BEARER_TOKEN: ${{ secrets.TWITTER_BEARER_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+      - name: Send announcement
+        run: |
+          curl -X POST http://localhost:3001/api/communications/${{ github.event.inputs.type }} \
+            -H "Content-Type: application/json" \
+            -d '{
+              "title": "'"${{ github.event.inputs.title }}"'",
+              "description": "'"${{ github.event.inputs.description }}"'",
+              "version": "'"${{ github.event.inputs.version }}"'",
+              "date": "'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"
+            }'
+
+      - name: Stop Press Agent server
+        if: always()
+        run: |
+          if [ ! -z "$PRESS_AGENT_PID" ]; then
+            kill $PRESS_AGENT_PID || true
+          fi
+
+      - name: Summary
+        run: |
+          echo "## Press Agent Announcement Sent" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Type:** ${{ github.event.inputs.type }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Title:** ${{ github.event.inputs.title }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Description:** ${{ github.event.inputs.description }}" >> $GITHUB_STEP_SUMMARY
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            echo "**Version:** ${{ github.event.inputs.version }}" >> $GITHUB_STEP_SUMMARY
+          fi
