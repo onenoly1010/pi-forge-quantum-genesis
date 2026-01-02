@@ -47,7 +47,7 @@ jobs:
           if [ -d "frontend" ]; then
             cp -r frontend/ build/pi-studio/frontend/
           else
-            echo "⚠️ frontend is not a directory, skipping frontend copy"
+            echo "⚠️ Warning: frontend is not a directory (found file instead), skipping frontend copy. Expected a directory for proper frontend deployment."
           fi
           
           # Copy root HTML/JS files
