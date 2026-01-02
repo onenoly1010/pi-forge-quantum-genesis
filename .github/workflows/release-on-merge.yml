@@ -43,8 +43,12 @@ jobs:
           # Copy server files
           cp -r server/ build/pi-studio/server/
           
-          # Copy frontend files
-          cp -r frontend/ build/pi-studio/frontend/
+          # Copy frontend files only if it's a directory
+          if [ -d "frontend" ]; then
+            cp -r frontend/ build/pi-studio/frontend/
+          else
+            echo "⚠️ frontend is not a directory, skipping frontend copy"
+          fi
           
           # Copy root HTML/JS files
           cp index.html build/pi-studio/ || true
