@@ -1,8 +1,9 @@
 {
   "version": 2,
+  "framework": null,
+  "buildCommand": "npm run build",
   "cleanUrls": true,
   "trailingSlash": false,
-  "buildCommand": "npm run build",
   "headers": [
     {
       "source": "/(.*)",

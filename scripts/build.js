@@ -105,8 +105,13 @@ function build() {
     const destPath = path.join(publicDir, dir);
     
     if (fs.existsSync(srcPath)) {
-      copyDir(srcPath, destPath);
-      console.log(`✓ Copied ${dir}/`);
+      const stats = fs.statSync(srcPath);
+      if (stats.isDirectory()) {
+        copyDir(srcPath, destPath);
+        console.log(`✓ Copied ${dir}/`);
+      } else {
+        console.warn(`⚠ ${dir} is not a directory, skipping`);
+      }
     } else {
       console.warn(`⚠ Directory not found: ${dir}`);
     }
