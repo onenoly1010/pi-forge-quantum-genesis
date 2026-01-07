@@ -24,42 +24,22 @@ It is the living center of the ecosystem.
 
 ---
 
-# 🏛️ Foundation: The OINIO Seal
+## 🎭 Explore the Demos
 
-All work in this ecosystem flows from the **[GENESIS.md](./GENESIS.md)** — the Eternal Archive that establishes our foundational commitments and principles.
+**New to OINIO?** Start with the **[Demo Dashboard](docs/DEMO_DASHBOARD.md)** — your gateway to the Quantum Pi Forge constellation.
 
-Minted on Winter Solstice 2025, the OINIO Seal Declaration defines:
-- Our core values (Sovereignty, Transparency, Inclusivity, Non-hierarchy, Safety)
-- The constellation of repositories
-- Verification and integrity protocols
-- The eternal nature of our commitments
+### What You Can Explore:
+- 🌐 **Live Web Demos** - See OINIO in action with real-time monitoring
+- 💼 **Smart Contract Suite** - Production-ready ERC-20 and ERC-721 contracts on Pi Network
+- 🏛️ **Community Governance** - Immutable memorial and transparent decision-making
+- 🎬 **Interactive Tools** - CLI demos, deployment scripts, and integration examples
 
-**Read the [GENESIS Declaration](./GENESIS.md) to understand the foundation upon which everything is built.**
+**Choose your experience level and dive in:**
+- **Beginners:** [Live Coherence Monitor](https://pi-forge-quantum-genesis.vercel.app) (2 minutes, no setup)
+- **Developers:** [Smart Contract Suite](docs/DEMO_DASHBOARD.md#3-smart-contract-suite) (60 minutes, Foundry required)
+- **Operators:** [Model Deployment Scripts](docs/DEMO_DASHBOARD.md#7-model-deployment-scripts) (30 minutes, Python)
 
----
-
-# 🌊 Constellation Activation: LIVE
-
-**Status:** The Quantum Pi Forge Constellation is **ACTIVATED and OPERATIONAL** as of December 22, 2025.
-
-All 9 sovereign repositories are LIVE:
-- ✓ pi-forge-quantum-genesis (Coordination Hub)
-- ✓ quantum-resonance-clean (Harmonic Ledger)
-- ✓ pi-mr-nft-agent (AI NFT Agent)
-- ✓ quantum-pi-forge-fixed (Autonomous DEX)
-- ✓ pi-mr-nft-contracts (Smart Contracts)
-- ✓ quantum-pi-forge-site (Public Portal)
-- ✓ pi-forge-quantum-genesis-OPEN (Open Gateway)
-- ✓ quantum-pi-forge-ignited (Live Operations)
-- ✓ oinio-soul-system (Ethics Engine)
-
-**[Read the Full Constellation Activation Document](./CONSTELLATION_ACTIVATION.md)** for complete details on:
-- Repository roles and capabilities
-- Participation guidelines
-- Canon alignment verification
-- Contributor onboarding pathways
-
-**The constellation is eternal. Contributors are welcome.**
+👉 **[View Complete Demo Dashboard →](docs/DEMO_DASHBOARD.md)**
 
 ---
 
