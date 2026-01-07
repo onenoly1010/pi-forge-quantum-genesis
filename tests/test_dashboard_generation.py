@@ -13,21 +13,14 @@ def test_dashboard_generation_in_repo():
     # Import the generate_dashboard module
     import generate_dashboard
     
-    # Constants for test thresholds
-    MIN_CONTENT_LENGTH = 1000
-    MAX_NAVIGATION_LINE = 100
-    TRUNCATION_CHECK_LENGTH = 5000  # Check first 5000 chars for truncation markers
-    
     # Generate the dashboard content
     content = generate_dashboard.generate_dashboard()
     
     # Verify content is not empty
-    assert len(content) > MIN_CONTENT_LENGTH, "Dashboard content should be substantial"
+    assert len(content) > 1000, "Dashboard content should be substantial"
     
     # Verify no truncation placeholders remain
-    # Check a substantial portion of early content for truncation markers
-    early_content = content[:TRUNCATION_CHECK_LENGTH]
-    assert '...' not in early_content, "Should not have ellipsis truncation in early content"
+    assert '...' not in content[:1000], "Should not have ellipsis truncation in early content"
     assert '[truncated]' not in content.lower(), "Should not have [truncated] markers"
     assert '<!-- truncated -->' not in content.lower(), "Should not have truncation comments"
     assert '(truncated)' not in content.lower(), "Should not have (truncated) markers"
@@ -35,12 +28,11 @@ def test_dashboard_generation_in_repo():
     # Verify navigation section exists and is properly located
     assert '## 📑 Quick Navigation' in content, "Quick Navigation section should exist"
     
-    # Verify the navigation appears early in the document
+    # Verify the navigation appears early in the document (within first 100 lines)
     lines = content.split('\n')
     nav_line = next((i for i, line in enumerate(lines) if '## 📑 Quick Navigation' in line), -1)
     assert nav_line != -1, "Navigation section should be found"
-    assert nav_line < MAX_NAVIGATION_LINE, \
-        f"Navigation should appear within first {MAX_NAVIGATION_LINE} lines, found at line {nav_line}"
+    assert nav_line < 100, f"Navigation should appear within first 100 lines, found at line {nav_line}"
     
     # Verify key sections exist
     assert '## 🧭 Prerequisites' in content, "Prerequisites section should exist"
@@ -64,10 +56,10 @@ def test_dashboard_generation_in_repo():
 def test_actual_file_generation():
     """Test that the dashboard file can be generated and exists"""
     
-    # Run the script from repo root using current Python interpreter
+    # Run the script from repo root
     import subprocess
     script_path = os.path.join(repo_root, 'generate_dashboard.py')
-    result = subprocess.run([sys.executable, script_path], 
+    result = subprocess.run(['python3', script_path], 
                           cwd=repo_root,
                           capture_output=True, text=True)
     

@@ -10,13 +10,22 @@ Integrates:
 - Sacred Trinity architecture optimization analysis
 """
 
-import os
-import json
 import asyncio
+import json
 import logging
+import os
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict, List, Optional
+
+# Import tracing system
+try:
+    from tracing_system import get_tracing_system
+    tracing_enabled = True
+    tracing_system = get_tracing_system()
+except ImportError:
+    tracing_enabled = False
+    tracing_system = None
 
 # Import our Sacred Trinity evaluation components
 from evaluation_system import QuantumLatticeEvaluator
@@ -37,6 +46,17 @@ class SacredTrinityEvaluationSuite:
         
     async def run_complete_evaluation(self) -> Dict[str, Any]:
         """Execute complete Sacred Trinity evaluation pipeline"""
+        if tracing_enabled and tracing_system:
+            with tracing_system.create_quantum_span(
+                tracing_system.get_tracer("evaluation-launcher"),
+                "run_complete_evaluation",
+                {"evaluation_suite": "sacred_trinity"}
+            ) as span:
+                return await self._run_complete_evaluation_impl()
+        else:
+            return await self._run_complete_evaluation_impl()
+
+    async def _run_complete_evaluation_impl(self) -> Dict[str, Any]:
         logger.info("🌌 Initiating Complete Sacred Trinity Evaluation Suite...")
         
         try:

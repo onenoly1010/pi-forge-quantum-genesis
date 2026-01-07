@@ -1086,6 +1086,9 @@ This section covers the most common deployment issues and their solutions.
    ```bash
    # Test webhook endpoint is accessible
    curl -X POST https://your-app.railway.app/api/pi-webhooks/payment      -H "Content-Type: application/json"      -d '{"test": true}'
+   curl -X POST https://your-app.railway.app/api/pi-webhooks/payment \
+     -H "Content-Type: application/json" \
+     -d '{"test": true}'
    
    # Expected: Response (even if verification fails, endpoint should respond)
    ```
@@ -1514,6 +1517,7 @@ If you're still stuck:
   ```bash
   # Test payment approval
   curl -X POST https://your-app.railway.app/api/payments/approve     -H "Content-Type: application/json"     -H "Authorization: Bearer YOUR_JWT"     -d '{"payment_id": "test_123", "amount": 0.15}'
+  curl -X POST https://your-app.railway.app/api/payments/approve      -H "Content-Type: application/json"      -H "Authorization: Bearer YOUR_JWT"      -d '{"payment_id": "test_123", "amount": 0.15}'
   ```
 - [ ] Review deployment logs
   - Railway: Check for warnings
