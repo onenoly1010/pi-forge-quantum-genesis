@@ -52,21 +52,18 @@ A comprehensive test suite was created at `tests/test_dashboard_generation.py` t
 
 ```
 $ python3 -m pytest tests/test_dashboard_generation.py -v
-================================================= test session starts ==================================================
 platform linux -- Python 3.12.3, pytest-9.0.2, pluggy-1.6.0 -- /usr/bin/python3
 collecting ... collected 2 items
 
 tests/test_dashboard_generation.py::test_dashboard_generation_in_repo PASSED     [ 50%]
 tests/test_dashboard_generation.py::test_actual_file_generation PASSED           [100%]
 
-================================================== 2 passed in 0.05s ===================================================
 ```
 
 ### Detailed Test Output
 
 ```
 Testing Dashboard Generation Fix
-============================================================
 
 Test 1: Content Generation
 ------------------------------------------------------------
@@ -85,9 +82,7 @@ Test 2: Actual File Generation
    - Dashboard file created: PASS
    - File has 45603 characters: PASS
 
-============================================================
 ✅ All verification tests passed!
-============================================================
 
 Summary of fixes verified:
   1. ✅ No truncation placeholders in generated content
