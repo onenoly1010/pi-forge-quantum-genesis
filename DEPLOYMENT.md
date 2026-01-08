@@ -58,7 +58,7 @@ The repository will continue to function normally without Vercel.
 
 ### Build Configuration (If Using Vercel)
 
-- **Framework**: None (static site with custom build)
+e- **Framework**: None (static site with custom build)
 - **Build Command**: `npm run build`
 - **Output Directory**: `.vercel/output/static` (Vercel Build Output API v3)
 - **Node.js Version**: 20.x (pinned to major version 20)
