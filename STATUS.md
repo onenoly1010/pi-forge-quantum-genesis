@@ -31,16 +31,42 @@
 - [ ] Treasury metrics updating (Web3.js)
 - [ ] WebSocket connections active
 
-## 🧭 NEXT STEPS
+## 📦 ARCHIVED REPOSITORIES
 
-1. Configure missing secrets (RAILWAY_TOKEN, GHCR_TOKEN)
-2. Verify all deployment endpoints
-3. Complete consolidation audit (9 repos)
-4. Disable broken workflows
+**Phase 4 Status:** Repository archival pending (manual GitHub UI action)
+
+Marked for archival:
+- pi-forge-quantum-genesis-OPEN
+- PiForgeSovereign-GoldStandard
+- Oinio-server-
+- Piforge
+- mainnetstatus
+- countdown
+
+## 🧭 NEXT STEPS — PHASE 5
+
+1. **Selective Code Consolidation** ← CURRENT
+   - Merge quantum-resonance-clean → /frontend
+   - Merge quantum-pi-forge-fixed → /server
+   - Merge quantum-pi-forge-site → /docs
+   - Merge pi-mr-nft-agent → /server/agents
+
+2. Archive 6 deprecated repos (manual GitHub UI)
+3. Configure missing secrets (RAILWAY_TOKEN, GHCR_TOKEN)
+4. Verify all deployment endpoints
 
 ## ⚠️ KNOWN ISSUES
 
 - None currently
+
+## ✅ COMPLETED (PHASE 4)
+
+- STATUS.md created
+- CONSOLIDATION.md documented (18-repo strategy)
+- REPO_LINKS.md navigation guide created
+- README.md ecosystem overview updated
+- 3 noisy workflows disabled
+- Markdownlint config (317 style warnings resolved)
 
 ## 📝 RECENT CHANGES
 
