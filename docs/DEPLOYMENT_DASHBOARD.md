@@ -1085,6 +1085,7 @@ This section covers the most common deployment issues and their solutions.
 2. **Verify webhook URL is public:**
    ```bash
    # Test webhook endpoint is accessible
+   curl -X POST https://your-app.railway.app/api/pi-webhooks/payment      -H "Content-Type: application/json"      -d '{"test": true}'
    curl -X POST https://your-app.railway.app/api/pi-webhooks/payment \
      -H "Content-Type: application/json" \
      -d '{"test": true}'
@@ -1221,11 +1222,7 @@ This section covers the most common deployment issues and their solutions.
 
 3. **Test CORS with curl:**
    ```bash
-   curl -H "Origin: https://your-project.vercel.app" \
-     -H "Access-Control-Request-Method: POST" \
-     -H "Access-Control-Request-Headers: Content-Type" \
-     -X OPTIONS \
-     https://your-app.railway.app/api/test
+   curl -H "Origin: https://your-project.vercel.app"      -H "Access-Control-Request-Method: POST"      -H "Access-Control-Request-Headers: Content-Type"      -X OPTIONS      https://your-app.railway.app/api/test
    
    # Should return:
    # Access-Control-Allow-Origin: https://your-project.vercel.app
@@ -1380,9 +1377,7 @@ This section covers the most common deployment issues and their solutions.
 2. **Generate new token:**
    ```bash
    # Request new token from auth endpoint
-   curl -X POST https://your-app.railway.app/token \
-     -H "Content-Type: application/json" \
-     -d '{"username": "user", "password": "pass"}'
+   curl -X POST https://your-app.railway.app/token      -H "Content-Type: application/json"      -d '{"username": "user", "password": "pass"}'
    ```
 
 3. **Increase token expiration (if appropriate):**
@@ -1521,10 +1516,8 @@ If you're still stuck:
 - [ ] Test full payment flow (testnet)
   ```bash
   # Test payment approval
-  curl -X POST https://your-app.railway.app/api/payments/approve \
-    -H "Content-Type: application/json" \
-    -H "Authorization: Bearer YOUR_JWT" \
-    -d '{"payment_id": "test_123", "amount": 0.15}'
+  curl -X POST https://your-app.railway.app/api/payments/approve     -H "Content-Type: application/json"     -H "Authorization: Bearer YOUR_JWT"     -d '{"payment_id": "test_123", "amount": 0.15}'
+  curl -X POST https://your-app.railway.app/api/payments/approve      -H "Content-Type: application/json"      -H "Authorization: Bearer YOUR_JWT"      -d '{"payment_id": "test_123", "amount": 0.15}'
   ```
 - [ ] Review deployment logs
   - Railway: Check for warnings
@@ -1682,11 +1675,7 @@ Guardian alerts will notify you of:
 **Manual Backup:**
 ```bash
 # Export database to SQL file
-pg_dump -h db.your-project.supabase.co \
-  -U postgres \
-  -d postgres \
-  --clean --if-exists \
-  > backup_$(date +%Y%m%d).sql
+pg_dump -h db.your-project.supabase.co   -U postgres   -d postgres   --clean --if-exists   > backup_$(date +%Y%m%d).sql
 
 # Or use Supabase CLI
 supabase db dump -f backup_$(date +%Y%m%d).sql
@@ -1695,10 +1684,7 @@ supabase db dump -f backup_$(date +%Y%m%d).sql
 **Test Restore:**
 ```bash
 # Restore from backup (on test database!)
-psql -h db.your-test-project.supabase.co \
-  -U postgres \
-  -d postgres \
-  < backup_20241221.sql
+psql -h db.your-test-project.supabase.co   -U postgres   -d postgres   < backup_20241221.sql
 
 # Or use Supabase CLI
 supabase db push --dry-run
