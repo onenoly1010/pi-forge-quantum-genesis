@@ -86,6 +86,7 @@ function build() {
       { handle: "filesystem" },
       { src: "/api/(.*)", dest: "https://pi-forge-quantum-genesis-1.onrender.com/api/$1" },
       { src: "/health", dest: "https://pi-forge-quantum-genesis-1.onrender.com/health" },
+      { src: "/docs/(.*)", dest: "/docs/$1" },
       { src: "/(.*)", dest: "/index.html" }
     ]
   };
