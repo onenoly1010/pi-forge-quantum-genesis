@@ -24,7 +24,8 @@ const staticFiles = [
 
 // Directories to copy from root to public directory
 const staticDirs = [
-  'frontend'
+  'frontend',
+  'docs'
 ];
 
 /**
