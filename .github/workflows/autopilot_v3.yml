@@ -1,0 +1,30 @@
+name: Quantum Pi Forge Autopilot v3
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v3
+
+    - name: Install Netlify CLI
+      run: npm install -g netlify-cli
+
+    - name: Publish to Netlify
+      run: netlify deploy --prod --dir=public
+
+    - name: Health Check
+      run: |
+        STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://quantumpiforgeee4091.pinet.com/validation-key.txt)
+        if [ "$STATUS" == "200" ]; then
+          echo "Validation Key Live"
+        else
+          echo "Health Check Failed ($STATUS)"
+          exit 1
+        fi
