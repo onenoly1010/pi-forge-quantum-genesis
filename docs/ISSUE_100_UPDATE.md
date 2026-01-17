@@ -38,7 +38,7 @@ One-page cheat sheet with:
 
 ### Templates
 
-#### 📋 [Guardian Decision Template](../.github/ISSUE_TEMPLATE/guardian-decision-template.md)
+#### 📋 [Guardian Decision Template](.github/ISSUE_TEMPLATE/guardian-decision-template.md)
 Structured template for all guardian decisions including:
 - Approval/rejection/modification checkboxes
 - Risk assessment fields
