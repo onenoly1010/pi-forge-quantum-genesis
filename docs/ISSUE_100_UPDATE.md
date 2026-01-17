@@ -50,24 +50,24 @@ Structured template for all guardian decisions including:
 ### Quick Links
 
 **Decision Making:**
-- Confidence Thresholds: See [Decision Types](../docs/GUARDIAN_PLAYBOOK.md#2-decision-types-and-confidence-thresholds)
-- Priority Matrix: See [Quick Reference](../docs/GUARDIAN_QUICK_REFERENCE.md#-priority-decision-matrix)
-- Templates: See [Decision Templates](../docs/GUARDIAN_PLAYBOOK.md#5-decision-templates)
+- Confidence Thresholds: See [Decision Types](docs/GUARDIAN_PLAYBOOK.md#2-decision-types-and-confidence-thresholds)
+- Priority Matrix: See [Quick Reference](docs/GUARDIAN_QUICK_REFERENCE.md#-priority-decision-matrix)
+- Templates: See [Decision Templates](docs/GUARDIAN_PLAYBOOK.md#5-decision-templates)
 
 **Emergency Procedures:**
-- Emergency Stop: [Playbook §4](../docs/GUARDIAN_PLAYBOOK.md#emergency-stop)
-- Emergency Rollback: [Playbook §4](../docs/GUARDIAN_PLAYBOOK.md#emergency-rollback)
-- Quick Commands: [Quick Reference](../docs/GUARDIAN_QUICK_REFERENCE.md#-emergency-actions)
+- Emergency Stop: [Playbook §4](docs/GUARDIAN_PLAYBOOK.md#emergency-stop)
+- Emergency Rollback: [Playbook §4](docs/GUARDIAN_PLAYBOOK.md#emergency-rollback)
+- Quick Commands: [Quick Reference](docs/GUARDIAN_QUICK_REFERENCE.md#-emergency-actions)
 
 **Monitoring:**
-- Monitoring Levels: [Playbook §6](../docs/GUARDIAN_PLAYBOOK.md#monitoring-level-management)
-- Safety Metrics: [Quick Reference](../docs/GUARDIAN_QUICK_REFERENCE.md#-safety-metrics)
-- Daily Tasks: [Quick Reference](../docs/GUARDIAN_QUICK_REFERENCE.md#-daily-tasks)
+- Monitoring Levels: [Playbook §6](docs/GUARDIAN_PLAYBOOK.md#monitoring-level-management)
+- Safety Metrics: [Quick Reference](docs/GUARDIAN_QUICK_REFERENCE.md#-safety-metrics)
+- Daily Tasks: [Quick Reference](docs/GUARDIAN_QUICK_REFERENCE.md#-daily-tasks)
 
 **Audit & Compliance:**
-- Audit Procedures: [Playbook §9](../docs/GUARDIAN_PLAYBOOK.md#9-audit-procedures)
-- Weekly Reports: [Playbook §9](../docs/GUARDIAN_PLAYBOOK.md#weekly-audit-review)
-- Incident Post-Mortems: [Playbook §9](../docs/GUARDIAN_PLAYBOOK.md#incident-post-mortems)
+- Audit Procedures: [Playbook §9](docs/GUARDIAN_PLAYBOOK.md#9-audit-procedures)
+- Weekly Reports: [Playbook §9](docs/GUARDIAN_PLAYBOOK.md#weekly-audit-review)
+- Incident Post-Mortems: [Playbook §9](docs/GUARDIAN_PLAYBOOK.md#incident-post-mortems)
 
 ### Guardian Team
 
