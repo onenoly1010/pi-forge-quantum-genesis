@@ -54,7 +54,7 @@ Welcome to the Guardian Team documentation for Pi Forge Quantum Genesis autonomo
 
 ### For Emergency Response
 
-1. Go to [Quick Reference - Emergency Actions](GUARDIAN_QUICK_REFERENCE.md#-emergency-actions)
+1. Go to [Quick Reference - Emergency Actions](GUARDIAN_QUICK_REFERENCE.md#emergency-actions)
 2. Follow the appropriate emergency protocol from [Playbook Section 4](GUARDIAN_PLAYBOOK.md#4-emergency-protocols)
 3. Document all actions in Issue #100
 
