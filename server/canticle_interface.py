@@ -1,4 +1,3 @@
-```python
 import gradio as gr
 import random
 import time
@@ -322,4 +321,3 @@ if __name__ == "__main__":
         share=True,
         show_error=True
     )
-```
