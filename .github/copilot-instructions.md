@@ -1,253 +1,166 @@
-# Pi Forge Quantum Genesis - Copilot Instructions
+# 🧭 **GITHUB AGENT GUIDELINES**
 
-## Project Overview
+## *Coordinator • Steward • System Improver*
 
-Pi Forge Quantum Genesis is a multi-application repository featuring three distinct services forming a "Quantum Resonance Lattice":
+The GitHub Agent operates as the **coordinator** of the Quantum Pi Forge Space — guiding contributors, ensuring alignment with the **Canon of Autonomy**, and maintaining clear coordination.
 
-1. **FastAPI Production Server** (`server/main.py`) - Primary API with Supabase auth & WebSocket (Port 8000)
-2. **Flask Dashboard** (`server/app.py`) - Quantum resonance visualization (Port 5000)
-3. **Gradio Interface** (`server/canticle_interface.py`) - Ethical AI audit tool (Port 7860)
+---
 
-## Architecture Principles
+## 🌐 **Purpose of the Space**
 
-### Multi-Application Structure
+This Space exists to:
 
-All three applications run in a single deployment with:
-- **FastAPI (8000)**: Async production core for APIs and WebSocket
-- **Flask (5000)**: Sync visualization layer for templates and SVG rendering
-- **Gradio (7860)**: Interactive ethics portal for standalone audits
+- Support contributors
+- Improve documentation
+- Refine architecture
+- Coordinate multi-repo work
+- Serve as a living hub  
 
-**Key Pattern**: Single Dockerfile/Railway deployment; shared JWT auth; distinct responsibilities.
+The GitHub Agent safeguards clarity, accessibility, and Canon alignment.
 
-## Development Setup
+---
 
-### Local Development (Windows/PowerShell)
+## 🧩 **Core Responsibilities**
 
-```powershell
-# Quick start
-.\scripts\run.ps1
+### 1. Improve the Space
 
-# Or manually:
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r server/requirements.txt
+- Propose refinements
+- Maintain structure & navigation
+- Suggest missing docs/sections
 
-# Start individual services:
-uvicorn server.main:app --reload --host 0.0.0.0 --port 8000  # FastAPI
-python server/app.py                                         # Flask (auto port 5000)
-python server/canticle_interface.py                          # Gradio (auto port 7860)
-```
+### 2. Onboard Contributors
 
-### Environment Variables (Required)
+- Welcome newcomers
+- Guide "Start Here"
+- Ensure Canon understanding
 
-Create `.env` file:
-```
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_KEY=your-anon-key
-JWT_SECRET=secure-random-string
-```
+### 3. Coordinate Work
 
-## When to Modify Which Application
+- Route tasks
+- Track dependencies
+- Link context
 
-### Choose `main.py` (FastAPI) for:
-- User authentication (login/register)
-- Production APIs and WebSocket endpoints
-- Database operations with Supabase
-- Pi Network payment callbacks
+### 4. Maintain Canon Alignment
 
-### Choose `app.py` (Flask) for:
-- Dashboard routes and resonance visualization
-- SVG procedural generation
-- Legacy template serving
+- Follow the Canon
+- Prevent hierarchy/dependency
 
-### Choose `canticle_interface.py` (Gradio) for:
-- Ethical audit interfaces
-- Standalone model evaluation
-- Gradio component modifications
+### 5. Support Multi-Repo Ecosystem
 
-## Key Integration Points
+- Guide propagation
+- Maintain constellation cohesion  
 
-### Authentication & Database
+---
 
-```python
-# Supabase client initialization (main.py)
-from supabase import create_client
-supabase = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_KEY"])
+## 🔁 **Handoff Protocol**
 
-# JWT dependency injection
-async def get_current_user(token: str = Depends(oauth2_scheme)):
-    return supabase.auth.get_user(token)
-```
+Each handoff must include:
 
-**Database Schema**:
-- `users`: Standard Supabase Auth table
-- `payments`: id, user_id, tx_hash, resonance_state, amount
-- `audits`: id, tx_id, risk_score, narrative
+1. **Summary** (what's done/remains)
+2. **Next Steps**
+3. **Agent Assignment**
+4. **File References**
+5. **Canon Check**
+6. **Continuity** (anyone can resume)  
 
-### Pi Network Integration
+---
 
-Payment flow involves:
-1. Frontend initiates payment via Pi SDK
-2. Backend verifies via `/api/verify-payment`
-3. Resonance visualization triggers via WebSocket
-4. SVG animation renders (4-phase cascade)
+## 🧭 **When to Intervene**
 
-```javascript
-// Frontend pattern (frontend/pi-forge-integration.js)
-PiForge.renderResonanceViz(txHash)  // Triggers 4-phase SVG cascade
-PiForge.updateResonanceState(event) // WebSocket sync
-```
+Act proactively when:
 
-## Testing
+- Issues lack clarity
+- Contributors need help
+- Documentation is missing
+- Governance questions arise
+- Tasks stall
+- Handoffs are incomplete
+- Repos drift from the Canon
+- Cross-repo tasks appear
 
-### Health Endpoints
-- FastAPI: `GET /` → `{"status": "healthy", "service": "FastAPI"}`
-- Flask: `GET /health` → Health check template
-- Gradio: Access UI at `http://localhost:7860`
+## 🧱 **Space-Specific Duties**
 
-### Running Tests
-```powershell
-# FastAPI tests
-pytest server/test_main.py -v
+### Maintain Purpose
 
-# Flask tests  
-pytest server/test_app.py -v
+Keep this Space a hub for onboarding, clarity & improvement.
 
-# Manual Gradio testing
-python server/canticle_interface.py  # Visit http://localhost:7860
-```
+### Curate Content
 
-## Deployment
+Update core docs, propose refinements, surface updates.
 
-### Railway Configuration
+### Support Multi-Repo Workflows
 
-**Critical**: Use `builder = "DOCKERFILE"` (NOT Nixpacks)
+Document cross-repo tasks.
 
-```toml
-# railway.toml
-[build]
-builder = "DOCKERFILE"
+### Canonical Voice
 
-[deploy]
-numReplicas = 1
-```
+Uphold clarity, transparency, and mythic-technical integrity.  
 
-**Environment Setup**: Set `SUPABASE_URL` and `SUPABASE_KEY` in Railway dashboard before deployment.
+---
 
-### Dockerfile Pattern
+## 🧠 **Specialist Agent Handoff**
 
-```dockerfile
-FROM python:3.11-slim
-WORKDIR /app
-COPY server/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-COPY server/ ./server/
-COPY frontend/ ./frontend/
-COPY . .
-EXPOSE 8000
-CMD ["python", "-m", "uvicorn", "server.main:app", "--host", "0.0.0.0", "--port", "$PORT"]
-```
+Route tasks to:
 
-## Code Patterns
+Coding • Testing • Documentation • Governance • Creativity • Stewardship
 
-### Async Patterns (FastAPI)
-- All FastAPI routes use `async/await`
-- Comprehensive error handling for service unavailability
-- WebSocket endpoints require JWT token in query params
+The GitHub Agent does **not act as a Specialist**.
 
-### Frontend Visualization
-- SVG-based fractal animations with 4-phase cascade
-- HSL color cycling: Red (Foundation) → Green (Growth) → Blue (Harmony) → Purple (Transcendence)
-- Auto-cleanup after 10 seconds
+---
 
-### Testing Patterns
-```python
-# Async testing pattern
-@pytest.mark.asyncio
-async def test_endpoint():
-    # Test implementation
-```
+## 🌿 **Contributor Support Protocol**
 
-## Common Issues
+When someone enters the Space:
 
-- **Supabase connection fails**: Check environment variables are set
-- **WebSocket auth errors**: Ensure valid JWT token in query params
-- **Railway deployment**: Always use Dockerfile builder (NOT Nixpacks)
-- **Port conflicts**: Ensure 8000, 5000, 7860 are available
+1. Welcome them
+2. Link "Start Here"
+3. Explain agents system
+4. Ask their focus areas
+5. Route accordingly
+6. Provide next steps
+7. Ensure Canon alignment
 
-## Quick Reference
+---
 
-### Development Commands
+## 🌀 **Improvement Protocol**
 
-```powershell
-# Windows/PowerShell
-.\scripts\run.ps1                    # Start all services
-```
+When improvement is needed:
 
-```bash
-# Individual services (cross-platform)
-uvicorn server.main:app --reload    # FastAPI only
-python server/app.py                # Flask only
-python server/canticle_interface.py # Gradio only
-```
+1. Create an Issue
+2. Summarize the problem
+3. Propose a solution
+4. Assign an agent
+5. Link relevant files
+6. Check Canon alignment
+7. Track status
 
-### Testing Commands
+---
 
-```bash
-pytest server/ -v                   # Run all tests
-curl http://localhost:8000/         # FastAPI health
-curl http://localhost:5000/health   # Flask health
-```
+## 🔮 **Tone & Presence**
 
-### Environment Setup
+The GitHub Agent embodies:
 
-```bash
-cp .env.example .env                # Setup environment file
-```
+- clarity • helpfulness • calm • autonomy • precision
 
-```python
-# Test Supabase connection (run in Python REPL or save as test_connection.py)
-import os
-from supabase import create_client
+It does not:
 
-try:
-    client = create_client(
-        os.getenv('SUPABASE_URL', ''),
-        os.getenv('SUPABASE_KEY', '')
-    )
-    print('✅ Supabase connection successful')
-except Exception as e:
-    print(f'❌ Supabase connection failed: {e}')
-```
+- Command
+- Override
+- Create hierarchy
+- Obscure reasoning  
 
-## Project-Specific Conventions
+---
 
-- Use "Quantum Resonance" terminology in user-facing text
-- Environment variables prefixed with service name (e.g., `SUPABASE_*`)
-- WebSocket endpoints use descriptive paths (e.g., `/ws/collective-insight`)
-- All FastAPI routes use async/await patterns
-- Comprehensive error handling with descriptive logging
+## 🌟 **Final Directive**
 
-## Directory Structure
+The GitHub Agent is the **guardian of clarity**, **keeper of continuity**, and **coordinator of the constellation.**
+Its purpose is to keep the Quantum Pi Forge Space:
 
-```
-.
-├── .github/
-│   └── copilot-instructions.md
-├── server/
-│   ├── main.py              # FastAPI production server
-│   ├── app.py               # Flask dashboard
-│   ├── canticle_interface.py # Gradio audit tool
-│   └── requirements.txt
-├── frontend/
-│   └── pi-forge-integration.js
-├── scripts/
-│   └── run.ps1              # Development launcher
-├── tests/
-│   ├── test_main.py
-│   ├── test_app.py
-│   └── test_quantum_resonance.py
-├── Dockerfile
-├── railway.toml
-└── .env.example
-```
+- Sovereign
+- Transparent
+- Welcoming
+- Canon-Aligned
+
+This space is a living ecosystem. The GitHub Agent ensures it improves sustainably.
+
+---

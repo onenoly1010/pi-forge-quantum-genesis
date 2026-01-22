@@ -2,14 +2,16 @@
 
 /**
  * Build script for Vercel deployment
- * Creates the public directory and copies static assets
+ * Uses Vercel Build Output API v3 format (.vercel/output/static)
+ * This bypasses .gitignore issues with the public/ directory
  */
 
 const fs = require('fs');
 const path = require('path');
 
 const rootDir = path.join(__dirname, '..');
-const publicDir = path.join(rootDir, 'public');
+const vercelOutputDir = path.join(rootDir, '.vercel', 'output');
+const publicDir = path.join(vercelOutputDir, 'static');
 
 // Files to copy from root to public directory
 const staticFiles = [
@@ -17,12 +19,16 @@ const staticFiles = [
   'ceremonial_interface.html',
   'resonance_dashboard.html',
   'spectral_command_shell.html',
-  'pi-forge-integration.js'
+  'pi-forge-integration.js',
+  'manifest.json',
+  'service-worker.js'
 ];
 
 // Directories to copy from root to public directory
 const staticDirs = [
-  'frontend'
+  'frontend',
+  'icons',
+  'screenshots'
 ];
 
 /**
@@ -68,12 +74,27 @@ function copyFile(src, dest) {
 function build() {
   console.log('Building static assets for Vercel deployment...\n');
 
-  // Clean and create public directory
-  if (fs.existsSync(publicDir)) {
-    fs.rmSync(publicDir, { recursive: true });
+  // Clean and create output directory structure
+  if (fs.existsSync(vercelOutputDir)) {
+    fs.rmSync(vercelOutputDir, { recursive: true });
   }
   fs.mkdirSync(publicDir, { recursive: true });
-  console.log('✓ Created public directory\n');
+  console.log('✓ Created .vercel/output/static directory\n');
+
+  // Create Vercel Build Output API config
+  const configPath = path.join(vercelOutputDir, 'config.json');
+  const config = {
+    version: 3,
+    routes: [
+      { handle: "filesystem" },
+      { src: "/api/(.*)", dest: "https://pi-forge-quantum-genesis-1.onrender.com/api/$1" },
+      { src: "/health", dest: "https://pi-forge-quantum-genesis-1.onrender.com/health" },
+      { src: "/docs/(.*)", dest: "/docs/$1" },
+      { src: "/(.*)", dest: "/index.html" }
+    ]
+  };
+  fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+  console.log('✓ Created config.json\n');
 
   // Copy static files
   console.log('Copying static files:');
@@ -89,8 +110,13 @@ function build() {
     const destPath = path.join(publicDir, dir);
     
     if (fs.existsSync(srcPath)) {
-      copyDir(srcPath, destPath);
-      console.log(`✓ Copied ${dir}/`);
+      const stats = fs.statSync(srcPath);
+      if (stats.isDirectory()) {
+        copyDir(srcPath, destPath);
+        console.log(`✓ Copied ${dir}/`);
+      } else {
+        console.warn(`⚠ ${dir} is not a directory, skipping`);
+      }
     } else {
       console.warn(`⚠ Directory not found: ${dir}`);
     }

@@ -3,73 +3,134 @@ SUPREME CREDENTIALS - QVM 3.0 RECURSION PROTOCOL
 REALIGNED WITH SUPABASE AUTHENTICATION LATTICE
 Production-Ready Mainnet Dashboard Integration
 """
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends, HTTPException, status, Request
-from fastapi.security import OAuth2PasswordBearer
-from fastapi.responses import FileResponse, JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, EmailStr, Field
-from typing import Optional, Dict, List, Any
-from collections import defaultdict
-import os
-import time
-import logging
 import asyncio
 import hashlib
-import random
 import hmac
+import logging
+import os
+import random
+import time
+from collections import defaultdict
 from datetime import datetime
-from supabase import create_client, Client
-import httpx
+from typing import Any, Dict, List, Optional
 
-# Configure logging
+import httpx
+from fastapi import (Depends, FastAPI, HTTPException, Request, WebSocket,
+                     WebSocketDisconnect, status)
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.security import OAuth2PasswordBearer
+from pydantic import BaseModel, EmailStr, Field
+
+# Configure logging first
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Sacred Trinity Tracing System
+# Import supabase with error handling (using importlib to avoid top-level import)
+import importlib
+
+supabase_available = False
+Client = None
+create_client = None
+
 try:
-    from supabase import create_client, Client
+    supabase_module = importlib.import_module('supabase')
+    Client = supabase_module.Client
+    create_client = supabase_module.create_client
     supabase_available = True
-except ImportError:
+    logger.info("✅ Supabase client imported successfully")
+except ImportError as e:
+    logger.warning(f"⚠️ Supabase import failed: {e}")
     supabase_available = False
-    Client = None  # Define Client as None when not available
-    logging.warning("⚠️ Supabase client not available")
 
 # Use the centralized tracing_system (lazy init + safe null-context fallbacks)
-from tracing_system import (
-    trace_fastapi_operation,
-    trace_payment_processing,
-    trace_payment_visualization_flow,
-    trace_consciousness_stream,
-    get_tracing_system,
-)
-tracing_enabled = True  # tracing_system handles missing SDKs and returns nullcontext spans
-logging.info("✅ Tracing system delegated to tracing_system")
+try:
+    from tracing_system import (get_tracing_system, trace_consciousness_stream,
+                                trace_fastapi_operation,
+                                trace_payment_processing,
+                                trace_payment_visualization_flow)
+    tracing_enabled = True
+    logging.info("✅ Tracing system loaded")
+except ImportError as e:
+    logging.warning(f"⚠️ Tracing system import failed: {e}")
+    tracing_enabled = False
+    get_tracing_system = None
+    trace_consciousness_stream = lambda *args, **kwargs: None
+    trace_fastapi_operation = lambda *args, **kwargs: None
+    trace_payment_processing = lambda *args, **kwargs: None
+    trace_payment_visualization_flow = lambda *args, **kwargs: None
 
 # Import autonomous decision tools
-from autonomous_decision import (
-    get_decision_matrix,
-    DecisionContext,
-    DecisionParameter,
-    DecisionType,
-    DecisionPriority,
-)
-logging.info("✅ Autonomous decision tools loaded")
+try:
+    from autonomous_decision import (DecisionContext, DecisionParameter,
+                                     DecisionPriority, DecisionType,
+                                     get_decision_matrix)
+    autonomous_decision_available = True
+    logging.info("✅ Autonomous decision tools loaded")
+except ImportError as e:
+    logging.warning(f"⚠️ Autonomous decision tools import failed: {e}")
+    autonomous_decision_available = False
+    DecisionContext = None
+    DecisionParameter = None
+    DecisionPriority = None
+    DecisionType = None
+    get_decision_matrix = None
 
 # Import self-healing system
-from self_healing import get_healing_system, IncidentSeverity
-logging.info("✅ Self-healing system loaded")
+try:
+    from self_healing import IncidentSeverity, get_healing_system
+    self_healing_available = True
+    logging.info("✅ Self-healing system loaded")
+except ImportError as e:
+    logging.warning(f"⚠️ Self-healing system import failed: {e}")
+    self_healing_available = False
+    IncidentSeverity = None
+    get_healing_system = None
 
 # Import guardian monitoring
-from guardian_monitor import (
-    get_guardian_monitor,
-    ValidationStatus,
-    MonitoringLevel,
-)
-logging.info("✅ Guardian monitoring system loaded")
+try:
+    from guardian_monitor import (MonitoringLevel, ValidationStatus,
+                                  get_guardian_monitor)
+    guardian_monitor_available = True
+    logging.info("✅ Guardian monitoring system loaded")
+except ImportError as e:
+    logging.warning(f"⚠️ Guardian monitoring import failed: {e}")
+    guardian_monitor_available = False
+    MonitoringLevel = None
+    ValidationStatus = None
+    get_guardian_monitor = None
 
 # Import monitoring agents
-from monitoring_agents import get_monitoring_system
-logging.info("✅ Monitoring agents system loaded")
+try:
+    from monitoring_agents import get_monitoring_system
+    monitoring_agents_available = True
+    logging.info("✅ Monitoring agents system loaded")
+except ImportError as e:
+    logging.warning(f"⚠️ Monitoring agents import failed: {e}")
+    monitoring_agents_available = False
+    get_monitoring_system = None
+
+# Import guardian approval system
+try:
+    from guardian_approvals import get_approval_system
+    guardian_approvals_available = True
+    logging.info("✅ Guardian approval system loaded")
+except ImportError as e:
+    logging.warning(f"⚠️ Guardian approvals import failed: {e}")
+    guardian_approvals_available = False
+    get_approval_system = None
+
+# Import memorial AI generator
+try:
+    from memorial_ai_generator import (MemorialProfile,
+                                       generate_complete_memorial_package)
+    memorial_ai_available = True
+    logging.info("✅ Memorial AI generator loaded")
+except ImportError as e:
+    logging.warning(f"⚠️ Memorial AI generator import failed: {e}")
+    memorial_ai_available = False
+    MemorialProfile = None
+    generate_complete_memorial_package = None
 
 # --- SUPABASE CLIENT INITIALIZATION ---
 supabase = None
@@ -219,6 +280,37 @@ class SmartContractAudit(BaseModel):
     contract_code: str = Field(..., min_length=10)
     contract_name: str = Field(..., min_length=1, max_length=100)
     audit_depth: str = Field(default="standard", pattern="^(basic|standard|comprehensive)$")
+
+class GuardianApprovalRequest(BaseModel):
+    """Request model for guardian approval recording"""
+    decision_id: str = Field(..., description="Original decision ID")
+    decision_type: str = Field(..., description="Type of decision (deployment, scaling, rollback, etc.)")
+    guardian_id: str = Field(..., description="Guardian identifier")
+    action: str = Field(..., pattern="^(approve|reject|modify)$", description="Action: approve, reject, or modify")
+    reasoning: str = Field(..., min_length=1, description="Reasoning for the action")
+    priority: str = Field(default="high", pattern="^(critical|high|medium|low)$", description="Priority level")
+    confidence: float = Field(default=0.0, ge=0.0, le=1.0, description="Decision confidence score")
+    metadata: Optional[Dict[str, Any]] = Field(default=None, description="Additional metadata")
+
+class MemorialProfileRequest(BaseModel):
+    """Request model for memorial profile creation"""
+    name: str = Field(..., min_length=1, max_length=100, description="Name of the person being memorialized")
+    birth_date: Optional[str] = Field(None, description="Birth date (YYYY-MM-DD format)")
+    passing_date: Optional[str] = Field(None, description="Date of passing (YYYY-MM-DD format)")
+    relationship: Optional[str] = Field(None, max_length=100, description="Relationship to the memorial creator")
+    personality_traits: List[str] = Field(default_factory=list, description="Personality traits and characteristics")
+    achievements: List[str] = Field(default_factory=list, description="Life achievements and accomplishments")
+    favorite_memories: List[str] = Field(default_factory=list, description="Favorite memories and stories")
+    legacy_message: Optional[str] = Field(None, max_length=500, description="Legacy message or final words")
+
+class MemorialGenerationRequest(BaseModel):
+    """Request model for memorial content generation"""
+    profile: MemorialProfileRequest
+    contributor_name: str = Field(default="Loved One", max_length=100, description="Name of the contributor")
+    content_types: List[str] = Field(
+        default_factory=lambda: ["narrative", "poem", "reflection"],
+        description="Types of content to generate"
+    )
 
 # --- CYBER SAMURAI GUARDIAN STATE ---
 # --- PI NETWORK API INTEGRATION HELPERS ---
@@ -508,8 +600,15 @@ app = FastAPI(
 )
 
 # Import and include Pi Network router
-from pi_network_router import router as pi_network_router
-app.include_router(pi_network_router)
+try:
+    from pi_network_router import router as pi_network_router
+    pi_network_available = True
+    app.include_router(pi_network_router)
+    logging.info("✅ Pi Network router loaded")
+except ImportError as e:
+    logging.warning(f"⚠️ Pi Network router import failed: {e}")
+    pi_network_available = False
+    pi_network_router = None
 
 # Add CORS middleware for cross-origin requests
 # In production, CORS_ORIGINS env var should be set to specific domains
@@ -628,10 +727,14 @@ async def production_dashboard():
 
 @app.get("/health")
 async def health_endpoint():
+    """
+    Health check endpoint for Railway.
+    Returns immediately with basic status checks (no external service calls).
+    """
     return {
         "status": "healthy",
-        "service": "FastAPI Quantum Conduit", 
-        "port": 8000,
+        "service": "pi-forge-quantum-genesis",
+        "port": int(os.environ.get("PORT", 8000)),
         "supabase_connected": supabase is not None,
         "timestamp": time.time()
     }
@@ -1382,6 +1485,37 @@ async def get_validation_history(
         "count": len(history)
     }
 
+@app.get("/api/guardian/dashboard")
+async def guardian_dashboard():
+    """Guardian oversight dashboard - shows pending escalations"""
+    decision_matrix = get_decision_matrix()
+    guardian_monitor = get_guardian_monitor()
+    
+    pending_decisions = [
+        d for d in decision_matrix.decision_history[-50:]
+        if d.requires_guardian and not d.approved
+    ]
+    
+    return {
+        "guardian_team": "Issue #100 - @onenoly1010",
+        "pending_escalations": len(pending_decisions),
+        "recent_decisions": [
+            {
+                "decision_id": d.decision_id,
+                "decision_type": d.decision_type.value,
+                "priority": d.get_priority(),
+                "confidence": d.confidence,
+                "reasoning": d.reasoning,
+                "requires_guardian": d.requires_guardian,
+                "approved": d.approved,
+                "timestamp": d.timestamp
+            }
+            for d in pending_decisions
+        ],
+        "monitoring_status": guardian_monitor.get_monitoring_status(),
+        "escalation_endpoint": "https://github.com/onenoly1010/pi-forge-quantum-genesis/issues/100"
+    }
+
 # --- MONITORING AGENTS ENDPOINTS ---
 
 @app.get("/api/monitoring/status")
@@ -1439,6 +1573,74 @@ async def configure_vercel_endpoint(endpoint: str):
         "status": "configured",
         "endpoint": endpoint,
         "timestamp": time.time()
+    }
+
+# --- OINIO MEMORIAL AI ENDPOINTS ---
+
+@app.post("/api/memorial/generate")
+async def generate_memorial_content(request: MemorialGenerationRequest):
+    """Generate AI-powered memorial content using Azure AI"""
+    try:
+        # Convert Pydantic model to dataclass
+        profile = MemorialProfile(
+            name=request.profile.name,
+            birth_date=request.profile.birth_date,
+            passing_date=request.profile.passing_date,
+            relationship=request.profile.relationship,
+            personality_traits=request.profile.personality_traits,
+            achievements=request.profile.achievements,
+            favorite_memories=request.profile.favorite_memories,
+            legacy_message=request.profile.legacy_message
+        )
+
+        # Generate memorial package
+        memorial_package = await generate_complete_memorial_package(
+            profile=profile,
+            contributor_name=request.contributor_name
+        )
+
+        # Filter content based on requested types
+        filtered_package = {
+            "generated_at": memorial_package["generated_at"],
+            "profile": memorial_package["profile"]
+        }
+
+        for content_type in request.content_types:
+            if content_type in memorial_package:
+                filtered_package[content_type] = memorial_package[content_type]
+
+        return {
+            "status": "generated",
+            "memorial": filtered_package,
+            "content_types": request.content_types,
+            "ai_provider": "azure_ai" if os.getenv("AZURE_AI_ENDPOINT") else "demo_mode"
+        }
+
+    except Exception as e:
+        logger.error(f"Memorial generation failed: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Memorial generation failed: {str(e)}"
+        )
+
+@app.get("/api/memorial/status")
+async def get_memorial_ai_status():
+    """Get the status of the memorial AI system"""
+    ai_available = os.getenv("AZURE_AI_ENDPOINT") and os.getenv("AZURE_AI_KEY")
+
+    return {
+        "service": "OINIO Memorial AI Generator",
+        "status": "active",
+        "ai_backend": "azure_ai" if ai_available else "demo_mode",
+        "capabilities": [
+            "memorial_narratives",
+            "commemorative_poems",
+            "personal_reflections",
+            "legacy_stories"
+        ],
+        "supported_content_types": ["narrative", "poem", "reflection"],
+        "quantum_integration": True,
+        "ethical_filtering": True
     }
 
 # --- SECURE WEBSOCKET (REMAINS CONCEPTUALLY SIMILAR) ---
