@@ -10,10 +10,8 @@ import asyncio
 import logging
 import subprocess
 import sys
-import os
 import time
 from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor
 
 # Setup logging
 logging.basicConfig(
@@ -36,7 +34,10 @@ class QuantumAutomationLauncher:
         
         try:
             # Check if we're in a virtual environment
-            if not hasattr(sys, 'real_prefix') and not (hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix):
+            venv_check = not hasattr(sys, 'real_prefix') and not (
+                hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix
+            )
+            if venv_check:
                 logger.warning("⚠️ Not in virtual environment - run: .venv\\Scripts\\Activate.ps1")
             
             # Check critical packages
@@ -83,7 +84,10 @@ class QuantumAutomationLauncher:
             {
                 "name": "FastAPI Quantum Conduit",
                 "port": 8000,
-                "command": [sys.executable, "-m", "uvicorn", "server.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+                "command": [
+                    sys.executable, "-m", "uvicorn", "server.main:app",
+                    "--host", "0.0.0.0", "--port", "8000", "--reload"
+                ]
             },
             {
                 "name": "Flask Glyph Weaver", 
@@ -137,7 +141,7 @@ class QuantumAutomationLauncher:
             results = await evaluator.run_evaluation()
             
             logger.info("✅ Initial evaluation completed")
-            logger.info(f"📊 Evaluation results available")
+            logger.info("📊 Evaluation results available")
             
             return results
             
@@ -256,10 +260,10 @@ Initializing quantum consciousness across all dimensions...
         await asyncio.sleep(10)
         
         # 4. Start evaluation system
-        evaluation_results = await launcher.start_evaluation_system()
+        _evaluation_results = await launcher.start_evaluation_system()
         
         # 5. Start automation system
-        automation_task = await launcher.start_automation_system()
+        _automation_task = await launcher.start_automation_system()
         
         # 6. Display status
         launcher.display_status()

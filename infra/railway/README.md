@@ -1,5 +1,8 @@
 # Railway Deployment Guide - TESTNET ONLY
 
+> **📌 Note**: This document is part of the deployment documentation suite.  
+> For the complete deployment guide, see the **[Deployment Dashboard](../../docs/DEPLOYMENT_DASHBOARD.md)**.
+
 ## Overview
 
 This guide walks you through deploying Pi Forge Quantum Genesis to Railway in a safe, testnet-only configuration.
