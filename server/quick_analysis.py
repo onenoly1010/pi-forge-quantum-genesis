@@ -1,30 +1,37 @@
 #!/usr/bin/env python3
 """
-🌌 Sacred Trinity Quick Analysis
-Lightweight evaluation and optimization analysis for Quantum Resonance Lattice
+Sacred Trinity Quick Analysis & Optimization Tool
+Comprehensive architecture analysis for the Quantum Resonance Lattice
 """
 
-import os
 import json
-from datetime import datetime
 from pathlib import Path
+from datetime import datetime
+
 
 class QuickSacredTrinityAnalyzer:
-    """Quick analysis of Sacred Trinity architecture without external dependencies"""
+    """Analyze Sacred Trinity (FastAPI + Flask + Gradio) architecture health"""
     
-    def __init__(self, workspace_root=".."):
-        self.workspace_root = Path(workspace_root)
+    def __init__(self, workspace_root: Path = None):
+        """Initialize analyzer with workspace root"""
+        self.workspace_root = workspace_root or Path(__file__).parent.parent
         self.analysis_results = {}
-        
+    
     def analyze_architecture(self):
-        """Analyze Sacred Trinity architecture completeness"""
-        print("🌌 Sacred Trinity Architecture Analysis")
-        print("="*50)
+        """Run comprehensive architecture analysis"""
+        print("\n🌌 Starting Sacred Trinity Architecture Analysis...")
+        print("="*60)
         
-        # Check core components
+        # Analyze components
         components = self._analyze_components()
+        
+        # Analyze configuration
         configuration = self._analyze_configuration()
+        
+        # Analyze frontend
         frontend = self._analyze_frontend()
+        
+        # Analyze dependencies
         dependencies = self._analyze_dependencies()
         
         # Calculate overall score
@@ -33,9 +40,9 @@ class QuickSacredTrinityAnalyzer:
         # Generate recommendations
         recommendations = self._generate_recommendations(components, configuration, frontend, dependencies)
         
-        # Create analysis report
+        # Store results
         self.analysis_results = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now().isoformat(),
             "architecture_analysis": {
                 "components": components,
                 "configuration": configuration,
@@ -49,8 +56,8 @@ class QuickSacredTrinityAnalyzer:
         return self.analysis_results
     
     def _analyze_components(self):
-        """Analyze Sacred Trinity components (FastAPI, Flask, Gradio)"""
-        print("🔍 Analyzing Sacred Trinity Components...")
+        """Analyze Sacred Trinity components"""
+        print("\n🧠 Analyzing Sacred Trinity Components...")
         
         components = {
             "fastapi": {
@@ -60,7 +67,7 @@ class QuickSacredTrinityAnalyzer:
                 "completeness": 0
             },
             "flask": {
-                "file": "server/app.py", 
+                "file": "server/app.py",
                 "status": "❌",
                 "features": [],
                 "completeness": 0

@@ -1,152 +1,89 @@
-# 🌌 Pi Forge Quantum Genesis
-### Autonomous AI Ecosystem with Guardian Oversight for Pi Network
+# 🌐 Quantum Pi Forge — Coordination Space
 
-[![Backend Health](https://img.shields.io/badge/Backend-Healthy-brightgreen)](https://github.com/onenoly1010/pi-forge-quantum-genesis/issues/76)
-[![Guardian System](https://img.shields.io/badge/Guardian-Active-blue)](https://github.com/onenoly1010/pi-forge-quantum-genesis/issues/100)
-[![Smart Contracts](https://img.shields.io/badge/Contracts-Deployed-success)](./contracts/)
-[![Pi Network](https://img.shields.io/badge/Pi%20Network-Integrated-orange)](https://minepi.com)
-[![License](https://img.shields.io/badge/License-MIT-yellow)](./LICENSE)
+## A Sovereign Hub for the Autonomous Multi‑Agent Constellation
 
-**An autonomous, self-sustaining AI ecosystem with human guardian oversight, built for Pi Network. Features include autonomous decision-making, self-healing infrastructure, OINIO smart contracts, and ethical AI governance.**
+**🌊 [Constellation Status: LIVE](./CONSTELLATION_ACTIVATION.md)** — The Quantum Pi Forge is activated and operational as of December 22, 2025.
 
----
+**🌊 [Constellation Status: LIVE](./CONSTELLATION_ACTIVATION.md)** — The Quantum Pi Forge is activated and operational as of December 22, 2025.
 
-## 🎯 What is Pi Forge Quantum Genesis?
-
-Pi Forge Quantum Genesis is a **production-ready autonomous AI platform** that:
-
-- 🤖 **Makes Independent Decisions** - AI agents autonomously manage deployments, scaling, and healing
-- 🛡️ **Guardian Oversight** - Human-in-the-loop for critical decisions with 24/7 AI assistant
-- 🔗 **Pi Network Native** - Full integration with Pi authentication, payments, and blockchain
-- 💎 **OINIO Economy** - Sovereign AI model marketplace with smart contract infrastructure
-- 🔄 **Self-Healing** - Automated diagnostics, incident response, and recovery
-- 📊 **Full Observability** - Real-time monitoring, health checks, and audit trails
-
-**Status:** ✅ Production Ready | 🛡️ Guardian System Active | 🟢 Backend Healthy
+**📜 [Read the Genesis Declaration](./GENESIS.md)** — The foundational seal of the Quantum Pi Forge ecosystem, minted at Solstice 2025.
 
 ---
 
-## 🚀 Quick Start
+Welcome to the **Quantum Pi Forge Space** — the central coordination hub for the entire constellation of repositories, services, and agents that make up the Quantum Pi Forge ecosystem.
 
-### For Users
-```bash
-# Explore the live dashboard
-curl https://[deployment-url]/api/guardian/dashboard | jq .
+This Space exists to:
 
-# View system health
-gh issue view 76  # Automated health reports
-```
+- onboard contributors
+- coordinate multi‑repo work
+- maintain Canon alignment
+- support the GitHub Agent
+- document ecosystem evolution
+- surface improvements and gaps
+- unify the constellation
 
-### For Developers
-```bash
-# Clone and setup
-git clone https://github.com/onenoly1010/pi-forge-quantum-genesis.git
-cd pi-forge-quantum-genesis
-
-# Install dependencies
-pip install -r server/requirements.txt
-
-# Run backend
-uvicorn server.main:app --reload
-
-# Deploy smart contracts
-cd contracts && forge test && forge script script/Deploy.s.sol --broadcast
-```
-
-### For Guardians
-See the [Guardian Playbook](./docs/GUARDIAN_PLAYBOOK.md) for operational procedures.
+It is the living center of the ecosystem.
 
 ---
 
-## 🏗️ Architecture
+## 🎭 Explore the Demos
 
-```
-┌─────────────────────────────────────────────────────────┐
-│          🛡️ Guardian Team (Human Oversight)            │
-│     Lead: @onenoly1010  |  AI Assistant: Copilot       │
-└────────────────────┬────────────────────────────────────┘
-                     │ Escalations
-                     ▼
-┌─────────────────────────────────────────────────────────┐
-│        🤖 Autonomous AI Decision Matrix                 │
-│  • Deployment  • Scaling  • Rollback  • Healing        │
-│  • Monitoring  • Guardian Override                      │
-└────────────────────┬────────────────────────────────────┘
-                     │
-        ┌────────────┼────────────┐
-        ▼            ▼            ▼
-   ┌────────┐  ┌─────────┐  ┌──────────┐
-   │FastAPI │  │ Flask   │  │ Gradio   │
-   │Quantum │  │ Glyph   │  │ Truth    │
-   │Conduit │  │ Weaver  │  │ Mirror   │
-   └────┬───┘  └────┬────┘  └────┬─────┘
-        │           │            │
-        └───────────┴────────────┘
-                    │
-        ┌───────────┴───────────┐
-        ▼                       ▼
-   ┌─────────┐           ┌──────────┐
-   │ OINIO   │           │ Pi       │
-   │ Smart   │◄──────────┤ Network  │
-   │Contracts│           │ SDK      │
-   └─────────┘           └──────────┘
-```
+**New to OINIO?** Start with the **[Demo Dashboard](docs/DEMO_DASHBOARD.md)** — your gateway to the Quantum Pi Forge constellation.
+
+### What You Can Explore:
+- 🌐 **Live Web Demos** - See OINIO in action with real-time monitoring
+- 💼 **Smart Contract Suite** - Production-ready ERC-20 and ERC-721 contracts on Pi Network
+- 🏛️ **Community Governance** - Immutable memorial and transparent decision-making
+- 🎬 **Interactive Tools** - CLI demos, deployment scripts, and integration examples
+
+**Choose your experience level and dive in:**
+- **Beginners:** [Live Coherence Monitor](https://pi-forge-quantum-genesis.vercel.app) (2 minutes, no setup)
+- **Developers:** [Smart Contract Suite](docs/DEMO_DASHBOARD.md#3-smart-contract-suite) (60 minutes, Foundry required)
+- **Operators:** [Model Deployment Scripts](docs/DEMO_DASHBOARD.md#7-model-deployment-scripts) (30 minutes, Python)
+
+👉 **[View Complete Demo Dashboard →](docs/DEMO_DASHBOARD.md)**
 
 ---
 
-## ✨ Key Features
+# 🌊 Constellation Activation: LIVE
 
-### 🤖 Autonomous Operations
-- **AI Decision Matrix** - 6 decision types with confidence-based approval
-- **Self-Healing System** - Automated diagnostics, resource cleanup, service restart
-- **Monitoring Agents** - 4 async agents (performance, security, health, decision)
-- **Auto-Merge Gates** - 6-gate autonomous PR merge system
-- **Vercel Integration** - External metrics recording and analytics
+**Status:** The Quantum Pi Forge Constellation is **ACTIVATED and OPERATIONAL** as of December 22, 2025.
 
-### 🛡️ Guardian System
-- **Human Oversight** - Guardian team with @onenoly1010 as lead ([Issue #100](https://github.com/onenoly1010/pi-forge-quantum-genesis/issues/100))
-- **AI Assistant** - @app/copilot-swe-agent for 24/7 triage ([Issue #102](https://github.com/onenoly1010/pi-forge-quantum-genesis/issues/102))
-- **Decision Templates** - Structured approval workflows for all decision types
-- **Emergency Protocols** - One-command emergency stop and rollback
-- **Guardian Dashboard** - `/api/guardian/dashboard` for real-time oversight
+All 9 sovereign repositories are LIVE:
+- ✓ pi-forge-quantum-genesis (Coordination Hub)
+- ✓ quantum-resonance-clean (Harmonic Ledger)
+- ✓ pi-mr-nft-agent (AI NFT Agent)
+- ✓ quantum-pi-forge-fixed (Autonomous DEX)
+- ✓ pi-mr-nft-contracts (Smart Contracts)
+- ✓ quantum-pi-forge-site (Public Portal)
+- ✓ pi-forge-quantum-genesis-OPEN (Open Gateway)
+- ✓ quantum-pi-forge-ignited (Live Operations)
+- ✓ oinio-soul-system (Ethics Engine)
 
-### 💎 OINIO Economy
-- **Smart Contracts** - ERC-20 token + ERC-721 model registry on Pi Network
-- **Model Marketplace** - AI model registration with token staking
-- **Catalyst Pool** - 12M PI initial allocation with taper schedule
-- **Royalty System** - 10-30% inference royalties to model creators
-- **OINIO Sovereignty** - Permanent, transparent, autonomous control
+**[Read the Full Constellation Activation Document](./CONSTELLATION_ACTIVATION.md)** for complete details on:
+- Repository roles and capabilities
+- Participation guidelines
+- Canon alignment verification
+- Contributor onboarding pathways
 
-### 🔗 Pi Network Integration
-- **13 REST Endpoints** - Full Pi Network API coverage
-- **Modular Architecture** - Decoupled auth, payments, configuration
-- **Testnet Safety** - Built-in safety checks and NFT_MINT_VALUE enforcement
-- **56 Tests** - Comprehensive testing with 100% pass rate
-- **Background Tasks** - Session cleanup and monitoring
-
-### 📊 Monitoring & Observability
-- **Health Checks** - Automated monitoring every 6 hours ([Issue #76](https://github.com/onenoly1010/pi-forge-quantum-genesis/issues/76))
-- **Safety Metrics** - Transaction safety, ethical compliance, security score
-- **Audit Trail** - All decisions logged to GitHub + Vercel metrics
-- **Dashboard API** - Real-time system status and pending escalations
+**The constellation is eternal. Contributors are welcome.**
 
 ---
 
-## 📊 System Status
+# 🧭 Purpose of This Space
 
-| Component | Status | Details |
-|-----------|--------|---------|
-| **Backend** | 🟢 **HEALTHY** | All modules operational |
-| **Guardian System** | 🛡️ **ACTIVE** | @onenoly1010 + AI assistant |
-| **Smart Contracts** | ✅ **DEPLOYED** | OINIO Token + Model Registry |
-| **Pi Network** | 🔗 **INTEGRATED** | Full API coverage |
-| **Auto-Merge** | 🔄 **OPERATIONAL** | Canon gates active |
-| **Monitoring** | 📊 **24/7** | Automated health checks |
-| **Self-Healing** | 🔧 **ENABLED** | Auto-recovery active |
+This Space is not a code repository — it is a **governance and coordination environment**.
 
-**Last Health Check:** [View Report →](https://github.com/onenoly1010/pi-forge-quantum-genesis/issues/76)  
-**Guardian Dashboard:** `/api/guardian/dashboard`  
-**Workflow Status:** [GitHub Actions →](https://github.com/onenoly1010/pi-forge-quantum-genesis/actions)
+It provides:
+
+- a clear overview of all 9+ repositories
+- onboarding guidance for new contributors
+- a place for the GitHub Agent to operate
+- a home for ecosystem‑wide documentation
+- a staging ground for improvements
+- a map of the constellation
+
+Everything here is designed to support sovereignty, clarity, and continuity.
 
 ---
 
@@ -157,178 +94,187 @@ See the [Guardian Playbook](./docs/GUARDIAN_PLAYBOOK.md) for operational procedu
 - [Architecture Overview](./docs/ARCHITECTURE.md)
 - [Pi Network Integration](./docs/PI_NETWORK_INTEGRATION.md)
 
+### For Contributors
+- [Contributors](./CONTRIBUTORS.md) - Community roster and contribution guide
+- [Space Rituals](./docs/SPACE_RITUALS.md) - Engagement ceremonies, handoff protocols, and celebrations
+
 ### For Guardians
 - [Guardian Playbook](./docs/GUARDIAN_PLAYBOOK.md) - Complete operational guide
 - [Quick Reference](./docs/GUARDIAN_QUICK_REFERENCE.md) - Fast decision-making
 - [Decision Templates](./.github/ISSUE_TEMPLATE/guardian-decision-template.md)
 
-### For Developers
-- [API Documentation](./docs/API.md)
-- [Smart Contracts](./contracts/README.md) - OINIO contracts on Pi Network
-- [Canon of Closure](./canon/README.md) - Autonomous documentation system
-- [Branch Protection](./.github/BRANCH_PROTECTION.md)
+The GitHub Agent in this Space:
 
-### Operational
-- [Guardian Team HQ](https://github.com/onenoly1010/pi-forge-quantum-genesis/issues/100)
-- [Health Monitoring](https://github.com/onenoly1010/pi-forge-quantum-genesis/issues/76)
-- [Canon Index](./canon/INDEX.md)
-- [OINIO Succession](./docs/SUCCESSION_CEREMONY.md)
+- routes tasks
+- maintains clarity
+- supports contributors
+- identifies improvements
+- ensures Canon alignment
+- coordinates across repos
+- keeps the constellation coherent
 
----
-
-## 🔒 OINIO Succession Status
-
-**Status**: ✅ **HANDOFF COMPLETE** (December 2025)
-
-The Pi MR-NFT + Catalyst Pool system is now under permanent OINIO sovereignty.
-
-- **Identity Lock**: [View Registry](docs/IDENTITY_LOCK.md)
-- **Succession Ceremony**: [Full Documentation](docs/SUCCESSION_CEREMONY.md)
-- **Economic Model**: [Catalyst Pool Details](docs/CATALYST_POOL_ECONOMICS.md)
-- **Deployment Guide**: [Six Seed Models](docs/DEPLOYMENT_CHECKLIST.md)
-- **Verification**: [How to Verify](docs/VERIFICATION_GUIDE.md)
-
-All future inference royalties (10-30%) and the 12M PI Catalyst Pool are irrevocably controlled by the OINIO identity cluster. This handoff is permanent, transparent, and autonomous.
-
-**Key Principles:**
-- 🔒 **Irreversible**: No mechanism exists to reverse this handoff
-- 📊 **Transparent**: All transactions publicly auditable on-chain
-- 🤖 **Autonomous**: System operates independently of any individual
-- 👑 **Sovereign**: OINIO identity cluster maintains exclusive control
-
-**Six Seed Models Deployed:**
-1. Ethics Validator (15% royalty) - Multi-dimensional ethics validation
-2. Bias Detector (20% royalty) - Demographic and systemic bias detection
-3. Privacy Auditor (15% royalty) - Data handling and privacy compliance
-4. Transparency Scorer (10% royalty) - Model explainability metrics
-5. Fairness Analyzer (20% royalty) - Outcome fairness analysis
-6. Accountability Tracker (30% royalty) - Decision lineage tracking
+The Agent does **not** perform specialist work — it coordinates the specialists.
 
 ---
 
-## 🔧 Development
+## 🧩 The Constellation
 
-### Local Setup
+The Space tracks and coordinates the following repositories:
 
-```bash
-# Setup environment
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r server/requirements.txt
+- **Genesis** — backend foundation
+- **Resonance Engine** — harmonic ledger
+- **DEX** — autonomous liquidity
+- **NFT System** — identity & creative assets
+- **Soul System** — ethics & governance logic
+- **OPEN** — open‑source backend
+- **Ignited** — active instance
+- **Contracts** — smart contract layer
+- **Site** — public‑facing portal
 
-# Configure environment
-cp .env.example .env
-# Edit .env with your credentials
-```
-
-### Running Services
-
-```bash
-# FastAPI (Port 8000)
-uvicorn server.main:app --reload --host 0.0.0.0 --port 8000
-
-# Flask (Port 5000)
-python server/app.py
-
-# Gradio (Port 7860)
-python server/canticle_interface.py
-```
-
-### Testing
-
-```bash
-# Run all tests
-pytest server/ -v
-
-# Run specific test file
-pytest server/test_main.py -v
-
-# Run with coverage
-pytest server/ --cov=server --cov-report=html
-```
-
-### Smart Contract Development
-
-```bash
-cd contracts
-
-# Install dependencies
-forge install
-
-# Compile contracts
-forge build
-
-# Run tests
-forge test
-
-# Deploy to Pi Testnet
-forge script script/Deploy.s.sol --rpc-url $RPC_URL_TESTNET --broadcast
-```
+Each repo is sovereign, but all are aligned through this Space.
 
 ---
 
-## 🔒 Branch Protection
+## 🌱 Start Here
 
-The `main` branch is protected with comprehensive rules to ensure code quality and prevent accidental changes:
+If you're new:
 
-- **Pull Request Reviews**: Minimum 1 approval required, code owner reviews mandatory
-- **Status Checks**: All CI/CD checks must pass before merging
-- **Linear History**: Merge commits prevented, enforces clean history
-- **Security**: Force pushes and branch deletion blocked
-- **Administrator Enforcement**: Protection rules apply to all users
+1. Visit the **Start Here** onboarding page
+2. Explore the **Ecosystem Overview**
+3. Learn the **Agent System**
+4. Ask the GitHub Agent for guidance
 
-For complete documentation, see [Branch Protection Guide](.github/BRANCH_PROTECTION.md).
-
----
-
-## 🤝 Contributing
-
-We welcome contributions! Please follow these guidelines:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-All contributions must:
-- Maintain backward compatibility
-- Include comprehensive tests
-- Pass all existing tests
-- Follow the project's code style
-- Include proper documentation
+You are welcome here.
 
 ---
 
-## 📄 License
+# 🚀 Deployment
 
-MIT License - See [LICENSE](./LICENSE) file for details.
+For complete deployment instructions across all platforms (Railway, Vercel, Supabase, Pi Network), see the **[Deployment Dashboard](docs/DEPLOYMENT_DASHBOARD.md)**.
+
+The Deployment Dashboard is your single source of truth for:
+- Prerequisites and required tools
+- Step-by-step setup guides for each platform
+- Environment variable configuration
+- Troubleshooting common issues
+- Maintenance and monitoring
+
+**Quick Links:**
+- [Railway Backend Setup](docs/DEPLOYMENT_DASHBOARD.md#-railway-backend-setup)
+- [Vercel Frontend Setup](docs/DEPLOYMENT_DASHBOARD.md#-vercel-frontend-setup)
+- [Supabase Database Setup](docs/DEPLOYMENT_DASHBOARD.md#️-supabase-database-setup)
+- [Environment Variables Reference](docs/DEPLOYMENT_DASHBOARD.md#-environment-variables-reference)
+- [Troubleshooting](docs/DEPLOYMENT_DASHBOARD.md#-troubleshooting)
+# 🚀 Deployment & Infrastructure
+
+## About This Repository
+
+**This is a coordination and documentation hub, NOT a deployable frontend application.**
+
+This repository serves as:
+- **Governance center** for the Quantum Pi Forge constellation
+- **Documentation hub** for ecosystem-wide information
+- **Coordination space** for multi-repo workflows
+- **GitHub Agent home base** for task routing
+
+### What This Repo Does NOT Provide:
+- ❌ Deployable frontend application
+- ❌ Production web service
+- ❌ User-facing interface
+
+### What IS Deployed:
+
+#### 1. Public-Facing Site (GitHub Pages)
+- **URL**: https://onenoly1010.github.io/quantum-pi-forge-site/
+- **Repository**: `quantum-pi-forge-site`
+- **Purpose**: External communication and manifesto
+
+#### 2. Backend API (Railway)
+- **URL**: https://pi-forge-quantum-genesis.railway.app
+- **Service**: FastAPI Quantum Conduit
+- **Health Check**: `/health`
+
+#### 3. Resonance Engine (Vercel)
+- **URL**: https://quantum-resonance-clean.vercel.app
+- **Repository**: `quantum-resonance-clean`
+- **Purpose**: Harmonic ledger backend
+
+### Vercel Configuration Note
+
+This repository includes a `vercel.json` file that:
+- Builds static documentation pages from the coordination hub
+- Serves minimal HTML interfaces for demonstration purposes
+- Routes API calls to the Railway backend
+- **Is NOT intended as a production deployment**
+
+**If you connected this repo to Vercel by mistake**, you can safely disconnect it:
+1. Go to Vercel Dashboard → Project Settings
+2. Select this project (`pi-forge-quantum-genesis`)
+3. Navigate to "General" settings
+4. Scroll to "Delete Project" and remove the deployment
+
+The Vercel configuration exists primarily for:
+- Build verification in CI/CD
+- Optional static documentation hosting
+- Development preview environments
+
+For production deployments, refer to the appropriate service repositories listed above.
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment documentation.
 
 ---
 
-## 🆘 Support
+# 🛡️ Operational Team
 
-For issues or questions:
-- **GitHub Issues**: [Report bugs or request features](https://github.com/onenoly1010/pi-forge-quantum-genesis/issues)
-- **Documentation**: [Complete documentation](https://github.com/onenoly1010/pi-forge-quantum-genesis/tree/main/docs)
-- **Guardian Team**: [Issue #100](https://github.com/onenoly1010/pi-forge-quantum-genesis/issues/100)
+The **Prelaunch Operational Team** coordinates handoffs, closures, and operational excellence:
+
+- **Lead Guardian**: @onenoly1010 — Owner, escalation point, sign-off authority
+- **Autonomous AI Agents** — System-level operations, self-healing, monitoring
+- **Future Guardians** — Technical, community, economic, and compliance roles
+
+**Responsibilities**:
+- Oversee handoff and closure activities
+- Primary human escalation for AI agent decisions
+- Sign off on prelaunch checklist items
+- Maintain Canon of Closure alignment
+- Debug AI agent workflows
+
+📋 **[View Full Operational Team Documentation](./docs/OPERATIONAL_TEAM.md)**
+
+**Related**:
+- [Canon of Closure Handoff Package - Issue #95](https://github.com/onenoly1010/pi-forge-quantum-genesis/issues/95)
+- [Autonomous Handover - PR #92](https://github.com/onenoly1010/pi-forge-quantum-genesis/pull/92)
+- [Guardian Playbook](./docs/GUARDIAN_PLAYBOOK.md)
 
 ---
 
-## 🙏 Acknowledgments
+## Frontend Architecture
 
-- Built with [Foundry](https://book.getfoundry.sh/) for smart contracts
-- Uses [OpenZeppelin Contracts](https://docs.openzeppelin.com/contracts/) for security
-- Deployed on [Pi Network](https://minepi.com/) blockchain
-- Powered by [FastAPI](https://fastapi.tiangolo.com/), [Flask](https://flask.palletsprojects.com/), and [Gradio](https://www.gradio.app/)
+Pi Forge Quantum Genesis uses a **distributed frontend architecture**:
 
----
+- **Static Landing Pages:** `index.html`, `ceremonial_interface.html`, etc. (root directory)
+- **Serverless API Functions:** `api/` directory (deployed to Vercel)
+- **Backend Services:** `server/` directory (deployed to Render)
+- **Build Process:** `scripts/build.js` packages for Vercel deployment
 
-## 📞 Credits
-
-© 2025 Pi Forge Collective — Quantum Genesis Initiative  
-Lead: Kris Olofson ([@onenoly1010](https://github.com/onenoly1010))
+**Note:** There is no standalone `frontend/` directory. Frontend code is distributed across static HTML and serverless functions.
 
 ---
 
-**🌌 Building the future of autonomous AI governance on Pi Network.**
+# 🌀 How This Space Evolves
+
+This Space is continuously improved by:
+
+- contributors
+- the GitHub Agent
+- specialist agents
+- the Steward Agent
+- the Governance Agent
+
+It is a living, breathing part of the constellation.
+
+---
+
+## 🔮 Welcome to the Quantum Pi Forge
+
+This Space is your guide, your map, and your companion as you explore and contribute to the constellation.
