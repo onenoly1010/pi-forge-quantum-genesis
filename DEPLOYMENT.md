@@ -84,6 +84,17 @@ Set these in your Vercel project settings:
 API endpoints in the `api/` directory are automatically deployed as Vercel serverless functions:
 - `/api/pi-identify` - Pi Network authentication endpoint
 
+### Dependency Management
+
+**Important**: This repository tracks `package-lock.json` in version control to ensure consistent dependency versions across all deployments. Do NOT add `package-lock.json` to `.gitignore`. This file:
+- Locks exact dependency versions for reproducible builds
+- Prevents supply chain attacks via dependency changes
+- Ensures Vercel deployments use the same dependencies as local development
+
+When updating dependencies:
+1. Run `npm install <package>`
+2. Commit both `package.json` and `package-lock.json` changes
+
 ### Local Testing
 
 To test the build locally:
