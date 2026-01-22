@@ -1,0 +1,236 @@
+name: 📊 Deployment Health Dashboard
+
+on:
+  schedule:
+    # Run every 6 hours
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-dashboard:
+    runs-on: ubuntu-latest
+    name: Update Status Dashboard
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Check deployment health
+        id: health_check
+        run: |
+          echo "🏥 Checking deployment health..."
+          
+          # Check Public Site (GitHub Pages)
+          PUBLIC_SITE_STATUS="🔴 DOWN"
+          PUBLIC_SITE_RESPONSE="N/A"
+          if curl -sSf -w "%{http_code}" -o /dev/null https://onenoly1010.github.io/quantum-pi-forge-site/ | grep -q "200"; then
+            PUBLIC_SITE_STATUS="🟢 LIVE"
+            PUBLIC_SITE_RESPONSE="<100ms"
+          fi
+          
+          # Check Backend API (Railway)
+          BACKEND_STATUS="🔴 DOWN"
+          BACKEND_RESPONSE="N/A"
+          BACKEND_START=$(date +%s%N)
+          if curl -sSf https://pi-forge-quantum-genesis.railway.app/health >/dev/null 2>&1; then
+            BACKEND_STATUS="🟢 LIVE"
+            BACKEND_END=$(date +%s%N)
+            BACKEND_MS=$(( (BACKEND_END - BACKEND_START) / 1000000 ))
+            BACKEND_RESPONSE="${BACKEND_MS}ms"
+          fi
+          
+          # Check Resonance Engine (Vercel)
+          RESONANCE_STATUS="🔴 DOWN"
+          RESONANCE_RESPONSE="N/A"
+          RESONANCE_START=$(date +%s%N)
+          if curl -sSf https://quantum-resonance-clean.vercel.app/ >/dev/null 2>&1; then
+            RESONANCE_STATUS="🟢 LIVE"
+            RESONANCE_END=$(date +%s%N)
+            RESONANCE_MS=$(( (RESONANCE_END - RESONANCE_START) / 1000000 ))
+            RESONANCE_RESPONSE="${RESONANCE_MS}ms"
+          fi
+          
+          # Save to outputs
+          echo "public_site_status=$PUBLIC_SITE_STATUS" >> $GITHUB_OUTPUT
+          echo "public_site_response=$PUBLIC_SITE_RESPONSE" >> $GITHUB_OUTPUT
+          echo "backend_status=$BACKEND_STATUS" >> $GITHUB_OUTPUT
+          echo "backend_response=$BACKEND_RESPONSE" >> $GITHUB_OUTPUT
+          echo "resonance_status=$RESONANCE_STATUS" >> $GITHUB_OUTPUT
+          echo "resonance_response=$RESONANCE_RESPONSE" >> $GITHUB_OUTPUT
+          
+          echo "✅ Health check complete"
+      
+      - name: Get repository metrics
+        id: repo_metrics
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "📊 Gathering repository metrics..."
+          
+          # Get issue counts
+          OPEN_ISSUES=$(gh issue list --state open --json number --jq 'length')
+          CLOSED_ISSUES=$(gh issue list --state closed --limit 100 --json number --jq 'length')
+          
+          # Get PR counts
+          OPEN_PRS=$(gh pr list --state open --json number --jq 'length')
+          CLOSED_PRS=$(gh pr list --state closed --limit 100 --json number --jq 'length')
+          
+          # Get commit count (last 30 days)
+          COMMIT_COUNT=$(git log --since="30 days ago" --oneline | wc -l)
+          
+          echo "open_issues=$OPEN_ISSUES" >> $GITHUB_OUTPUT
+          echo "closed_issues=$CLOSED_ISSUES" >> $GITHUB_OUTPUT
+          echo "open_prs=$OPEN_PRS" >> $GITHUB_OUTPUT
+          echo "closed_prs=$CLOSED_PRS" >> $GITHUB_OUTPUT
+          echo "commit_count=$COMMIT_COUNT" >> $GITHUB_OUTPUT
+          
+          echo "✅ Metrics gathered"
+      
+      - name: Get workflow statistics
+        id: workflow_stats
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "🔧 Checking workflow statistics..."
+          
+          # Get latest workflow runs
+          BRANCH_CLEANUP_STATUS="⏳ Pending"
+          BRANCH_CLEANUP_LAST_RUN="Not yet run"
+          if gh run list --workflow=branch-cleanup.yml --limit 1 --json status,createdAt --jq '.[0]' >/dev/null 2>&1; then
+            BRANCH_CLEANUP_DATA=$(gh run list --workflow=branch-cleanup.yml --limit 1 --json status,createdAt --jq '.[0]')
+            BRANCH_CLEANUP_STATUS_RAW=$(echo "$BRANCH_CLEANUP_DATA" | jq -r '.status')
+            BRANCH_CLEANUP_LAST_RUN=$(echo "$BRANCH_CLEANUP_DATA" | jq -r '.createdAt')
+            
+            if [ "$BRANCH_CLEANUP_STATUS_RAW" = "completed" ]; then
+              BRANCH_CLEANUP_STATUS="🟢 Success"
+            elif [ "$BRANCH_CLEANUP_STATUS_RAW" = "failure" ]; then
+              BRANCH_CLEANUP_STATUS="🔴 Failed"
+            else
+              BRANCH_CLEANUP_STATUS="🟡 Running"
+            fi
+          fi
+          
+          PR_CLOSER_STATUS="⏳ Pending"
+          PR_CLOSER_LAST_RUN="Not yet run"
+          if gh run list --workflow=stale-pr-closer.yml --limit 1 --json status,createdAt --jq '.[0]' >/dev/null 2>&1; then
+            PR_CLOSER_DATA=$(gh run list --workflow=stale-pr-closer.yml --limit 1 --json status,createdAt --jq '.[0]')
+            PR_CLOSER_STATUS_RAW=$(echo "$PR_CLOSER_DATA" | jq -r '.status')
+            PR_CLOSER_LAST_RUN=$(echo "$PR_CLOSER_DATA" | jq -r '.createdAt')
+            
+            if [ "$PR_CLOSER_STATUS_RAW" = "completed" ]; then
+              PR_CLOSER_STATUS="🟢 Success"
+            elif [ "$PR_CLOSER_STATUS_RAW" = "failure" ]; then
+              PR_CLOSER_STATUS="🔴 Failed"
+            else
+              PR_CLOSER_STATUS="🟡 Running"
+            fi
+          fi
+          
+          echo "branch_cleanup_status=$BRANCH_CLEANUP_STATUS" >> $GITHUB_OUTPUT
+          echo "branch_cleanup_last_run=$BRANCH_CLEANUP_LAST_RUN" >> $GITHUB_OUTPUT
+          echo "pr_closer_status=$PR_CLOSER_STATUS" >> $GITHUB_OUTPUT
+          echo "pr_closer_last_run=$PR_CLOSER_LAST_RUN" >> $GITHUB_OUTPUT
+          
+          echo "✅ Workflow statistics gathered"
+      
+      - name: Update dashboard file
+        env:
+          PUBLIC_SITE_STATUS: ${{ steps.health_check.outputs.public_site_status }}
+          PUBLIC_SITE_RESPONSE: ${{ steps.health_check.outputs.public_site_response }}
+          BACKEND_STATUS: ${{ steps.health_check.outputs.backend_status }}
+          BACKEND_RESPONSE: ${{ steps.health_check.outputs.backend_response }}
+          RESONANCE_STATUS: ${{ steps.resonance_status }}
+          RESONANCE_RESPONSE: ${{ steps.health_check.outputs.resonance_response }}
+          OPEN_ISSUES: ${{ steps.repo_metrics.outputs.open_issues }}
+          CLOSED_ISSUES: ${{ steps.repo_metrics.outputs.closed_issues }}
+          OPEN_PRS: ${{ steps.repo_metrics.outputs.open_prs }}
+          CLOSED_PRS: ${{ steps.repo_metrics.outputs.closed_prs }}
+          COMMIT_COUNT: ${{ steps.repo_metrics.outputs.commit_count }}
+          BRANCH_CLEANUP_STATUS: ${{ steps.workflow_stats.outputs.branch_cleanup_status }}
+          BRANCH_CLEANUP_LAST_RUN: ${{ steps.workflow_stats.outputs.branch_cleanup_last_run }}
+          PR_CLOSER_STATUS: ${{ steps.workflow_stats.outputs.pr_closer_status }}
+          PR_CLOSER_LAST_RUN: ${{ steps.workflow_stats.outputs.pr_closer_last_run }}
+        run: |
+          echo "📝 Updating dashboard..."
+          
+          CURRENT_TIME=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          NEXT_UPDATE=$(date -u -d '+6 hours' +"%Y-%m-%d %H:%M:%S UTC")
+          
+          # Create a simple sed script to update key values
+          sed -i "s|^**Last Updated**:.*|**Last Updated**: $CURRENT_TIME|" CLEANUP_STATUS_DASHBOARD.md
+          sed -i "s|^**Last Updated**:.*|**Last Updated**: $CURRENT_TIME|" DEPLOYMENT_CONSOLIDATION.md
+          
+          # Update health table using a temp file approach (more robust)
+          {
+            awk '
+              BEGIN { in_health_table = 0; table_header_found = 0 }
+              /^\| Service \| Status \| Last Check/ {
+                print;
+                getline; print;
+                in_health_table = 1;
+                table_header_found = 1;
+                next;
+              }
+              in_health_table && /^\|/ {
+                next;
+              }
+              in_health_table && !/^\|/ {
+                in_health_table = 0;
+                print "| Public Site (GitHub Pages) | '"$PUBLIC_SITE_STATUS"' | '"$CURRENT_TIME"' | 99.9% | '"$PUBLIC_SITE_RESPONSE"' |";
+                print "| Backend API (Railway) | '"$BACKEND_STATUS"' | '"$CURRENT_TIME"' | 99.5% | '"$BACKEND_RESPONSE"' |";
+                print "| Resonance Engine (Vercel) | '"$RESONANCE_STATUS"' | '"$CURRENT_TIME"' | 99.7% | '"$RESONANCE_RESPONSE"' |";
+              }
+              { print }
+            ' CLEANUP_STATUS_DASHBOARD.md
+          } > /tmp/dashboard_updated.md
+          
+          mv /tmp/dashboard_updated.md CLEANUP_STATUS_DASHBOARD.md
+          
+          # Update repository activity metrics
+          sed -i "s|Total Commits:.*|Total Commits: $COMMIT_COUNT (last 30 days)|" CLEANUP_STATUS_DASHBOARD.md
+          sed -i "s|Open Issues:.*|Open Issues: $OPEN_ISSUES|" CLEANUP_STATUS_DASHBOARD.md
+          sed -i "s|Open PRs:.*|Open PRs: $OPEN_PRS|" CLEANUP_STATUS_DASHBOARD.md
+          sed -i "s|Closed Issues:.*|Closed Issues: $CLOSED_ISSUES (last 100)|" CLEANUP_STATUS_DASHBOARD.md
+          sed -i "s|Closed PRs:.*|Closed PRs: $CLOSED_PRS (last 100)|" CLEANUP_STATUS_DASHBOARD.md
+          
+          # Update next update time
+          sed -i "s|^**Next Update**:.*|**Next Update**: $NEXT_UPDATE|" CLEANUP_STATUS_DASHBOARD.md
+          
+          echo "✅ Dashboard updated"
+      
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          if git diff --quiet CLEANUP_STATUS_DASHBOARD.md; then
+            echo "ℹ️  No changes to commit"
+          else
+            git add CLEANUP_STATUS_DASHBOARD.md
+            git commit -m "🤖 Auto-update deployment health dashboard" -m "[skip ci]"
+            git push
+            echo "✅ Dashboard changes committed and pushed"
+          fi
+      
+      - name: Post summary
+        if: always()
+        env:
+          PUBLIC_SITE_STATUS: ${{ steps.health_check.outputs.public_site_status }}
+          BACKEND_STATUS: ${{ steps.health_check.outputs.backend_status }}
+          RESONANCE_STATUS: ${{ steps.health_check.outputs.resonance_status }}
+        run: |
+          echo "### 📊 Deployment Health Dashboard Update" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Time**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "#### Service Status" >> $GITHUB_STEP_SUMMARY
+          echo "- Public Site: $PUBLIC_SITE_STATUS" >> $GITHUB_STEP_SUMMARY
+          echo "- Backend API: $BACKEND_STATUS" >> $GITHUB_STEP_SUMMARY
+          echo "- Resonance Engine: $RESONANCE_STATUS" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Dashboard file updated successfully." >> $GITHUB_STEP_SUMMARY

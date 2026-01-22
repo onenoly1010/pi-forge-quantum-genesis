@@ -2,8 +2,11 @@ Pi Forge Quantum Genesis — Relaunch v2.0
 
 ## Overview
 
-Pi Forge Quantum Genesis unifies ethical AI, finance resonance, and creative intelligence through the Universal Pi Forge framework.
-The Cyber Samarai serves as the quantum guardian maintaining sub-5-nanosecond coherence between all layers.
+**🌟 [START HERE](./START_HERE.md)** — New to Quantum Pi Forge? Begin with the universal onboarding guide.
+
+**🌊 [Constellation Status: LIVE](./CONSTELLATION_ACTIVATION.md)** — The Quantum Pi Forge is activated and operational as of December 22, 2025.
+
+**📜 [Read the Genesis Declaration](./GENESIS.md)** — The foundational seal of the Quantum Pi Forge ecosystem, minted at Solstice 2025.
 
 ---
 
@@ -115,14 +118,18 @@ python canticle_interface.py
 
 ## Module Summary
 
-| Module | Function |
-|--------|----------|
-| `cyber_samarai.py` | Core guardian module enforcing ≤5 ns latency across Pi Forge layers |
-| `guardian_init.py` | Launches the guardian cycle and loads the manifest |
-| `cyber_samarai_manifest.json` | Configuration file for guardian parameters and system links |
-| `api/pi-identify.ts` | Vercel serverless function for Pi Network authentication |
-| `service-worker.js` | PWA service worker for offline capability |
-| `manifest.json` | PWA manifest for mobile installation |
+**New to Quantum Pi Forge?**
+
+👉 **[START_HERE.md](./START_HERE.md)** — Your universal onboarding entry point
+
+This comprehensive guide will help you:
+1. Understand the constellation structure
+2. Navigate the documentation
+3. Find the right resources for your interests
+4. Engage with the agent system
+5. Make your first contribution
+
+You are welcome here.
 
 ---
 
@@ -140,10 +147,9 @@ This repository includes complete autonomous deployment capabilities:
 
 ## 📚 Documentation
 
-- [Vercel Deployment Guide](./VERCEL_DEPLOYMENT_GUIDE.md) - Complete Vercel deployment instructions
-- [Autonomous Deployment Handoff](./AUTONOMOUS_DEPLOYMENT_HANDOFF.md) - Agent oversight documentation
-- [Production Deployment](./docs/PRODUCTION_DEPLOYMENT.md) - Railway backend deployment
-- [Docker Development Guide](./docs/DOCKER_DEVELOPMENT_GUIDE.md) - Local Docker setup
+**📋 For complete deployment information, see [DEPLOYMENT_CONSOLIDATION.md](./DEPLOYMENT_CONSOLIDATION.md)**
+
+### Vercel Configuration Note
 
 ---
 
