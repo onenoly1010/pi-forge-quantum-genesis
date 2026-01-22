@@ -40,17 +40,18 @@ FROM base as production
 COPY server/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code ONLY (no frontend for Railway)
-COPY server/ ./server/
+# Copy application code to /app root (not /app/server)
+COPY server/ ./
 
 # Create non-root user
 RUN useradd --create-home --shell /bin/bash app \
     && chown -R app:app /app
 USER app
 
-# Health check for Railway
+# Health check for Railway - use PORT env var
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:${PORT:-8000}/health || exit 1
 
-# Production command - Railway will override with $PORT
-CMD ["python", "-m", "uvicorn", "server.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Production command - Railway provides $PORT dynamically
+# Use shell form to allow environment variable expansion
+CMD sh -c "python -m uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"

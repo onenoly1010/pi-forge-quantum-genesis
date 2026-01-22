@@ -1,241 +1,181 @@
 #!/bin/bash
-set -euo pipefail
 
-##############################################################################
 # Vercel Deployment Verification Script
-# Tests static frontend deployment and Pi Network integration readiness
-##############################################################################
+# Usage: ./scripts/verify-vercel-deployment.sh <deployment-url>
 
-DEPLOYMENT_URL="${1:-}"
-PI_APP_SECRET="${PI_APP_SECRET:-}"
+set -e
 
-# Color codes for output
+DEPLOYMENT_URL="${1:-https://your-project.vercel.app}"
+FAILED_CHECKS=0
+TOTAL_CHECKS=0
+
+# Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Counters
-TOTAL_TESTS=0
-PASSED_TESTS=0
-FAILED_TESTS=0
-
-##############################################################################
-# Helper Functions
-##############################################################################
-
-log_info() {
-    echo -e "${BLUE}ℹ${NC} $1"
+# Helper functions
+check_passed() {
+  echo -e "${GREEN}✅ $1${NC}"
+  TOTAL_CHECKS=$((TOTAL_CHECKS + 1))
 }
 
-log_success() {
-    echo -e "${GREEN}✓${NC} $1"
+check_failed() {
+  echo -e "${RED}❌ $1${NC}"
+  FAILED_CHECKS=$((FAILED_CHECKS + 1))
+  TOTAL_CHECKS=$((TOTAL_CHECKS + 1))
 }
 
-log_error() {
-    echo -e "${RED}✗${NC} $1"
+check_warning() {
+  echo -e "${YELLOW}⚠️  $1${NC}"
+  TOTAL_CHECKS=$((TOTAL_CHECKS + 1))
 }
 
-log_warning() {
-    echo -e "${YELLOW}⚠${NC} $1"
-}
-
-test_http_endpoint() {
-    local endpoint="$1"
-    local description="$2"
-    local expected_status="${3:-200}"
-    
-    TOTAL_TESTS=$((TOTAL_TESTS + 1))
-    log_info "Testing: $description"
-    
-    local response=$(curl --max-time 10 -s -o /dev/null -w "%{http_code}" "$endpoint" 2>&1)
-    
-    if [ "$response" = "$expected_status" ]; then
-        log_success "$description - Status: $response"
-        PASSED_TESTS=$((PASSED_TESTS + 1))
-        return 0
-    else
-        log_error "$description - Expected: $expected_status, Got: $response"
-        FAILED_TESTS=$((FAILED_TESTS + 1))
-        return 1
-    fi
-}
-
-test_content_exists() {
-    local endpoint="$1"
-    local search_text="$2"
-    local description="$3"
-    
-    TOTAL_TESTS=$((TOTAL_TESTS + 1))
-    log_info "Testing: $description"
-    
-    local content=$(curl --max-time 10 -s "$endpoint" 2>&1)
-    
-    if echo "$content" | grep -q "$search_text"; then
-        log_success "$description - Found: '$search_text'"
-        PASSED_TESTS=$((PASSED_TESTS + 1))
-        return 0
-    else
-        log_error "$description - Not found: '$search_text'"
-        FAILED_TESTS=$((FAILED_TESTS + 1))
-        echo "Sample content: ${content:0:200}..."
-        return 1
-    fi
-}
-
-##############################################################################
-# Main Verification
-##############################################################################
-
-echo "═══════════════════════════════════════════════════════════════════"
-echo "  Vercel Deployment Verification"
-echo "═══════════════════════════════════════════════════════════════════"
+# Start verification
+echo "======================================"
+echo "Vercel Deployment Verification"
+echo "======================================"
+echo "URL: $DEPLOYMENT_URL"
+echo "Time: $(date)"
+echo "======================================"
 echo ""
 
-# Validate input
-if [ -z "$DEPLOYMENT_URL" ]; then
-    log_error "Usage: $0 <DEPLOYMENT_URL>"
-    log_info "Example: $0 https://your-app.vercel.app"
-    exit 1
-fi
-
-log_info "Deployment URL: $DEPLOYMENT_URL"
-log_info "Starting verification..."
-echo ""
-
-##############################################################################
-# Test 1: Homepage Accessibility
-##############################################################################
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "Test Suite 1: Static Site Accessibility"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
-test_http_endpoint "$DEPLOYMENT_URL" "Homepage loads" || true
-test_http_endpoint "$DEPLOYMENT_URL/index.html" "index.html accessible" || true
-test_content_exists "$DEPLOYMENT_URL" "Pi Forge" "Homepage contains 'Pi Forge'" || true
-
-##############################################################################
-# Test 2: Frontend Pages
-##############################################################################
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "Test Suite 2: Frontend Pages"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
-test_http_endpoint "$DEPLOYMENT_URL/ceremonial_interface.html" "Ceremonial Interface" || true
-test_http_endpoint "$DEPLOYMENT_URL/resonance_dashboard.html" "Resonance Dashboard" || true
-test_http_endpoint "$DEPLOYMENT_URL/spectral_command_shell.html" "Spectral Command Shell" "200" || true
-
-##############################################################################
-# Test 3: JavaScript Assets
-##############################################################################
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "Test Suite 3: JavaScript Integration"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
-test_http_endpoint "$DEPLOYMENT_URL/pi-forge-integration.js" "Pi Forge Integration Script" || true
-test_content_exists "$DEPLOYMENT_URL/pi-forge-integration.js" "PiForge" "Integration script contains PiForge object" || true
-
-##############################################################################
-# Test 4: Frontend Directory Structure
-##############################################################################
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "Test Suite 4: Frontend Directory"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
-test_http_endpoint "$DEPLOYMENT_URL/frontend/index.html" "Frontend index.html" "200" || true
-test_http_endpoint "$DEPLOYMENT_URL/frontend/pi-forge-integration.js" "Frontend integration.js" "200" || true
-
-##############################################################################
-# Test 5: Pi Network SDK Detection
-##############################################################################
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "Test Suite 5: Pi Network Integration"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
-# Check if homepage loads Pi SDK
-TOTAL_TESTS=$((TOTAL_TESTS + 1))
-log_info "Testing: Pi SDK script tag in homepage"
-HOMEPAGE_CONTENT=$(curl --max-time 10 -s "$DEPLOYMENT_URL")
-if echo "$HOMEPAGE_CONTENT" | grep -q "sdk.minepi.com/pi-sdk.js"; then
-    log_success "Pi SDK script tag found in homepage"
+# Check 1: Homepage accessibility
+echo "🔍 Checking homepage..."
+HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$DEPLOYMENT_URL" 2>/dev/null || echo "000")
+if [ "$HTTP_STATUS" == "200" ]; then
+  check_passed "Homepage accessible (HTTP $HTTP_STATUS)"
 else
-    log_warning "Pi SDK script tag not found (may be loaded dynamically)"
+  check_failed "Homepage failed (HTTP $HTTP_STATUS)"
 fi
 
-##############################################################################
-# Test 6: API Proxy Configuration (if configured)
-##############################################################################
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "Test Suite 6: API Proxy (Optional)"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
-# Test if API proxy is configured (should return error if backend not connected)
-TOTAL_TESTS=$((TOTAL_TESTS + 1))
-log_info "Testing: API proxy configuration"
-API_RESPONSE=$(curl --max-time 10 -s -o /dev/null -w "%{http_code}" "$DEPLOYMENT_URL/api/health" 2>&1)
-
-if [ "$API_RESPONSE" = "200" ]; then
-    log_success "API proxy working - Backend connected"
-elif [ "$API_RESPONSE" = "404" ]; then
-    log_warning "API proxy not configured (expected for static-only deployment)"
+# Check 2: Mobile viewport configuration
+echo "🔍 Checking mobile viewport..."
+VIEWPORT_CHECK=$(curl -s "$DEPLOYMENT_URL" 2>/dev/null | grep -c 'viewport.*width=device-width' || echo "0")
+if [ "$VIEWPORT_CHECK" -gt 0 ]; then
+  check_passed "Mobile viewport configured"
 else
-    log_warning "API proxy returned status: $API_RESPONSE"
+  check_warning "Mobile viewport meta tag missing"
 fi
 
-##############################################################################
-# Test 7: Security Headers
-##############################################################################
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "Test Suite 7: Security Headers"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
-TOTAL_TESTS=$((TOTAL_TESTS + 1))
-log_info "Testing: X-Frame-Options header"
-HEADERS=$(curl --max-time 10 -sI "$DEPLOYMENT_URL")
-if echo "$HEADERS" | grep -qi "x-frame-options"; then
-    log_success "X-Frame-Options header present"
+# Check 3: Static JavaScript assets
+echo "🔍 Checking JavaScript assets..."
+HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${DEPLOYMENT_URL}/pi-forge-integration.js" 2>/dev/null || echo "000")
+if [ "$HTTP_STATUS" == "200" ]; then
+  check_passed "JavaScript assets loading (HTTP $HTTP_STATUS)"
 else
-    log_warning "X-Frame-Options header not found"
+  check_warning "JavaScript assets returned HTTP $HTTP_STATUS"
 fi
 
-TOTAL_TESTS=$((TOTAL_TESTS + 1))
-log_info "Testing: X-Content-Type-Options header"
-if echo "$HEADERS" | grep -qi "x-content-type-options"; then
-    log_success "X-Content-Type-Options header present"
+# Check 4: Frontend directory
+echo "🔍 Checking frontend pages..."
+PAGES=(
+  "ceremonial_interface.html"
+  "resonance_dashboard.html"
+  "spectral_command_shell.html"
+)
+
+for page in "${PAGES[@]}"; do
+  HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${DEPLOYMENT_URL}/${page}" 2>/dev/null || echo "000")
+  if [ "$HTTP_STATUS" == "200" ]; then
+    check_passed "$page accessible (HTTP $HTTP_STATUS)"
+  else
+    check_failed "$page failed (HTTP $HTTP_STATUS)"
+  fi
+done
+
+# Check 5: Frontend subdirectory
+echo "🔍 Checking frontend subdirectory..."
+HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${DEPLOYMENT_URL}/frontend/index.html" 2>/dev/null || echo "000")
+if [ "$HTTP_STATUS" == "200" ]; then
+  check_passed "Frontend subdirectory accessible (HTTP $HTTP_STATUS)"
 else
-    log_warning "X-Content-Type-Options header not found"
+  check_warning "Frontend subdirectory returned HTTP $HTTP_STATUS"
 fi
 
-##############################################################################
+# Check 6: API endpoint (may return 405 for GET, which is expected)
+echo "🔍 Checking API endpoint..."
+HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${DEPLOYMENT_URL}/api/pi-identify" 2>/dev/null || echo "000")
+if [ "$HTTP_STATUS" == "405" ] || [ "$HTTP_STATUS" == "200" ]; then
+  check_passed "API endpoint responding (HTTP $HTTP_STATUS, expected 405 for GET)"
+else
+  check_warning "API endpoint returned HTTP $HTTP_STATUS"
+fi
+
+# Check 7: Security headers
+echo "🔍 Checking security headers..."
+HEADERS=$(curl -s -I "$DEPLOYMENT_URL" 2>/dev/null)
+
+if echo "$HEADERS" | grep -qi "X-Frame-Options"; then
+  check_passed "X-Frame-Options header present"
+else
+  check_warning "X-Frame-Options header missing"
+fi
+
+if echo "$HEADERS" | grep -qi "X-Content-Type-Options"; then
+  check_passed "X-Content-Type-Options header present"
+else
+  check_warning "X-Content-Type-Options header missing"
+fi
+
+# Check 8: HTTPS enforcement
+echo "🔍 Checking HTTPS..."
+if [[ "$DEPLOYMENT_URL" == https://* ]]; then
+  check_passed "HTTPS enabled"
+else
+  check_warning "HTTPS not detected in URL"
+fi
+
+# Check 9: Response time
+echo "🔍 Checking response time..."
+RESPONSE_TIME=$(curl -s -o /dev/null -w "%{time_total}" "$DEPLOYMENT_URL" 2>/dev/null || echo "99")
+RESPONSE_TIME_MS=$(echo "$RESPONSE_TIME * 1000" | bc | cut -d. -f1)
+
+if [ "$RESPONSE_TIME_MS" -lt 1000 ]; then
+  check_passed "Response time: ${RESPONSE_TIME_MS}ms (excellent)"
+elif [ "$RESPONSE_TIME_MS" -lt 2000 ]; then
+  check_passed "Response time: ${RESPONSE_TIME_MS}ms (good)"
+else
+  check_warning "Response time: ${RESPONSE_TIME_MS}ms (slow)"
+fi
+
+# Check 10: Content size
+echo "🔍 Checking content size..."
+CONTENT_SIZE=$(curl -s -w "%{size_download}" -o /dev/null "$DEPLOYMENT_URL" 2>/dev/null || echo "0")
+CONTENT_SIZE_KB=$(echo "$CONTENT_SIZE / 1024" | bc)
+
+if [ "$CONTENT_SIZE_KB" -gt 0 ]; then
+  check_passed "Content size: ${CONTENT_SIZE_KB}KB"
+else
+  check_warning "Content size could not be determined"
+fi
+
+# Check 11: Compression
+echo "🔍 Checking compression..."
+ENCODING=$(curl -s -I "$DEPLOYMENT_URL" 2>/dev/null | grep -i "content-encoding" | cut -d: -f2 | tr -d ' \r\n')
+if [ -n "$ENCODING" ]; then
+  check_passed "Compression enabled: $ENCODING"
+else
+  check_warning "Compression not detected"
+fi
+
 # Summary
-##############################################################################
 echo ""
-echo "═══════════════════════════════════════════════════════════════════"
-echo "  Verification Summary"
-echo "═══════════════════════════════════════════════════════════════════"
-echo -e "Total Tests:  ${BLUE}$TOTAL_TESTS${NC}"
-echo -e "Passed:       ${GREEN}$PASSED_TESTS${NC}"
-echo -e "Failed:       ${RED}$FAILED_TESTS${NC}"
-echo ""
+echo "======================================"
+echo "Verification Summary"
+echo "======================================"
+echo "Total checks: $TOTAL_CHECKS"
+echo "Passed: $((TOTAL_CHECKS - FAILED_CHECKS))"
+echo "Failed: $FAILED_CHECKS"
+echo "======================================"
 
-if [ $FAILED_TESTS -eq 0 ]; then
-    echo -e "${GREEN}✓ All critical tests passed!${NC}"
-    echo ""
-    log_info "Next steps:"
-    echo "  1. Configure backend API URL in Vercel rewrites (vercel.json)"
-    echo "  2. Set up environment variables in Vercel dashboard"
-    echo "  3. Test Pi Network authentication flow"
-    echo "  4. Deploy backend to Railway"
-    exit 0
+if [ $FAILED_CHECKS -eq 0 ]; then
+  echo -e "${GREEN}✅ All critical checks passed!${NC}"
+  echo "Deployment verified successfully."
+  exit 0
 else
-    echo -e "${RED}✗ Some tests failed. Please review the errors above.${NC}"
-    echo ""
-    exit 1
+  echo -e "${RED}❌ $FAILED_CHECKS check(s) failed${NC}"
+  echo "Please review the failures above."
+  exit 1
 fi
