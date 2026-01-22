@@ -19,12 +19,16 @@ const staticFiles = [
   'ceremonial_interface.html',
   'resonance_dashboard.html',
   'spectral_command_shell.html',
-  'pi-forge-integration.js'
+  'pi-forge-integration.js',
+  'manifest.json',
+  'service-worker.js'
 ];
 
 // Directories to copy from root to public directory
 const staticDirs = [
-  'frontend'
+  'frontend',
+  'icons',
+  'screenshots'
 ];
 
 /**
@@ -85,6 +89,7 @@ function build() {
       { handle: "filesystem" },
       { src: "/api/(.*)", dest: "https://pi-forge-quantum-genesis-1.onrender.com/api/$1" },
       { src: "/health", dest: "https://pi-forge-quantum-genesis-1.onrender.com/health" },
+      { src: "/docs/(.*)", dest: "/docs/$1" },
       { src: "/(.*)", dest: "/index.html" }
     ]
   };
@@ -105,8 +110,13 @@ function build() {
     const destPath = path.join(publicDir, dir);
     
     if (fs.existsSync(srcPath)) {
-      copyDir(srcPath, destPath);
-      console.log(`✓ Copied ${dir}/`);
+      const stats = fs.statSync(srcPath);
+      if (stats.isDirectory()) {
+        copyDir(srcPath, destPath);
+        console.log(`✓ Copied ${dir}/`);
+      } else {
+        console.warn(`⚠ ${dir} is not a directory, skipping`);
+      }
     } else {
       console.warn(`⚠ Directory not found: ${dir}`);
     }

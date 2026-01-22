@@ -1,65 +1,151 @@
-# Vercel Ignore File
-# This overrides .gitignore for Vercel deployments
-# Note: public/ is NOT ignored here since it's our build output
+# Vercel Deployment - Files to Exclude
 
-# Python cache and environment
+# Python artifacts
 __pycache__/
 *.py[cod]
+*$py.class
+*.so
+*.egg-info/
+.Python
+build/
+dist/
+
+# Virtual environments
 .venv/
 venv/
 env/
-*.egg-info/
+ENV/
 
-# Byte-compiled / optimized files
-*.pyc
-*.pyo
+# Python servers (backend services not deployed to Vercel)
+server/
+ledger-api/
 
-# Development files
-.env.local
-.env.development
-.env.test
-
-# Test files
+# Tests
 tests/
+*.test.ts
 *.test.js
+*.spec.ts
 *.spec.js
+.pytest_cache/
+.coverage
+htmlcov/
 
-# Documentation (not needed for deployment)
-docs/
-
-# Docker files
-Dockerfile*
-docker-compose*.yml
-.dockerignore
-
-# Git
-.git/
-.github/
-
-# IDE
+# Development tools
 .vscode/
 .vs/
 .idea/
-
-# Contract development files
-contracts/cache/
-contracts/out/
-contracts/broadcast/
-contracts/lib/
-
-# Large/unnecessary files
-*.exe
-*.dll
-*.msi
-python-*.exe
-*.log
-
-# Other build artifacts (but NOT public/)
-node_modules/
-build/
-artifacts/
-dist/
+*.swp
+*.swo
+*~
 
 # OS files
 .DS_Store
 Thumbs.db
+
+# Logs
+*.log
+logs/
+press-agent/logs/
+
+# Dependencies (will be installed during build)
+node_modules/
+
+# Build artifacts (generated during build)
+public/
+artifacts/
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# CI/CD
+.github/
+.circleci/
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Infrastructure
+infra/
+railway.toml
+railway.json
+
+# Scripts (development only)
+scripts/*.ps1
+scripts/*.sh
+.scripts/
+
+# Documentation (not needed in deployment)
+docs/
+*.md
+!README.md
+
+# Configuration (development only)
+.env
+.env.*
+!.env.example
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Jupyter notebooks
+*.ipynb
+.ipynb_checkpoints/
+
+# Press agent
+press-agent/
+
+# Rollback system
+rollback/
+
+# Guardian scripts (Python-based)
+guardian_alerts.py
+quantum_*.py
+sacred_trinity_*.py
+trinity_bridge.py
+verify_*.py
+simple_demo.py
+EVALUATION_ENHANCEMENT_COMPLETE.py
+
+# Executables
+*.exe
+*.dll
+*.msi
+python-*.exe
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Workflow summaries
+workflow-test-summary.md
+IMPLEMENTATION_COMPLETE.md
+LEDGER_API_V1_BRANCH_READY.md
+READY_FOR_PR.txt
+
+# Config files not needed in production
+tsconfig.json
+validation-key.txt
+
+# HTML files that are copied to public/ during build
+# (redundant at root level)
+index.html
+ceremonial_interface.html
+resonance_dashboard.html
+spectral_command_shell.html
+
+# JavaScript files that are copied to public/ during build
+pi-forge-integration.js
+
+# Keep only essential files:
+# - api/ (Vercel serverless functions)
+# - frontend/ (will be copied to public/)
+# - package.json, package-lock.json (dependencies)
+# - vercel.json (Vercel config)
+# - scripts/build.js (build script)
