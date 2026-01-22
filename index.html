@@ -3,7 +3,46 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    
+    <!-- Primary Meta Tags -->
     <title>Pi Forge Quantum Genesis</title>
+    <meta name="title" content="Pi Forge Quantum Genesis" />
+    <meta name="description" content="Quantum mining platform for Pi Network with ethical AI, VR experiences, and Web3 integration. Stake tokens, compete globally, and participate in the quantum economy." />
+    <meta name="keywords" content="Pi Network, quantum mining, blockchain, Web3, cryptocurrency, staking, VR, ethical AI" />
+    <meta name="author" content="Kris Olofson (onenoly1010)" />
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#8000ff" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Pi Forge" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Icons for PWA -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180x180.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png" />
+    <link rel="apple-touch-icon" sizes="144x144" href="/icons/icon-144x144.png" />
+    <link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120x120.png" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://pi-forge-quantum-genesis.vercel.app/" />
+    <meta property="og:title" content="Pi Forge Quantum Genesis" />
+    <meta property="og:description" content="Quantum mining platform for Pi Network with ethical AI and Web3 integration" />
+    <meta property="og:image" content="/screenshots/desktop.png" />
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://pi-forge-quantum-genesis.vercel.app/" />
+    <meta property="twitter:title" content="Pi Forge Quantum Genesis" />
+    <meta property="twitter:description" content="Quantum mining platform for Pi Network with ethical AI and Web3 integration" />
+    <meta property="twitter:image" content="/screenshots/desktop.png" />
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Roboto+Mono&display=swap');
         
@@ -187,6 +226,13 @@
             .quickstart .label { text-align: left; }
         }
     </style>
+    
+    <!-- Vercel Speed Insights: Real-time performance monitoring -->
+    <!-- This tracks web vitals and performance metrics for optimization insights -->
+    <script>
+      window.va = window.va || function() { (window.vaq = window.vaq || []).push(arguments); };
+    </script>
+    <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 <div class="card">
@@ -238,5 +284,20 @@
         Built with Quantum Spirit by Kris Olofson | Pi Forge Genesis 2024-2025
     </footer>
 </div>
+
+<!-- Service Worker Registration for PWA -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then((registration) => {
+          console.log('✅ Service Worker registered successfully:', registration.scope);
+        })
+        .catch((error) => {
+          console.warn('⚠️  Service Worker registration failed:', error);
+        });
+    });
+  }
+</script>
 </body>
 </html>

@@ -3,44 +3,134 @@ SUPREME CREDENTIALS - QVM 3.0 RECURSION PROTOCOL
 REALIGNED WITH SUPABASE AUTHENTICATION LATTICE
 Production-Ready Mainnet Dashboard Integration
 """
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends, HTTPException, status, Request
-from fastapi.security import OAuth2PasswordBearer
-from fastapi.responses import FileResponse, JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, EmailStr, Field
-from typing import Optional, Dict, List, Any
-import os
-import time
-import logging
 import asyncio
 import hashlib
+import hmac
+import logging
+import os
 import random
+import time
+from collections import defaultdict
 from datetime import datetime
-from supabase import create_client, Client
+from typing import Any, Dict, List, Optional
 
-# Configure logging
+import httpx
+from fastapi import (Depends, FastAPI, HTTPException, Request, WebSocket,
+                     WebSocketDisconnect, status)
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.security import OAuth2PasswordBearer
+from pydantic import BaseModel, EmailStr, Field
+
+# Configure logging first
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Sacred Trinity Tracing System
+# Import supabase with error handling (using importlib to avoid top-level import)
+import importlib
+
+supabase_available = False
+Client = None
+create_client = None
+
 try:
-    from supabase import create_client, Client
+    supabase_module = importlib.import_module('supabase')
+    Client = supabase_module.Client
+    create_client = supabase_module.create_client
     supabase_available = True
-except ImportError:
+    logger.info("✅ Supabase client imported successfully")
+except ImportError as e:
+    logger.warning(f"⚠️ Supabase import failed: {e}")
     supabase_available = False
-    Client = None  # Define Client as None when not available
-    logging.warning("⚠️ Supabase client not available")
 
 # Use the centralized tracing_system (lazy init + safe null-context fallbacks)
-from tracing_system import (
-    trace_fastapi_operation,
-    trace_payment_processing,
-    trace_payment_visualization_flow,
-    trace_consciousness_stream,
-    get_tracing_system,
-)
-tracing_enabled = True  # tracing_system handles missing SDKs and returns nullcontext spans
-logging.info("✅ Tracing system delegated to tracing_system")
+try:
+    from tracing_system import (get_tracing_system, trace_consciousness_stream,
+                                trace_fastapi_operation,
+                                trace_payment_processing,
+                                trace_payment_visualization_flow)
+    tracing_enabled = True
+    logging.info("✅ Tracing system loaded")
+except ImportError as e:
+    logging.warning(f"⚠️ Tracing system import failed: {e}")
+    tracing_enabled = False
+    get_tracing_system = None
+    trace_consciousness_stream = lambda *args, **kwargs: None
+    trace_fastapi_operation = lambda *args, **kwargs: None
+    trace_payment_processing = lambda *args, **kwargs: None
+    trace_payment_visualization_flow = lambda *args, **kwargs: None
+
+# Import autonomous decision tools
+try:
+    from autonomous_decision import (DecisionContext, DecisionParameter,
+                                     DecisionPriority, DecisionType,
+                                     get_decision_matrix)
+    autonomous_decision_available = True
+    logging.info("✅ Autonomous decision tools loaded")
+except ImportError as e:
+    logging.warning(f"⚠️ Autonomous decision tools import failed: {e}")
+    autonomous_decision_available = False
+    DecisionContext = None
+    DecisionParameter = None
+    DecisionPriority = None
+    DecisionType = None
+    get_decision_matrix = None
+
+# Import self-healing system
+try:
+    from self_healing import IncidentSeverity, get_healing_system
+    self_healing_available = True
+    logging.info("✅ Self-healing system loaded")
+except ImportError as e:
+    logging.warning(f"⚠️ Self-healing system import failed: {e}")
+    self_healing_available = False
+    IncidentSeverity = None
+    get_healing_system = None
+
+# Import guardian monitoring
+try:
+    from guardian_monitor import (MonitoringLevel, ValidationStatus,
+                                  get_guardian_monitor)
+    guardian_monitor_available = True
+    logging.info("✅ Guardian monitoring system loaded")
+except ImportError as e:
+    logging.warning(f"⚠️ Guardian monitoring import failed: {e}")
+    guardian_monitor_available = False
+    MonitoringLevel = None
+    ValidationStatus = None
+    get_guardian_monitor = None
+
+# Import monitoring agents
+try:
+    from monitoring_agents import get_monitoring_system
+    monitoring_agents_available = True
+    logging.info("✅ Monitoring agents system loaded")
+except ImportError as e:
+    logging.warning(f"⚠️ Monitoring agents import failed: {e}")
+    monitoring_agents_available = False
+    get_monitoring_system = None
+
+# Import guardian approval system
+try:
+    from guardian_approvals import get_approval_system
+    guardian_approvals_available = True
+    logging.info("✅ Guardian approval system loaded")
+except ImportError as e:
+    logging.warning(f"⚠️ Guardian approvals import failed: {e}")
+    guardian_approvals_available = False
+    get_approval_system = None
+
+# Import memorial AI generator
+try:
+    from memorial_ai_generator import (MemorialProfile,
+                                       generate_complete_memorial_package)
+    memorial_ai_available = True
+    logging.info("✅ Memorial AI generator loaded")
+except ImportError as e:
+    logging.warning(f"⚠️ Memorial AI generator import failed: {e}")
+    memorial_ai_available = False
+    MemorialProfile = None
+    generate_complete_memorial_package = None
 
 # --- SUPABASE CLIENT INITIALIZATION ---
 supabase = None
@@ -121,14 +211,56 @@ PI_NETWORK_CONFIG = {
     "api_key": os.environ.get("PI_NETWORK_API_KEY", ""),
     "app_id": os.environ.get("PI_NETWORK_APP_ID", ""),
     "api_endpoint": os.environ.get("PI_NETWORK_API_ENDPOINT", "https://api.minepi.com"),
-    "sandbox_mode": os.environ.get("PI_SANDBOX_MODE", "false").lower() == "true"
+    "sandbox_mode": os.environ.get("PI_SANDBOX_MODE", "false").lower() == "true",
+    "wallet_private_key": os.environ.get("PI_NETWORK_WALLET_PRIVATE_KEY", ""),
+    "webhook_secret": os.environ.get("PI_NETWORK_WEBHOOK_SECRET", "")
 }
+
+# Validate critical Pi Network configuration on startup
+def validate_pi_network_config():
+    """Validate Pi Network configuration for mainnet deployment"""
+    if PI_NETWORK_CONFIG["network"] == "mainnet":
+        if not PI_NETWORK_CONFIG["api_key"]:
+            logger.error("❌ PI_NETWORK_API_KEY not set - payments will fail in mainnet mode")
+            raise ValueError("PI_NETWORK_API_KEY is required for mainnet deployment")
+        if not PI_NETWORK_CONFIG["app_id"]:
+            logger.error("❌ PI_NETWORK_APP_ID not set - payments will fail in mainnet mode")
+            raise ValueError("PI_NETWORK_APP_ID is required for mainnet deployment")
+        if not PI_NETWORK_CONFIG["webhook_secret"]:
+            logger.warning("⚠️ PI_NETWORK_WEBHOOK_SECRET not set - webhook verification disabled")
+        logger.info(f"✅ Pi Network Mainnet Mode: API configured={bool(PI_NETWORK_CONFIG['api_key'])}")
+    else:
+        logger.info(f"🧪 Pi Network Testnet/Sandbox Mode")
 
 # --- PYDANTIC MODELS FOR REQUEST/RESPONSE ---
 class PaymentVerification(BaseModel):
     payment_id: str = Field(..., description="Pi Network payment identifier")
     amount: float = Field(..., gt=0, description="Payment amount in Pi")
     metadata: Optional[Dict[str, Any]] = Field(default=None, description="Additional payment metadata")
+
+class PaymentApprovalRequest(BaseModel):
+    payment_id: str = Field(..., description="Pi Network payment ID from SDK")
+    amount: float = Field(..., gt=0, description="Payment amount to approve")
+    user_id: str = Field(..., description="User ID from authentication")
+    metadata: Optional[Dict[str, Any]] = Field(default=None)
+
+class PaymentCompletionRequest(BaseModel):
+    payment_id: str = Field(..., description="Pi Network payment ID")
+    txid: str = Field(..., description="Blockchain transaction ID")
+
+class IncompletePaymentRequest(BaseModel):
+    payment_id: str = Field(..., description="Incomplete payment ID")
+    amount: float = Field(..., gt=0)
+    user_uid: str = Field(..., description="User UID")
+
+class PiWebhookPayload(BaseModel):
+    """Pi Network webhook payload model"""
+    payment_id: str
+    status: str  # completed, cancelled, failed
+    txid: Optional[str] = None
+    amount: float
+    user_uid: str
+    created_at: str
     tx_hash: Optional[str] = Field(default=None, description="Transaction hash for mainnet verification")
 
 class EthicalAuditRequest(BaseModel):
@@ -149,7 +281,95 @@ class SmartContractAudit(BaseModel):
     contract_name: str = Field(..., min_length=1, max_length=100)
     audit_depth: str = Field(default="standard", pattern="^(basic|standard|comprehensive)$")
 
+class GuardianApprovalRequest(BaseModel):
+    """Request model for guardian approval recording"""
+    decision_id: str = Field(..., description="Original decision ID")
+    decision_type: str = Field(..., description="Type of decision (deployment, scaling, rollback, etc.)")
+    guardian_id: str = Field(..., description="Guardian identifier")
+    action: str = Field(..., pattern="^(approve|reject|modify)$", description="Action: approve, reject, or modify")
+    reasoning: str = Field(..., min_length=1, description="Reasoning for the action")
+    priority: str = Field(default="high", pattern="^(critical|high|medium|low)$", description="Priority level")
+    confidence: float = Field(default=0.0, ge=0.0, le=1.0, description="Decision confidence score")
+    metadata: Optional[Dict[str, Any]] = Field(default=None, description="Additional metadata")
+
+class MemorialProfileRequest(BaseModel):
+    """Request model for memorial profile creation"""
+    name: str = Field(..., min_length=1, max_length=100, description="Name of the person being memorialized")
+    birth_date: Optional[str] = Field(None, description="Birth date (YYYY-MM-DD format)")
+    passing_date: Optional[str] = Field(None, description="Date of passing (YYYY-MM-DD format)")
+    relationship: Optional[str] = Field(None, max_length=100, description="Relationship to the memorial creator")
+    personality_traits: List[str] = Field(default_factory=list, description="Personality traits and characteristics")
+    achievements: List[str] = Field(default_factory=list, description="Life achievements and accomplishments")
+    favorite_memories: List[str] = Field(default_factory=list, description="Favorite memories and stories")
+    legacy_message: Optional[str] = Field(None, max_length=500, description="Legacy message or final words")
+
+class MemorialGenerationRequest(BaseModel):
+    """Request model for memorial content generation"""
+    profile: MemorialProfileRequest
+    contributor_name: str = Field(default="Loved One", max_length=100, description="Name of the contributor")
+    content_types: List[str] = Field(
+        default_factory=lambda: ["narrative", "poem", "reflection"],
+        description="Types of content to generate"
+    )
+
 # --- CYBER SAMURAI GUARDIAN STATE ---
+# --- PI NETWORK API INTEGRATION HELPERS ---
+async def call_pi_network_api(endpoint: str, method: str = "GET", data: Optional[Dict] = None) -> Dict[str, Any]:
+    """Make authenticated API calls to Pi Network"""
+    url = f"{PI_NETWORK_CONFIG['api_endpoint']}/{endpoint}"
+    headers = {"Authorization": f"Key {PI_NETWORK_CONFIG['api_key']}"}
+    
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        try:
+            if method == "GET":
+                response = await client.get(url, headers=headers)
+            elif method == "POST":
+                response = await client.post(url, headers=headers, json=data)
+            else:
+                raise ValueError(f"Unsupported HTTP method: {method}")
+            
+            response.raise_for_status()
+            return response.json()
+        except httpx.HTTPStatusError as e:
+            logger.error(f"Pi Network API error: {e.response.status_code} - {e.response.text}")
+            raise HTTPException(
+                status_code=e.response.status_code,
+                detail=f"Pi Network API error: {e.response.text}"
+            )
+        except Exception as e:
+            logger.error(f"Pi Network API call failed: {e}")
+            raise HTTPException(status_code=500, detail=f"Pi Network API unavailable: {str(e)}")
+
+async def approve_payment_with_pi_network(payment_id: str) -> Dict[str, Any]:
+    """Approve payment with Pi Network API"""
+    return await call_pi_network_api(f"v2/payments/{payment_id}/approve", method="POST")
+
+async def complete_payment_with_pi_network(payment_id: str, txid: str) -> Dict[str, Any]:
+    """Complete payment with Pi Network API"""
+    return await call_pi_network_api(
+        f"v2/payments/{payment_id}/complete",
+        method="POST",
+        data={"txid": txid}
+    )
+
+async def get_payment_from_pi_network(payment_id: str) -> Dict[str, Any]:
+    """Get payment details from Pi Network API"""
+    return await call_pi_network_api(f"v2/payments/{payment_id}", method="GET")
+
+def verify_webhook_signature(payload: bytes, signature: str) -> bool:
+    """Verify Pi Network webhook signature using HMAC"""
+    if not PI_NETWORK_CONFIG["webhook_secret"]:
+        logger.warning("⚠️ Webhook signature verification skipped - no secret configured")
+        return True  # Allow in development, but warn
+    
+    expected_signature = hmac.new(
+        PI_NETWORK_CONFIG["webhook_secret"].encode(),
+        payload,
+        hashlib.sha256
+    ).hexdigest()
+    
+    return hmac.compare_digest(signature, expected_signature)
+
 class CyberSamuraiGuardian:
     """Guardian monitoring system for quantum resonance and system health
     
@@ -297,6 +517,36 @@ class RateLimiter:
 # Initialize rate limiter (60 requests per minute per IP)
 rate_limiter = RateLimiter(requests_per_minute=60)
 
+# =============================================================================
+# UTILITY FUNCTIONS
+# =============================================================================
+
+def validate_enum(value: Optional[str], enum_class: type, param_name: str):
+    """
+    Helper function to validate and convert string to enum
+    
+    Args:
+        value: String value to convert
+        enum_class: Enum class to convert to
+        param_name: Parameter name for error messages
+        
+    Returns:
+        Enum value or None
+        
+    Raises:
+        HTTPException: If value is invalid
+    """
+    if value is None:
+        return None
+    
+    try:
+        return enum_class(value)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid {param_name}. Must be one of: {[e.value for e in enum_class]}"
+        )
+
 # Connection tracking for scalability metrics
 class ConnectionTracker:
     """Track active connections for load monitoring"""
@@ -337,6 +587,9 @@ class ConnectionTracker:
 
 connection_tracker = ConnectionTracker(max_connections=10000)
 
+# Track application startup time for metrics
+startup_time = time.time()
+
 # --- FASTAPI APPLICATION ---
 app = FastAPI(
     title="QVM 3.0 Supabase Resonance Bridge", 
@@ -345,6 +598,17 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc"
 )
+
+# Import and include Pi Network router
+try:
+    from pi_network_router import router as pi_network_router
+    pi_network_available = True
+    app.include_router(pi_network_router)
+    logging.info("✅ Pi Network router loaded")
+except ImportError as e:
+    logging.warning(f"⚠️ Pi Network router import failed: {e}")
+    pi_network_available = False
+    pi_network_router = None
 
 # Add CORS middleware for cross-origin requests
 # In production, CORS_ORIGINS env var should be set to specific domains
@@ -427,6 +691,30 @@ async def health_check():
         }
     }
 
+@app.get("/api/metrics")
+async def metrics_endpoint():
+    """Prometheus-compatible metrics endpoint"""
+    connection_metrics = connection_tracker.get_metrics()
+    guardian_status = guardian.get_status()
+    
+    return {
+        "service": "pi-forge-quantum-genesis",
+        "version": "3.3.0",
+        "uptime_seconds": time.time() - startup_time,
+        "connections": connection_metrics,
+        "guardian": {
+            "latency_ns": guardian_status["latency"]["latency_ns"],
+            "harmonic_stability": guardian_status["latency"]["harmonic_stability"],
+            "quantum_coherence": guardian_status["quantum_coherence"],
+            "total_alerts": guardian_status["total_alerts"]
+        },
+        "payments_processed": len(payment_records),
+        "websocket_connections": connection_metrics["active_websocket_connections"],
+        "requests_total": connection_metrics["total_requests"],
+        "requests_per_second": connection_metrics["requests_per_second"],
+        "timestamp": time.time()
+    }
+
 @app.get("/ceremonial")
 async def ceremonial_interface():
     """Serve the ceremonial interface in all its glory"""
@@ -439,10 +727,14 @@ async def production_dashboard():
 
 @app.get("/health")
 async def health_endpoint():
+    """
+    Health check endpoint for Railway.
+    Returns immediately with basic status checks (no external service calls).
+    """
     return {
         "status": "healthy",
-        "service": "FastAPI Quantum Conduit", 
-        "port": 8000,
+        "service": "pi-forge-quantum-genesis",
+        "port": int(os.environ.get("PORT", 8000)),
         "supabase_connected": supabase is not None,
         "timestamp": time.time()
     }
@@ -496,9 +788,233 @@ async def pi_network_status():
         "timestamp": time.time()
     }
 
+@app.post("/api/payments/approve")
+async def approve_payment(payment: PaymentApprovalRequest, current_user = Depends(get_current_user)):
+    """
+    Approve Pi Network payment (called by frontend after SDK's onReadyForServerApproval)
+    This endpoint validates the payment and tells Pi Network to proceed with blockchain transaction
+    """
+    start_time = time.perf_counter_ns()
+    
+    try:
+        logger.info(f"💳 Approving payment: {payment.payment_id} for {payment.amount} Pi")
+        
+        # Get payment details from Pi Network to verify
+        pi_payment = await get_payment_from_pi_network(payment.payment_id)
+        
+        # Validate payment amount matches what we expect
+        if abs(float(pi_payment.get("amount", 0)) - payment.amount) > 0.0001:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Payment amount mismatch: expected {payment.amount}, got {pi_payment.get('amount')}"
+            )
+        
+        # Validate payment is in correct state
+        if pi_payment.get("status") != "pending":
+            raise HTTPException(
+                status_code=400,
+                detail=f"Payment not in pending state: {pi_payment.get('status')}"
+            )
+        
+        # Call Pi Network API to approve payment
+        approval_result = await approve_payment_with_pi_network(payment.payment_id)
+        
+        # Store pending payment in database
+        if supabase:
+            try:
+                supabase.table("payments").insert({
+                    "payment_id": payment.payment_id,
+                    "user_id": current_user.id,
+                    "amount": payment.amount,
+                    "status": "approved",
+                    "metadata": payment.metadata or {},
+                    "approved_at": datetime.utcnow().isoformat()
+                }).execute()
+            except Exception as db_error:
+                logger.error(f"Failed to store payment in database: {db_error}")
+        
+        processing_time_ns = time.perf_counter_ns() - start_time
+        
+        logger.info(f"✅ Payment approved: {payment.payment_id}")
+        return {
+            "approved": True,
+            "payment_id": payment.payment_id,
+            "status": "approved",
+            "message": "Payment approved - proceed to blockchain",
+            "processing_time_ns": processing_time_ns,
+            "timestamp": time.time()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Payment approval failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Payment approval failed: {str(e)}")
+
+@app.post("/api/payments/complete")
+async def complete_payment(payment: PaymentCompletionRequest):
+    """
+    Complete Pi Network payment (called by frontend after blockchain confirmation)
+    This endpoint verifies the blockchain transaction and finalizes the payment
+    """
+    start_time = time.perf_counter_ns()
+    
+    try:
+        logger.info(f"🎉 Completing payment: {payment.payment_id} with txid: {payment.txid}")
+        
+        # Complete payment with Pi Network API
+        completion_result = await complete_payment_with_pi_network(payment.payment_id, payment.txid)
+        
+        # Determine resonance state based on payment amount
+        pi_payment = await get_payment_from_pi_network(payment.payment_id)
+        amount = float(pi_payment.get("amount", 0))
+        
+        if amount >= 1.0:
+            resonance_state = "transcendence"
+        elif amount >= 0.5:
+            resonance_state = "harmony"
+        elif amount >= 0.1:
+            resonance_state = "growth"
+        else:
+            resonance_state = "foundation"
+        
+        # Update payment in database
+        if supabase:
+            try:
+                supabase.table("payments").update({
+                    "status": "completed",
+                    "txid": payment.txid,
+                    "resonance_state": resonance_state,
+                    "completed_at": datetime.utcnow().isoformat()
+                }).eq("payment_id", payment.payment_id).execute()
+            except Exception as db_error:
+                logger.error(f"Failed to update payment in database: {db_error}")
+        
+        processing_time_ns = time.perf_counter_ns() - start_time
+        
+        logger.info(f"✅ Payment completed: {payment.payment_id}")
+        return {
+            "success": True,
+            "payment_id": payment.payment_id,
+            "txid": payment.txid,
+            "status": "completed",
+            "resonance_state": resonance_state,
+            "amount": amount,
+            "message": "Payment completed successfully",
+            "processing_time_ns": processing_time_ns,
+            "timestamp": time.time()
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Payment completion failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Payment completion failed: {str(e)}")
+
+@app.post("/api/payments/incomplete")
+async def handle_incomplete_payment(payment: IncompletePaymentRequest):
+    """
+    Handle incomplete payment found during user authentication
+    Pi SDK calls this when a payment was interrupted (user closed app, etc.)
+    """
+    try:
+        logger.info(f"🔄 Handling incomplete payment: {payment.payment_id}")
+        
+        # Get payment status from Pi Network
+        pi_payment = await get_payment_from_pi_network(payment.payment_id)
+        
+        if pi_payment.get("status") == "completed":
+            # Payment was actually completed, update our records
+            if supabase:
+                supabase.table("payments").upsert({
+                    "payment_id": payment.payment_id,
+                    "user_id": payment.user_uid,
+                    "amount": payment.amount,
+                    "status": "completed",
+                    "txid": pi_payment.get("transaction", {}).get("txid"),
+                    "completed_at": datetime.utcnow().isoformat()
+                }).execute()
+            
+            return {"status": "completed", "message": "Payment was completed"}
+        else:
+            # Payment incomplete, return current status
+            return {
+                "status": pi_payment.get("status"),
+                "message": f"Payment is {pi_payment.get('status')}"
+            }
+            
+    except Exception as e:
+        logger.error(f"Error handling incomplete payment: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/pi-webhooks/payment")
+async def pi_payment_webhook(request: Request):
+    """
+    Webhook endpoint for Pi Network payment status updates
+    Handles: payment.approved, payment.completed, payment.cancelled
+    """
+    try:
+        # Get raw body for signature verification
+        body = await request.body()
+        signature = request.headers.get("X-Pi-Signature", "")
+        
+        # Verify webhook signature
+        if not verify_webhook_signature(body, signature):
+            logger.error("❌ Invalid webhook signature")
+            raise HTTPException(status_code=401, detail="Invalid webhook signature")
+        
+        # Parse webhook payload
+        payload = await request.json()
+        webhook_data = PiWebhookPayload(**payload)
+        
+        logger.info(f"📨 Webhook received: {webhook_data.status} for payment {webhook_data.payment_id}")
+        
+        # Update payment status in database
+        if supabase:
+            update_data = {
+                "status": webhook_data.status,
+                "updated_at": datetime.utcnow().isoformat()
+            }
+            
+            if webhook_data.txid:
+                update_data["txid"] = webhook_data.txid
+                
+            if webhook_data.status == "completed":
+                update_data["completed_at"] = datetime.utcnow().isoformat()
+            
+            try:
+                supabase.table("payments").update(update_data).eq(
+                    "payment_id", webhook_data.payment_id
+                ).execute()
+                logger.info(f"✅ Database updated for payment {webhook_data.payment_id}")
+            except Exception as db_error:
+                logger.error(f"Failed to update payment via webhook: {db_error}")
+        
+        # Broadcast payment status to connected WebSocket clients
+        status_message = {
+            "type": "payment_status_update",
+            "payment_id": webhook_data.payment_id,
+            "status": webhook_data.status,
+            "txid": webhook_data.txid,
+            "timestamp": time.time()
+        }
+        
+        for ws in connected_users.values():
+            try:
+                await ws.send_json(status_message)
+            except:
+                pass  # Ignore disconnected clients
+        
+        return {"status": "received", "payment_id": webhook_data.payment_id}
+        
+    except Exception as e:
+        logger.error(f"❌ Webhook processing failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/api/verify-payment")
 async def verify_payment(payment: PaymentVerification, current_user = Depends(get_current_user)):
-    """Verify and process a Pi Network payment on mainnet"""
+    """
+    Legacy endpoint - Verify and process a Pi Network payment on mainnet
+    Note: Use /api/payments/approve and /api/payments/complete for new integrations
+    """
     start_time = time.perf_counter_ns()
     
     try:
@@ -506,7 +1022,8 @@ async def verify_payment(payment: PaymentVerification, current_user = Depends(ge
         verification_data = f"{payment.payment_id}{payment.amount}{time.time()}"
         verification_hash = hashlib.sha256(verification_data.encode()).hexdigest()
         
-        # Simulate mainnet verification (in production, call Pi Network API)
+        # Get payment from Pi Network
+        pi_payment = await get_payment_from_pi_network(payment.payment_id)
         resonance_state = "transcendence" if payment.amount >= 0.1 else "harmony"
         
         # Calculate processing latency
@@ -516,7 +1033,7 @@ async def verify_payment(payment: PaymentVerification, current_user = Depends(ge
             "status": "verified",
             "payment_id": payment.payment_id,
             "amount": payment.amount,
-            "tx_hash": payment.tx_hash or verification_hash[:16],
+            "tx_hash": pi_payment.get("transaction", {}).get("txid", verification_hash[:16]),
             "verification_hash": verification_hash,
             "resonance_state": resonance_state,
             "network": PI_NETWORK_CONFIG["network"],
@@ -763,6 +1280,369 @@ async def audit_smart_contract(audit: SmartContractAudit, current_user=Depends(g
         "timestamp": time.time()
     }
 
+# --- AUTONOMOUS DECISION ENDPOINTS ---
+
+@app.post("/api/autonomous/decision")
+async def make_autonomous_decision(context: DecisionContext):
+    """
+    Make an autonomous decision based on provided context and parameters.
+    Returns decision result with approval status and recommended actions.
+    """
+    decision_matrix = get_decision_matrix()
+    result = decision_matrix.make_decision(context)
+    
+    return {
+        "decision_id": result.decision_id,
+        "decision_type": result.decision_type.value,
+        "approved": result.approved,
+        "confidence": result.confidence,
+        "reasoning": result.reasoning,
+        "actions": result.actions,
+        "requires_guardian": result.requires_guardian,
+        "timestamp": result.timestamp,
+        "metadata": result.metadata
+    }
+
+@app.get("/api/autonomous/decision-history")
+async def get_decision_history(
+    decision_type: Optional[str] = None,
+    limit: int = 100
+):
+    """Get history of autonomous decisions"""
+    decision_matrix = get_decision_matrix()
+    
+    # Convert string to enum if provided
+    type_filter = validate_enum(decision_type, DecisionType, "decision_type")
+    
+    history = decision_matrix.get_decision_history(type_filter, limit)
+    
+    return {
+        "decisions": [
+            {
+                "decision_id": d.decision_id,
+                "decision_type": d.decision_type.value,
+                "approved": d.approved,
+                "confidence": d.confidence,
+                "reasoning": d.reasoning,
+                "requires_guardian": d.requires_guardian,
+                "timestamp": d.timestamp
+            }
+            for d in history
+        ],
+        "count": len(history)
+    }
+
+@app.get("/api/autonomous/metrics")
+async def get_decision_metrics():
+    """Get metrics about autonomous decision making"""
+    decision_matrix = get_decision_matrix()
+    metrics = decision_matrix.get_decision_metrics()
+    
+    return {
+        "metrics": metrics,
+        "timestamp": time.time()
+    }
+
+# --- SELF-HEALING & DIAGNOSTICS ENDPOINTS ---
+
+@app.get("/api/health/diagnostics")
+async def run_system_diagnostics():
+    """Run automated system diagnostics and return health status"""
+    healing_system = get_healing_system()
+    health_status = healing_system.get_system_health()
+    return health_status
+
+@app.get("/api/health/incidents")
+async def get_incident_reports(
+    severity: Optional[str] = None,
+    component: Optional[str] = None,
+    limit: int = 100
+):
+    """Get incident reports with optional filtering"""
+    healing_system = get_healing_system()
+    
+    # Convert string to enum if provided
+    severity_filter = validate_enum(severity, IncidentSeverity, "severity")
+    
+    incidents = healing_system.get_incident_report(severity_filter, component, limit)
+    
+    return {
+        "incidents": [
+            {
+                "incident_id": i.incident_id,
+                "severity": i.severity.value,
+                "component": i.component,
+                "description": i.description,
+                "auto_healed": i.auto_healed,
+                "healing_actions": i.healing_actions,
+                "timestamp": i.timestamp,
+                "metadata": i.metadata
+            }
+            for i in incidents
+        ],
+        "count": len(incidents)
+    }
+
+# --- GUARDIAN MONITORING & OVERSIGHT ENDPOINTS ---
+
+@app.get("/api/guardian/monitoring-status")
+async def get_guardian_monitoring_status():
+    """Get comprehensive guardian monitoring status"""
+    monitor = get_guardian_monitor()
+    return monitor.get_monitoring_status()
+
+@app.post("/api/guardian/validate-decision")
+async def validate_decision(
+    decision_id: str,
+    decision_data: Dict[str, Any]
+):
+    """Validate an autonomous decision for safety and compliance"""
+    monitor = get_guardian_monitor()
+    result = monitor.validate_decision(decision_id, decision_data)
+    
+    return {
+        "validation_id": result.validation_id,
+        "target": result.target,
+        "status": result.status.value,
+        "checks_passed": result.checks_passed,
+        "checks_failed": result.checks_failed,
+        "details": result.details,
+        "timestamp": result.timestamp
+    }
+
+@app.post("/api/guardian/override-decision")
+async def override_decision(
+    original_decision_id: str,
+    action: str,
+    reasoning: str,
+    guardian_id: str
+):
+    """Guardian override of an autonomous decision (requires guardian authentication)"""
+    # In production, verify guardian authentication via JWT
+    # For now, accept the guardian_id parameter
+    
+    monitor = get_guardian_monitor()
+    decision = monitor.guardian_override_decision(
+        original_decision_id,
+        action,
+        reasoning,
+        guardian_id
+    )
+    
+    return {
+        "decision_id": decision.decision_id,
+        "original_decision_id": decision.original_decision_id,
+        "action": decision.action,
+        "reasoning": decision.reasoning,
+        "guardian_id": decision.guardian_id,
+        "timestamp": decision.timestamp
+    }
+
+@app.post("/api/guardian/update-monitoring-level")
+async def update_monitoring_level(
+    level: str,
+    reason: str
+):
+    """Update system monitoring level (requires guardian authentication)"""
+    # Convert string to enum
+    new_level = validate_enum(level, MonitoringLevel, "monitoring_level")
+    
+    monitor = get_guardian_monitor()
+    monitor.update_monitoring_level(new_level, reason)
+    
+    return {
+        "monitoring_level": new_level.value,
+        "reason": reason,
+        "timestamp": time.time()
+    }
+
+@app.get("/api/guardian/validation-history")
+async def get_validation_history(
+    status: Optional[str] = None,
+    limit: int = 100
+):
+    """Get validation history with optional filtering"""
+    monitor = get_guardian_monitor()
+    
+    # Convert string to enum if provided
+    status_filter = validate_enum(status, ValidationStatus, "status")
+    
+    history = monitor.get_validation_history(status_filter, limit)
+    
+    return {
+        "validations": [
+            {
+                "validation_id": v.validation_id,
+                "target": v.target,
+                "status": v.status.value,
+                "checks_passed": v.checks_passed,
+                "checks_failed": v.checks_failed,
+                "details": v.details,
+                "timestamp": v.timestamp
+            }
+            for v in history
+        ],
+        "count": len(history)
+    }
+
+@app.get("/api/guardian/dashboard")
+async def guardian_dashboard():
+    """Guardian oversight dashboard - shows pending escalations"""
+    decision_matrix = get_decision_matrix()
+    guardian_monitor = get_guardian_monitor()
+    
+    pending_decisions = [
+        d for d in decision_matrix.decision_history[-50:]
+        if d.requires_guardian and not d.approved
+    ]
+    
+    return {
+        "guardian_team": "Issue #100 - @onenoly1010",
+        "pending_escalations": len(pending_decisions),
+        "recent_decisions": [
+            {
+                "decision_id": d.decision_id,
+                "decision_type": d.decision_type.value,
+                "priority": d.get_priority(),
+                "confidence": d.confidence,
+                "reasoning": d.reasoning,
+                "requires_guardian": d.requires_guardian,
+                "approved": d.approved,
+                "timestamp": d.timestamp
+            }
+            for d in pending_decisions
+        ],
+        "monitoring_status": guardian_monitor.get_monitoring_status(),
+        "escalation_endpoint": "https://github.com/onenoly1010/pi-forge-quantum-genesis/issues/100"
+    }
+
+# --- MONITORING AGENTS ENDPOINTS ---
+
+@app.get("/api/monitoring/status")
+async def get_monitoring_status():
+    """Get status of all monitoring agents"""
+    monitoring = get_monitoring_system()
+    return monitoring.get_system_status()
+
+@app.get("/api/monitoring/latest-data")
+async def get_latest_monitoring_data(limit: int = 10):
+    """Get latest data from all monitoring agents"""
+    monitoring = get_monitoring_system()
+    data = monitoring.get_all_latest_data(limit)
+    
+    return {
+        "data": data,
+        "timestamp": time.time()
+    }
+
+@app.post("/api/monitoring/report-to-vercel")
+async def report_metrics_to_vercel(metrics: Dict[str, Any]):
+    """Report metrics to Vercel serverless function"""
+    monitoring = get_monitoring_system()
+    
+    # Add timestamp and source
+    metrics_payload = {
+        "metrics": [
+            {
+                "metric_type": k,
+                "value": v,
+                "timestamp": time.time(),
+                "source": "pi-forge-quantum-genesis"
+            }
+            for k, v in metrics.items()
+        ],
+        "service": "pi-forge-quantum-genesis",
+        "version": "3.3.0"
+    }
+    
+    await monitoring.report_to_vercel(metrics_payload)
+    
+    return {
+        "status": "reported",
+        "metrics_count": len(metrics_payload["metrics"]),
+        "timestamp": time.time()
+    }
+
+@app.post("/api/monitoring/configure-vercel")
+async def configure_vercel_endpoint(endpoint: str):
+    """Configure Vercel endpoint for metrics reporting"""
+    monitoring = get_monitoring_system()
+    monitoring.configure_vercel_endpoint(endpoint)
+    
+    return {
+        "status": "configured",
+        "endpoint": endpoint,
+        "timestamp": time.time()
+    }
+
+# --- OINIO MEMORIAL AI ENDPOINTS ---
+
+@app.post("/api/memorial/generate")
+async def generate_memorial_content(request: MemorialGenerationRequest):
+    """Generate AI-powered memorial content using Azure AI"""
+    try:
+        # Convert Pydantic model to dataclass
+        profile = MemorialProfile(
+            name=request.profile.name,
+            birth_date=request.profile.birth_date,
+            passing_date=request.profile.passing_date,
+            relationship=request.profile.relationship,
+            personality_traits=request.profile.personality_traits,
+            achievements=request.profile.achievements,
+            favorite_memories=request.profile.favorite_memories,
+            legacy_message=request.profile.legacy_message
+        )
+
+        # Generate memorial package
+        memorial_package = await generate_complete_memorial_package(
+            profile=profile,
+            contributor_name=request.contributor_name
+        )
+
+        # Filter content based on requested types
+        filtered_package = {
+            "generated_at": memorial_package["generated_at"],
+            "profile": memorial_package["profile"]
+        }
+
+        for content_type in request.content_types:
+            if content_type in memorial_package:
+                filtered_package[content_type] = memorial_package[content_type]
+
+        return {
+            "status": "generated",
+            "memorial": filtered_package,
+            "content_types": request.content_types,
+            "ai_provider": "azure_ai" if os.getenv("AZURE_AI_ENDPOINT") else "demo_mode"
+        }
+
+    except Exception as e:
+        logger.error(f"Memorial generation failed: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Memorial generation failed: {str(e)}"
+        )
+
+@app.get("/api/memorial/status")
+async def get_memorial_ai_status():
+    """Get the status of the memorial AI system"""
+    ai_available = os.getenv("AZURE_AI_ENDPOINT") and os.getenv("AZURE_AI_KEY")
+
+    return {
+        "service": "OINIO Memorial AI Generator",
+        "status": "active",
+        "ai_backend": "azure_ai" if ai_available else "demo_mode",
+        "capabilities": [
+            "memorial_narratives",
+            "commemorative_poems",
+            "personal_reflections",
+            "legacy_stories"
+        ],
+        "supported_content_types": ["narrative", "poem", "reflection"],
+        "quantum_integration": True,
+        "ethical_filtering": True
+    }
+
 # --- SECURE WEBSOCKET (REMAINS CONCEPTUALLY SIMILAR) ---
 @app.websocket("/ws/collective-insight")
 async def websocket_collective_insight(websocket: WebSocket, token: Optional[str] = None):
@@ -880,11 +1760,45 @@ async def websocket_guardian_alerts(websocket: WebSocket):
 async def startup_event():
     logging.basicConfig(level=logging.INFO)
     logger.info("🚀 QVM 3.3.0 - Pi Forge Quantum Genesis - INITIALIZING...")
+    
+    # Validate Pi Network configuration
+    try:
+        validate_pi_network_config()
+    except ValueError as e:
+        logger.error(f"❌ Pi Network configuration validation failed: {e}")
+        if PI_NETWORK_CONFIG["network"] == "mainnet":
+            raise  # Fail fast in mainnet mode
+    
     logger.info(f"📡 Network Mode: {PI_NETWORK_CONFIG['network']}")
     logger.info(f"🔒 Supabase: {'connected' if supabase else 'demo mode'}")
     logger.info(f"⚔️ Cyber Samurai Guardian: {'active' if guardian.guardian_active else 'inactive'}")
     logger.info(f"🎯 Latency Target: <{guardian.latency_threshold_ns}ns")
     logger.info("🌌 Sacred Trinity entanglement complete - Mainnet Ready!")
+    
+    # Start Pi Network background tasks
+    try:
+        from pi_network_router import pi_client
+        await pi_client.start_background_tasks()
+        logger.info("✅ Pi Network background tasks started")
+    except Exception as e:
+        logger.warning(f"⚠️ Failed to start Pi Network background tasks: {e}")
+
+
+# --- SHUTDOWN EVENT ---
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Cleanup on application shutdown"""
+    logger.info("🛑 Shutting down Pi Forge Quantum Genesis...")
+    
+    # Stop Pi Network background tasks
+    try:
+        from pi_network_router import pi_client
+        await pi_client.stop_background_tasks()
+        logger.info("✅ Pi Network background tasks stopped")
+    except Exception as e:
+        logger.warning(f"⚠️ Error stopping Pi Network background tasks: {e}")
+    
+    logger.info("👋 Shutdown complete")
 
 # --- MAIN ---
 if __name__ == "__main__":

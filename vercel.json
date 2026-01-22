@@ -1,24 +1,48 @@
 {
   "version": 2,
-  "public": true,
+  "framework": null,
+  "buildCommand": "npm run build",
   "cleanUrls": true,
   "trailingSlash": false,
-  "outputDirectory": "public",
-  "buildCommand": "npm run build",
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "https://quantumpiforge.com/api/$1" },
-    { "source": "/health",      "destination": "https://quantumpiforge.com/health" },
-    { "source": "/ws",          "destination": "wss://quantumpiforge.com/ws" },
-    { "source": "/socket.io/(.*)", "destination": "wss://quantumpiforge.com/socket.io/$1" },
-    { "source": "/(.*)",        "destination": "/index.html" }
-  ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
         { "key": "X-Frame-Options", "value": "DENY" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" }
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-XSS-Protection", "value": "1; mode=block" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" }
+      ]
+    },
+    {
+      "source": "/(.*)\\.(js|css|svg|png|jpg|jpeg|gif|webp|woff|woff2|ttf|eot)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "source": "/(.*)\\.(html|json)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/manifest.json",
+      "headers": [
+        { "key": "Content-Type", "value": "application/manifest+json" },
+        { "key": "Cache-Control", "value": "public, max-age=3600" }
+      ]
+    },
+    {
+      "source": "/service-worker.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" },
+        { "key": "Service-Worker-Allowed", "value": "/" }
       ]
     }
-  ]
+  ],
+  "github": {
+    "silent": true
+  }
 }
