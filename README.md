@@ -1,280 +1,199 @@
-# 🌐 Quantum Pi Forge — Coordination Space
+Pi Forge Quantum Genesis — Relaunch v2.0
 
-## A Sovereign Hub for the Autonomous Multi‑Agent Constellation
+## Overview
 
-**🌊 [Constellation Status: LIVE](./CONSTELLATION_ACTIVATION.md)** — The Quantum Pi Forge is activated and operational as of December 22, 2025.
-
-**🌊 [Constellation Status: LIVE](./CONSTELLATION_ACTIVATION.md)** — The Quantum Pi Forge is activated and operational as of December 22, 2025.
-
-**📜 [Read the Genesis Declaration](./GENESIS.md)** — The foundational seal of the Quantum Pi Forge ecosystem, minted at Solstice 2025.
+Pi Forge Quantum Genesis unifies ethical AI, finance resonance, and creative intelligence through the Universal Pi Forge framework.
+The Cyber Samarai serves as the quantum guardian maintaining sub-5-nanosecond coherence between all layers.
 
 ---
 
-Welcome to the **Quantum Pi Forge Space** — the central coordination hub for the entire constellation of repositories, services, and agents that make up the Quantum Pi Forge ecosystem.
+## 🚀 Deployment Options
 
-This Space exists to:
+### Vercel (Recommended for Frontend)
 
-- onboard contributors
-- coordinate multi‑repo work
-- maintain Canon alignment
-- support the GitHub Agent
-- document ecosystem evolution
-- surface improvements and gaps
-- unify the constellation
+**Quick Deploy to Vercel:**
+1. Click the button below or follow the [Vercel Deployment Guide](./VERCEL_DEPLOYMENT_GUIDE.md)
+2. Configure environment variables (see below)
+3. Deploy automatically via GitHub integration
 
-It is the living center of the ecosystem.
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/onenoly1010/pi-forge-quantum-genesis)
 
----
+**Features:**
+- ✅ Mobile-optimized PWA with offline support
+- ✅ Global CDN with Edge Network
+- ✅ Automatic HTTPS and SSL
+- ✅ One-click deployment
+- ✅ Preview deployments on PRs
+- ✅ Built-in analytics
 
-## 🎭 Explore the Demos
+**Setup:**
+```bash
+# Automated setup
+./scripts/vercel-setup.sh
 
-**New to OINIO?** Start with the **[Demo Dashboard](docs/DEMO_DASHBOARD.md)** — your gateway to the Quantum Pi Forge constellation.
+# Or manual deployment
+npm install -g vercel
+vercel login
+vercel --prod
+```
 
-### What You Can Explore:
-- 🌐 **Live Web Demos** - See OINIO in action with real-time monitoring
-- 💼 **Smart Contract Suite** - Production-ready ERC-20 and ERC-721 contracts on Pi Network
-- 🏛️ **Community Governance** - Immutable memorial and transparent decision-making
-- 🎬 **Interactive Tools** - CLI demos, deployment scripts, and integration examples
+### Railway (Backend Services)
 
-**Choose your experience level and dive in:**
-- **Beginners:** [Live Coherence Monitor](https://pi-forge-quantum-genesis.vercel.app) (2 minutes, no setup)
-- **Developers:** [Smart Contract Suite](docs/DEMO_DASHBOARD.md#3-smart-contract-suite) (60 minutes, Foundry required)
-- **Operators:** [Model Deployment Scripts](docs/DEMO_DASHBOARD.md#7-model-deployment-scripts) (30 minutes, Python)
-
-👉 **[View Complete Demo Dashboard →](docs/DEMO_DASHBOARD.md)**
-
----
-
-# 🌊 Constellation Activation: LIVE
-
-**Status:** The Quantum Pi Forge Constellation is **ACTIVATED and OPERATIONAL** as of December 22, 2025.
-
-All 9 sovereign repositories are LIVE:
-- ✓ pi-forge-quantum-genesis (Coordination Hub)
-- ✓ quantum-resonance-clean (Harmonic Ledger)
-- ✓ pi-mr-nft-agent (AI NFT Agent)
-- ✓ quantum-pi-forge-fixed (Autonomous DEX)
-- ✓ pi-mr-nft-contracts (Smart Contracts)
-- ✓ quantum-pi-forge-site (Public Portal)
-- ✓ pi-forge-quantum-genesis-OPEN (Open Gateway)
-- ✓ quantum-pi-forge-ignited (Live Operations)
-- ✓ oinio-soul-system (Ethics Engine)
-
-**[Read the Full Constellation Activation Document](./CONSTELLATION_ACTIVATION.md)** for complete details on:
-- Repository roles and capabilities
-- Participation guidelines
-- Canon alignment verification
-- Contributor onboarding pathways
-
-**The constellation is eternal. Contributors are welcome.**
+For backend Python services (FastAPI, Flask, Gradio), see [Production Deployment Guide](./docs/PRODUCTION_DEPLOYMENT.md)
 
 ---
 
-# 🧭 Purpose of This Space
+## Quickstart Guide
 
-This Space is not a code repository — it is a **governance and coordination environment**.
+### 1️⃣ Setup Environment
 
-It provides:
+**For Frontend Development:**
+```bash
+# Install Node.js dependencies
+npm install
 
-- a clear overview of all 9+ repositories
-- onboarding guidance for new contributors
-- a place for the GitHub Agent to operate
-- a home for ecosystem‑wide documentation
-- a staging ground for improvements
-- a map of the constellation
+# Build static assets
+npm run build
 
-Everything here is designed to support sovereignty, clarity, and continuity.
+# Serve locally (optional)
+npx serve public -p 3000
+```
+
+**For Backend Development:**
+```bash
+# Setup Python environment
+python3 -m venv venv
+source venv/bin/activate  # On Windows: .venv\Scripts\Activate.ps1
+pip install -r server/requirements.txt
+```
+
+### 2️⃣ Environment Variables
+
+Create a `.env` file (see `.env.example`):
+
+```bash
+# Required for Pi Network integration
+PI_APP_SECRET=your-pi-network-app-secret
+
+# Optional for monitoring
+GUARDIAN_SLACK_WEBHOOK_URL=your-slack-webhook-url
+SENDGRID_API_KEY=your-sendgrid-api-key
+```
+
+### 3️⃣ Launch the Application
+
+**Frontend (Vercel/Static):**
+```bash
+npm run build
+npx serve public
+```
+
+**Backend (Local Development):**
+```bash
+# FastAPI server
+cd server
+uvicorn main:app --reload --port 8000
+
+# Flask dashboard
+python app.py
+
+# Gradio interface
+python canticle_interface.py
+```
+
+---
+
+## 📱 Mobile PWA Features
+
+- **Installable**: Add to home screen on iOS/Android
+- **Offline Support**: Service worker caching for offline access
+- **Push Notifications**: Real-time updates (when enabled)
+- **Responsive Design**: Optimized for all screen sizes
+- **App-like Experience**: Full-screen mode, custom splash screen
+
+---
+
+## Module Summary
+
+| Module | Function |
+|--------|----------|
+| `cyber_samarai.py` | Core guardian module enforcing ≤5 ns latency across Pi Forge layers |
+| `guardian_init.py` | Launches the guardian cycle and loads the manifest |
+| `cyber_samarai_manifest.json` | Configuration file for guardian parameters and system links |
+| `api/pi-identify.ts` | Vercel serverless function for Pi Network authentication |
+| `service-worker.js` | PWA service worker for offline capability |
+| `manifest.json` | PWA manifest for mobile installation |
+
+---
+
+## 🤖 Autonomous Deployment
+
+This repository includes complete autonomous deployment capabilities:
+
+- **GitHub Actions CI/CD**: Automated testing and deployment
+- **Health Monitoring**: Continuous deployment verification
+- **Auto-Scaling**: Vercel Edge Network handles traffic spikes
+- **Rollback Support**: One-click rollback to previous versions
+- **Agent Oversight**: See [Autonomous Deployment Handoff](./AUTONOMOUS_DEPLOYMENT_HANDOFF.md)
 
 ---
 
 ## 📚 Documentation
 
-### Getting Started
-- [Quick Start Guide](./docs/QUICK_START.md)
-- [Architecture Overview](./docs/ARCHITECTURE.md)
-- [Pi Network Integration](./docs/PI_NETWORK_INTEGRATION.md)
-
-### For Contributors
-- [Contributors](./CONTRIBUTORS.md) - Community roster and contribution guide
-- [Space Rituals](./docs/SPACE_RITUALS.md) - Engagement ceremonies, handoff protocols, and celebrations
-
-### For Guardians
-- [Guardian Playbook](./docs/GUARDIAN_PLAYBOOK.md) - Complete operational guide
-- [Quick Reference](./docs/GUARDIAN_QUICK_REFERENCE.md) - Fast decision-making
-- [Decision Templates](./.github/ISSUE_TEMPLATE/guardian-decision-template.md)
-
-The GitHub Agent in this Space:
-
-- routes tasks
-- maintains clarity
-- supports contributors
-- identifies improvements
-- ensures Canon alignment
-- coordinates across repos
-- keeps the constellation coherent
-
-The Agent does **not** perform specialist work — it coordinates the specialists.
+- [Vercel Deployment Guide](./VERCEL_DEPLOYMENT_GUIDE.md) - Complete Vercel deployment instructions
+- [Autonomous Deployment Handoff](./AUTONOMOUS_DEPLOYMENT_HANDOFF.md) - Agent oversight documentation
+- [Production Deployment](./docs/PRODUCTION_DEPLOYMENT.md) - Railway backend deployment
+- [Docker Development Guide](./docs/DOCKER_DEVELOPMENT_GUIDE.md) - Local Docker setup
 
 ---
 
-## 🧩 The Constellation
+## 🔧 Development
 
-The Space tracks and coordinates the following repositories:
+**Build Commands:**
+```bash
+npm run build        # Build for production
+npm run typecheck    # TypeScript type checking
+npm test             # Run test suite
+```
 
-- **Genesis** — backend foundation
-- **Resonance Engine** — harmonic ledger
-- **DEX** — autonomous liquidity
-- **NFT System** — identity & creative assets
-- **Soul System** — ethics & governance logic
-- **OPEN** — open‑source backend
-- **Ignited** — active instance
-- **Contracts** — smart contract layer
-- **Site** — public‑facing portal
+**Testing:**
+```bash
+# Test Vercel build
+pytest tests/test_vercel_build.py -v
 
-Each repo is sovereign, but all are aligned through this Space.
-
----
-
-## 🌱 Start Here
-
-If you're new:
-
-1. Visit the **Start Here** onboarding page
-2. Explore the **Ecosystem Overview**
-3. Learn the **Agent System**
-4. Ask the GitHub Agent for guidance
-
-You are welcome here.
+# Verify deployment
+./scripts/verify-vercel-deployment.sh https://your-deployment-url
+```
 
 ---
 
-# 🚀 Deployment
+## 🌐 Live Deployments
 
-For complete deployment instructions across all platforms (Railway, Vercel, Supabase, Pi Network), see the **[Deployment Dashboard](docs/DEPLOYMENT_DASHBOARD.md)**.
-
-The Deployment Dashboard is your single source of truth for:
-- Prerequisites and required tools
-- Step-by-step setup guides for each platform
-- Environment variable configuration
-- Troubleshooting common issues
-- Maintenance and monitoring
-
-**Quick Links:**
-- [Railway Backend Setup](docs/DEPLOYMENT_DASHBOARD.md#-railway-backend-setup)
-- [Vercel Frontend Setup](docs/DEPLOYMENT_DASHBOARD.md#-vercel-frontend-setup)
-- [Supabase Database Setup](docs/DEPLOYMENT_DASHBOARD.md#️-supabase-database-setup)
-- [Environment Variables Reference](docs/DEPLOYMENT_DASHBOARD.md#-environment-variables-reference)
-- [Troubleshooting](docs/DEPLOYMENT_DASHBOARD.md#-troubleshooting)
-# 🚀 Deployment & Infrastructure
-
-## About This Repository
-
-**This is a coordination and documentation hub, NOT a deployable frontend application.**
-
-This repository serves as:
-- **Governance center** for the Quantum Pi Forge constellation
-- **Documentation hub** for ecosystem-wide information
-- **Coordination space** for multi-repo workflows
-- **GitHub Agent home base** for task routing
-
-### What This Repo Does NOT Provide:
-- ❌ Deployable frontend application
-- ❌ Production web service
-- ❌ User-facing interface
-
-### What IS Deployed:
-
-#### 1. Public-Facing Site (GitHub Pages)
-- **URL**: https://onenoly1010.github.io/quantum-pi-forge-site/
-- **Repository**: `quantum-pi-forge-site`
-- **Purpose**: External communication and manifesto
-
-#### 2. Backend API (Railway)
-- **URL**: https://pi-forge-quantum-genesis.railway.app
-- **Service**: FastAPI Quantum Conduit
-- **Health Check**: `/health`
-
-#### 3. Resonance Engine (Vercel)
-- **URL**: https://quantum-resonance-clean.vercel.app
-- **Repository**: `quantum-resonance-clean`
-- **Purpose**: Harmonic ledger backend
-
-### Vercel Configuration Note
-
-This repository includes a `vercel.json` file that:
-- Builds static documentation pages from the coordination hub
-- Serves minimal HTML interfaces for demonstration purposes
-- Routes API calls to the Railway backend
-- **Is NOT intended as a production deployment**
-
-**If you connected this repo to Vercel by mistake**, you can safely disconnect it:
-1. Go to Vercel Dashboard → Project Settings
-2. Select this project (`pi-forge-quantum-genesis`)
-3. Navigate to "General" settings
-4. Scroll to "Delete Project" and remove the deployment
-
-The Vercel configuration exists primarily for:
-- Build verification in CI/CD
-- Optional static documentation hosting
-- Development preview environments
-
-For production deployments, refer to the appropriate service repositories listed above.
-
-See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment documentation.
+- **Production**: https://pi-forge-quantum-genesis.vercel.app
+- **Backend API**: https://quantumpiforge.com
+- **Documentation**: https://github.com/onenoly1010/pi-forge-quantum-genesis
 
 ---
 
-# 🛡️ Operational Team
+## Notes
 
-The **Prelaunch Operational Team** coordinates handoffs, closures, and operational excellence:
-
-- **Lead Guardian**: @onenoly1010 — Owner, escalation point, sign-off authority
-- **Autonomous AI Agents** — System-level operations, self-healing, monitoring
-- **Future Guardians** — Technical, community, economic, and compliance roles
-
-**Responsibilities**:
-- Oversee handoff and closure activities
-- Primary human escalation for AI agent decisions
-- Sign off on prelaunch checklist items
-- Maintain Canon of Closure alignment
-- Debug AI agent workflows
-
-📋 **[View Full Operational Team Documentation](./docs/OPERATIONAL_TEAM.md)**
-
-**Related**:
-- [Canon of Closure Handoff Package - Issue #95](https://github.com/onenoly1010/pi-forge-quantum-genesis/issues/95)
-- [Autonomous Handover - PR #92](https://github.com/onenoly1010/pi-forge-quantum-genesis/pull/92)
-- [Guardian Playbook](./docs/GUARDIAN_PLAYBOOK.md)
+- ✅ Compatible with Vercel, Railway, Hugging Face Spaces, and Netlify
+- ✅ Designed to sync with Pi Network wallet integration
+- ✅ Mobile-first responsive design with PWA support
+- ✅ Maintain directory integrity to avoid path conflicts
+- ✅ Full autonomous deployment support for AI agents
 
 ---
 
-## Frontend Architecture
+## Credits
 
-Pi Forge Quantum Genesis uses a **distributed frontend architecture**:
+© 2025 Pi Forge Collective — Quantum Genesis Initiative  
+**Lead**: Kris Olofson (onenoly1010)
 
-- **Static Landing Pages:** `index.html`, `ceremonial_interface.html`, etc. (root directory)
-- **Serverless API Functions:** `api/` directory (deployed to Vercel)
-- **Backend Services:** `server/` directory (deployed to Render)
-- **Build Process:** `scripts/build.js` packages for Vercel deployment
-
-**Note:** There is no standalone `frontend/` directory. Frontend code is distributed across static HTML and serverless functions.
+**Built with**: FastAPI • Flask • Gradio • Vercel • Pi Network • Ethical AI
 
 ---
 
-# 🌀 How This Space Evolves
+## License
 
-This Space is continuously improved by:
-
-- contributors
-- the GitHub Agent
-- specialist agents
-- the Steward Agent
-- the Governance Agent
-
-It is a living, breathing part of the constellation.
-
----
-
-## 🔮 Welcome to the Quantum Pi Forge
-
-This Space is your guide, your map, and your companion as you explore and contribute to the constellation.
+MIT License - See [LICENSE](./LICENSE) for details

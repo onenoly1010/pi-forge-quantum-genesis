@@ -19,13 +19,16 @@ const staticFiles = [
   'ceremonial_interface.html',
   'resonance_dashboard.html',
   'spectral_command_shell.html',
-  'pi-forge-integration.js'
+  'pi-forge-integration.js',
+  'manifest.json',
+  'service-worker.js'
 ];
 
 // Directories to copy from root to public directory
 const staticDirs = [
   'frontend',
-  'docs'
+  'icons',
+  'screenshots'
 ];
 
 /**
