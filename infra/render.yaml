@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: pi-forge-backend
+    runtime: docker
+    branch: main
+    dockerfilePath: Dockerfile
+    plan: free
+    region: oregon
+    envVars:
+      - key: PORT
+        value: "8000"
+      - key: SERVER_PORT
+        value: "8000"
+      - key: PI_API_KEY
+        value: "${PI_API_KEY}"
+      - key: PI_APP_ID
+        value: "Quantum Pi Forge"
+      - key: PI_APP_SECRET
+        value: ""  # set as secret in Render dashboard
+      - key: SAFE_MULTISIG_ADDRESS
+        value: "0xREPLACE_WITH_YOUR_SAFE_ADDRESS"
+      - key: AI_SIGNER_PRIVATE_KEY
+        value: ""  # set as secret in Render dashboard
+      - key: AI_PRIVATE_KEY
+        value: "${AI_SIGNER_PRIVATE_KEY}"
+      - key: AI_WALLET_ADDRESS
+        value: "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67"
+      - key: OINIO_CONTRACT_ADDRESS
+        value: "0x07f43E5B1A8a0928B364E40d5885f81A543B05C7"
+      - key: POLYGON_RPC_URL
+        value: "https://polygon-rpc.com"
+    healthCheckPath: /health

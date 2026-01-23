@@ -1085,6 +1085,7 @@ This section covers the most common deployment issues and their solutions.
 2. **Verify webhook URL is public:**
    ```bash
    # Test webhook endpoint is accessible
+   curl -X POST https://your-app.railway.app/api/pi-webhooks/payment      -H "Content-Type: application/json"      -d '{"test": true}'
    curl -X POST https://your-app.railway.app/api/pi-webhooks/payment \
      -H "Content-Type: application/json" \
      -d '{"test": true}'
@@ -1515,6 +1516,7 @@ If you're still stuck:
 - [ ] Test full payment flow (testnet)
   ```bash
   # Test payment approval
+  curl -X POST https://your-app.railway.app/api/payments/approve     -H "Content-Type: application/json"     -H "Authorization: Bearer YOUR_JWT"     -d '{"payment_id": "test_123", "amount": 0.15}'
   curl -X POST https://your-app.railway.app/api/payments/approve      -H "Content-Type: application/json"      -H "Authorization: Bearer YOUR_JWT"      -d '{"payment_id": "test_123", "amount": 0.15}'
   ```
 - [ ] Review deployment logs

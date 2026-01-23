@@ -1,5 +1,9 @@
 # Deployment Notes
 
+> **📌 Note**: This document is part of the deployment documentation suite.  
+> For the complete deployment guide, see the **[Deployment Dashboard](docs/DEPLOYMENT_DASHBOARD.md)**.
+
+## Vercel Deployment
 ## ⚠️ Important: Repository Purpose
 
 **This repository is a COORDINATION HUB, not a deployable application.**
@@ -54,14 +58,18 @@ The repository will continue to function normally without Vercel.
 
 ### Build Configuration (If Using Vercel)
 
+e- **Framework**: None (static site with custom build)
 - **Build Command**: `npm run build`
-- **Output Directory**: `public`
-- **Node.js Version**: 18.x or higher (supports up to 24.x)
+- **Output Directory**: `.vercel/output/static` (Vercel Build Output API v3)
+- **Node.js Version**: 20.x (pinned to major version 20)
 
 The build process:
-1. Runs TypeScript type-checking (`tsc --noEmit`)
-2. Copies static assets to the `public` directory
-3. Includes all HTML files, JavaScript files, and the `frontend` directory
+1. Creates `.vercel/output/static` directory
+2. Generates `config.json` with routing rules
+3. Copies static HTML files (index.html, ceremonial_interface.html, etc.)
+4. Copies static JavaScript files (pi-forge-integration.js)
+
+**Important**: This repository uses Vercel Build Output API v3 format, not the traditional `public` directory. The `vercel.json` file explicitly sets `"framework": null` to prevent framework auto-detection.
 
 ### Environment Variables
 
@@ -76,6 +84,17 @@ Set these in your Vercel project settings:
 API endpoints in the `api/` directory are automatically deployed as Vercel serverless functions:
 - `/api/pi-identify` - Pi Network authentication endpoint
 
+### Dependency Management
+
+**Important**: This repository tracks `package-lock.json` in version control to ensure consistent dependency versions across all deployments. Do NOT add `package-lock.json` to `.gitignore`. This file:
+- Locks exact dependency versions for reproducible builds
+- Prevents supply chain attacks via dependency changes
+- Ensures Vercel deployments use the same dependencies as local development
+
+When updating dependencies:
+1. Run `npm install <package>`
+2. Commit both `package.json` and `package-lock.json` changes
+
 ### Local Testing
 
 To test the build locally:
@@ -84,7 +103,7 @@ npm install
 npm run build
 ```
 
-The `public` directory will contain all deployable assets.
+The `.vercel/output/static` directory will contain all deployable assets, and `.vercel/output/config.json` will contain the routing configuration.
 
 ---
 

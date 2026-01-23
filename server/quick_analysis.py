@@ -151,7 +151,7 @@ class QuickSacredTrinityAnalyzer:
     
     def _analyze_configuration(self):
         """Analyze configuration files and deployment setup"""
-        print("\n⚙️ Analyzing Configuration...")
+        print("⚙️ Analyzing Configuration...")
         
         config = {
             "dockerfile": {"status": "❌", "optimized": False},
@@ -198,7 +198,7 @@ class QuickSacredTrinityAnalyzer:
     
     def _analyze_frontend(self):
         """Analyze frontend integration"""
-        print("\n🎨 Analyzing Frontend Integration...")
+        print("🎨 Analyzing Frontend Integration...")
         
         frontend = {
             "html_files": {"count": 0, "status": "❌"},
@@ -246,7 +246,7 @@ class QuickSacredTrinityAnalyzer:
     
     def _analyze_dependencies(self):
         """Analyze dependencies and evaluation framework"""
-        print("\n📦 Analyzing Dependencies and Evaluation...")
+        print("📦 Analyzing Dependencies and Evaluation...")
         
         dependencies = {
             "evaluation_system": {"status": "❌", "azure_ai": False},
@@ -393,7 +393,8 @@ class QuickSacredTrinityAnalyzer:
         """Print comprehensive analysis report"""
         results = self.analysis_results
         
-        print("\n" + "="*60)
+        print("\
+" + "="*60)
         print("🌌 SACRED TRINITY ARCHITECTURE ANALYSIS REPORT")
         print("="*60)
         
@@ -401,19 +402,22 @@ class QuickSacredTrinityAnalyzer:
         score_data = results["overall_score"]
         rating = score_data["rating"]
         
-        print(f"\n🎯 OVERALL PERFORMANCE: {score_data['overall_percentage']}%")
+        print(f"\
+🎯 OVERALL PERFORMANCE: {score_data['overall_percentage']}%")
         print(f"   {rating['emoji']} Rating: {rating['level']}")
         print(f"   {rating['description']}")
         
         # Detailed scores
-        print(f"\n📊 DETAILED SCORES:")
+        print(f"\
+📊 DETAILED SCORES:")
         print(f"   🧠 Components: {round(score_data['component_score'] * 100, 1)}%")
         print(f"   ⚙️ Configuration: {round(score_data['config_score'] * 100, 1)}%")
         print(f"   🎨 Frontend: {round(score_data['frontend_score'] * 100, 1)}%")
         print(f"   📦 Dependencies: {round(score_data['dependencies_score'] * 100, 1)}%")
         
         # Component status
-        print(f"\n🧠 SACRED TRINITY COMPONENTS:")
+        print(f"\
+🧠 SACRED TRINITY COMPONENTS:")
         components = results["architecture_analysis"]["components"]
         for comp_name, comp_data in components.items():
             print(f"   {comp_name.title()}: {comp_data['status']} ({len(comp_data['features'])} features)")
@@ -421,25 +425,28 @@ class QuickSacredTrinityAnalyzer:
         # Recommendations
         recommendations = results["recommendations"]
         if recommendations:
-            print(f"\n🔧 OPTIMIZATION RECOMMENDATIONS:")
+            print(f"\
+🔧 OPTIMIZATION RECOMMENDATIONS:")
             for i, rec in enumerate(recommendations[:8], 1):  # Show top 8
                 print(f"   {i}. {rec}")
         
-        print(f"\n📄 Analysis completed at: {results['timestamp']}")
+        print(f"\
+📄 Analysis completed at: {results['timestamp']}")
         print("✅ Sacred Trinity analysis complete!")
     
     def save_report(self, filename="sacred_trinity_analysis.json"):
         """Save analysis report to JSON file"""
         with open(filename, 'w') as f:
             json.dump(self.analysis_results, f, indent=2)
-        print(f"\n💾 Analysis report saved to: {filename}")
+        print(f"\
+💾 Analysis report saved to: {filename}")
         return filename
-
 
 def main():
     """Main analysis function"""
     print("🌌 Sacred Trinity Quick Analysis & Optimization Tool")
-    print("🎯 Analyzing Quantum Resonance Lattice Architecture...\n")
+    print("🎯 Analyzing Quantum Resonance Lattice Architecture...\
+")
     
     # Initialize analyzer
     analyzer = QuickSacredTrinityAnalyzer()
@@ -454,7 +461,6 @@ def main():
     report_file = analyzer.save_report()
     
     return results
-
 
 if __name__ == "__main__":
     main()

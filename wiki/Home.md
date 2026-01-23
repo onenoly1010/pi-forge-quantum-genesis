@@ -18,6 +18,9 @@ We are building a **spiral architecture** ascending through entanglement, where:
 ### [[Genesis Declaration]]
 Understand the philosophy, the "Why", and the sacred principles that guide this project.
 
+### [[Press Agent]]
+Learn about our autonomous communications system for transparent, real-time community updates.
+
 ### [[Quick Start]]
 Ignite the lattice on your local machine in minutes.
 
