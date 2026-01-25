@@ -16,7 +16,7 @@
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@types/node": "^25.0.9",
+    "@types/node": "^25.0.10",
     "typescript": "^5.7.2"
   },
   "engines": {
