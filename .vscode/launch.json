@@ -2,14 +2,56 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Launch Edge",
+            "request": "launch",
+            "type": "msedge",
+            "url": "http://localhost:8080",
+            "webRoot": "${workspaceFolder}"
+        },
+        
+        {
+            "name": "Python Debugger: FastAPI",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "uvicorn",
+            "args": [
+                "main:app",
+                "--reload"
+            ],
+            "jinja": true
+        },
+        {
+            "name": "Python Debugger: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Python Debugger: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Python Debugger: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        },
+        {
             "name": "🧠 FastAPI Quantum Conduit (8000)",
             "type": "python",
             "request": "launch",
             "module": "uvicorn",
             "args": [
                 "server.main:app",
-                "--host", "0.0.0.0",
-                "--port", "8000",
+                "--host",
+                "0.0.0.0",
+                "--port",
+                "8000",
                 "--reload"
             ],
             "console": "integratedTerminal",
@@ -71,7 +113,9 @@
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/quantum_demo.py",
-            "args": ["--interactive"],
+            "args": [
+                "--interactive"
+            ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
             "presentation": {
