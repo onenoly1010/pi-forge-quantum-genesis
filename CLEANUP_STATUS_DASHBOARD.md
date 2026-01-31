@@ -2,7 +2,7 @@
 
 **Live Status Tracking for Emergency Cleanup Protocol**
 
-**Last Updated**: Auto-updated every 6 hours by GitHub Actions
+**Last Updated**: 2026-01-31 06:42:37 UTC
 
 ---
 
@@ -48,9 +48,9 @@
 
 | Service | Status | Last Check | Uptime | Response Time |
 |---------|--------|------------|--------|---------------|
-| Public Site (GitHub Pages) | 🟢 LIVE | Auto | 99.9% | <100ms |
-| Backend API (Railway) | 🟢 LIVE | Auto | 99.5% | <500ms |
-| Resonance Engine (Vercel) | 🟢 LIVE | Auto | 99.7% | <300ms |
+| Public Site (GitHub Pages) | 🟢 LIVE | 2026-01-31 06:42:37 UTC | 99.9% | <100ms |
+| Backend API (Railway) | 🟢 LIVE | 2026-01-31 06:42:37 UTC | 99.5% | 155ms |
+| Resonance Engine (Vercel) | 🔴 DOWN | 2026-01-31 06:42:37 UTC | 99.7% | N/A |
 
 **Last Health Check**: Auto-updated by `scheduled-monitoring.yml`
 
@@ -128,11 +128,11 @@ gh workflow run stale-pr-closer.yml --field dry_run=false
 ## 📊 Constellation Health Overview
 
 ### Repository Activity (Last 30 Days)
-- Total Commits: Auto-updated
-- Open Issues: Auto-updated
-- Open PRs: Auto-updated
-- Closed Issues: Auto-updated
-- Closed PRs: Auto-updated
+- Total Commits: 1 (last 30 days)
+- Open Issues: 1
+- Open PRs: 1
+- Closed Issues: 29 (last 100)
+- Closed PRs: 100 (last 100)
 
 ### Agent Activity
 - GitHub Agent: ✅ Active
@@ -221,7 +221,7 @@ gh workflow run stale-pr-closer.yml --field dry_run=false
 
 This dashboard is automatically updated every 6 hours by the `deployment-health-dashboard.yml` workflow.
 
-**Next Update**: Auto-calculated (6 hours from last update)
+**Next Update**: 2026-01-31 12:42:37 UTC
 
 ---
 
