@@ -226,7 +226,18 @@
                     data.temporal_anomalies.forEach(anomaly => {
                         const li = document.createElement('li');
                         li.className = `anomaly-${anomaly.severity?.toLowerCase()}`;
-                        li.innerHTML = `<strong>${anomaly.type}:</strong> ${anomaly.recommended_action} (Impact: ${anomaly.projected_impact})`;
+                        
+                        // Use DOM methods to prevent XSS
+                        const typeStrong = document.createElement('strong');
+                        typeStrong.textContent = anomaly.type || 'Unknown';
+                        
+                        li.appendChild(typeStrong);
+                        li.appendChild(document.createTextNode(': '));
+                        li.appendChild(document.createTextNode(anomaly.recommended_action || 'No action'));
+                        li.appendChild(document.createTextNode(' (Impact: '));
+                        li.appendChild(document.createTextNode(anomaly.projected_impact || 'Unknown'));
+                        li.appendChild(document.createTextNode(')'));
+                        
                         anomaliesListEl.appendChild(li);
                     });
                 } else {
