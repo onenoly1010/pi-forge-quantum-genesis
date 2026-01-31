@@ -5,8 +5,14 @@
 # Load environment variables from a .env file if it exists
 if (Test-Path ".env") {
     Get-Content .env | ForEach-Object {
+        # Skip empty lines and comments
+        if ($_ -match '^\s*$' -or $_ -match '^\s*#') {
+            return
+        }
         $name, $value = $_.Split('=', 2)
-        Set-Item -Path "env:$name" -Value $value
+        if ($name -and $value) {
+            Set-Item -Path "env:$name" -Value $value
+        }
     }
     Write-Host "✅ .env file loaded."
 } else {
