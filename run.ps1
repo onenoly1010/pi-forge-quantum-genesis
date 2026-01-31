@@ -14,7 +14,10 @@ if (Test-Path ".env") {
             # Trim whitespace from both name and value
             $name = $name.Trim()
             $value = $value.Trim()
-            Set-Item -Path "env:$name" -Value $value
+            # Only set if both are non-empty after trimming
+            if ($name -and $value) {
+                Set-Item -Path "env:$name" -Value $value
+            }
         }
     }
     Write-Host "✅ .env file loaded."

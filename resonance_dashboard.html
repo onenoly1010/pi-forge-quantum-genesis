@@ -227,7 +227,7 @@
                 if (data.temporal_anomalies && data.temporal_anomalies.length > 0) {
                     data.temporal_anomalies.forEach(anomaly => {
                         const li = document.createElement('li');
-                        li.className = `anomaly-${anomaly.severity?.toLowerCase()}`;
+                        li.className = `anomaly-${(anomaly.severity || 'low').toLowerCase()}`;
                         
                         // Use DOM methods to prevent XSS
                         const typeStrong = document.createElement('strong');
