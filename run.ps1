@@ -11,6 +11,9 @@ if (Test-Path ".env") {
         }
         $name, $value = $_.Split('=', 2)
         if ($name -and $value) {
+            # Trim whitespace from both name and value
+            $name = $name.Trim()
+            $value = $value.Trim()
             Set-Item -Path "env:$name" -Value $value
         }
     }

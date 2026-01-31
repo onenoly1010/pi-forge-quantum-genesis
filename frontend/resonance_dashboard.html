@@ -204,7 +204,9 @@
                 harmonyEl.textContent = data.harmony_index?.toFixed(3) || '--';
                 trendEl.textContent = data.resonance_trend?.toFixed(2) || '--';
                 confidenceEl.textContent = data.forecast_confidence?.toFixed(3) || '--';
-                timestampEl.textContent = data.timestamp ? new Date(data.timestamp * 1000).toLocaleTimeString() : '--';
+                timestampEl.textContent = (data.timestamp && typeof data.timestamp === 'number' && data.timestamp > 0) 
+                    ? new Date(data.timestamp * 1000).toLocaleTimeString() 
+                    : '--';
 
                 // Update Sovereign Actions
                 actionsListEl.innerHTML = '';
