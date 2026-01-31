@@ -37,10 +37,10 @@ jobs:
 
       - name: Verify build output
         run: |
-          echo "Checking public directory..."
-          ls -la public/
-          test -f public/index.html || (echo "Error: index.html not found in public/" && exit 1)
-          test -d public/frontend || (echo "Error: frontend directory not found in public/" && exit 1)
+          echo "Checking .vercel/output/static directory..."
+          ls -la .vercel/output/static/
+          test -f .vercel/output/static/index.html || (echo "Error: index.html not found in .vercel/output/static/" && exit 1)
+          test -d .vercel/output/static/frontend || (echo "Error: frontend directory not found in .vercel/output/static/" && exit 1)
           echo "✅ Build output verified"
 
       - name: Run Vercel build tests
