@@ -2,7 +2,7 @@
 
 # FastAPI and web framework
 fastapi>=0.115.2,<0.125
-uvicorn[standard]>=0.24.0,<0.32
+uvicorn[standard]>=0.24.0,<0.35
 python-multipart>=0.0.18
 
 # Database
