@@ -164,7 +164,10 @@
             const anomaliesListEl = document.getElementById('anomalies-list');
 
             function connectWebSocket() {
-                const ws = new WebSocket('ws://127.0.0.1:8000/ws/collective-insight');
+                // Use secure WebSocket (wss://) in production, fallback to ws:// for local development
+                const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                const wsUrl = wsProtocol + '//' + window.location.host + '/ws/collective-insight';
+                const ws = new WebSocket(wsUrl);
 
                 ws.onopen = function() {
                     console.log('Connected to QVM Resonance Bridge.');
