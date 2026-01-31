@@ -209,7 +209,7 @@
                     : '--';
 
                 // Update Sovereign Actions
-                actionsListEl.innerHTML = '';
+                actionsListEl.replaceChildren(); // Clear existing content
                 if (data.sovereign_actions && data.sovereign_actions.length > 0) {
                     data.sovereign_actions.forEach(action => {
                         const li = document.createElement('li');
@@ -217,11 +217,13 @@
                         actionsListEl.appendChild(li);
                     });
                 } else {
-                    actionsListEl.innerHTML = '<li>No specific actions recommended.</li>';
+                    const li = document.createElement('li');
+                    li.textContent = 'No specific actions recommended.';
+                    actionsListEl.appendChild(li);
                 }
 
                 // Update Temporal Anomalies
-                anomaliesListEl.innerHTML = '';
+                anomaliesListEl.replaceChildren(); // Clear existing content
                 if (data.temporal_anomalies && data.temporal_anomalies.length > 0) {
                     data.temporal_anomalies.forEach(anomaly => {
                         const li = document.createElement('li');
@@ -241,7 +243,9 @@
                         anomaliesListEl.appendChild(li);
                     });
                 } else {
-                    anomaliesListEl.innerHTML = '<li>No anomalies detected.</li>';
+                    const li = document.createElement('li');
+                    li.textContent = 'No anomalies detected.';
+                    anomaliesListEl.appendChild(li);
                 }
             }
 
