@@ -144,7 +144,7 @@ jobs:
           PUBLIC_SITE_RESPONSE: ${{ steps.health_check.outputs.public_site_response }}
           BACKEND_STATUS: ${{ steps.health_check.outputs.backend_status }}
           BACKEND_RESPONSE: ${{ steps.health_check.outputs.backend_response }}
-          RESONANCE_STATUS: ${{ steps.resonance_status }}
+          RESONANCE_STATUS: ${{ steps.health_check.outputs.resonance_status }}
           RESONANCE_RESPONSE: ${{ steps.health_check.outputs.resonance_response }}
           OPEN_ISSUES: ${{ steps.repo_metrics.outputs.open_issues }}
           CLOSED_ISSUES: ${{ steps.repo_metrics.outputs.closed_issues }}
@@ -162,8 +162,8 @@ jobs:
           NEXT_UPDATE=$(date -u -d '+6 hours' +"%Y-%m-%d %H:%M:%S UTC")
           
           # Create a simple sed script to update key values
-          sed -i "s|^**Last Updated**:.*|**Last Updated**: $CURRENT_TIME|" CLEANUP_STATUS_DASHBOARD.md
-          sed -i "s|^**Last Updated**:.*|**Last Updated**: $CURRENT_TIME|" DEPLOYMENT_CONSOLIDATION.md
+          sed -i "s|^\*\*Last Updated\*\*:.*|\*\*Last Updated\*\*: $CURRENT_TIME|" CLEANUP_STATUS_DASHBOARD.md
+          sed -i "s|^\*\*Last Updated\*\*:.*|\*\*Last Updated\*\*: $CURRENT_TIME|" DEPLOYMENT_CONSOLIDATION.md
           
           # Update health table using a temp file approach (more robust)
           {
@@ -199,7 +199,7 @@ jobs:
           sed -i "s|Closed PRs:.*|Closed PRs: $CLOSED_PRS (last 100)|" CLEANUP_STATUS_DASHBOARD.md
           
           # Update next update time
-          sed -i "s|^**Next Update**:.*|**Next Update**: $NEXT_UPDATE|" CLEANUP_STATUS_DASHBOARD.md
+          sed -i "s|^\*\*Next Update\*\*:.*|\*\*Next Update\*\*: $NEXT_UPDATE|" CLEANUP_STATUS_DASHBOARD.md
           
           echo "✅ Dashboard updated"
       
