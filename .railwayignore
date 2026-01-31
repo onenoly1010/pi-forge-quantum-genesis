@@ -1,0 +1,21 @@
+# Railway - Ignore TypeScript/Node.js files
+# These are for Vercel serverless functions, NOT Railway deployment
+
+# TypeScript
+*.ts
+tsconfig.json
+api/
+
+# Node.js
+node_modules/
+package.json
+package-lock.json
+
+# Build artifacts
+dist/
+build/
+.next/
+.vercel/
+
+# Only Python backend should be deployed
+# Railway uses Dockerfile which handles server/ and frontend/ correctly

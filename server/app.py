@@ -42,9 +42,11 @@ except ImportError as e:
     def trace_agent_framework_operation(*args):
         def decorator(func): return func
         return decorator
+    
     def trace_cross_trinity_synchronization(*args):
         def decorator(func): return func
         return decorator
+    
     tracing_enabled = False
 
 app = Flask(__name__)
@@ -87,6 +89,7 @@ class QuantumEngine:
             'guardian': random.randint(10, 20)
         }
 
+# Veiled Vow Engine for ethical processing
 class VeiledVowEngine:
     """Ethical vow engine for mainnet governance"""
     

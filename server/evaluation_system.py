@@ -153,23 +153,6 @@ class QuantumLatticeEvaluator:
                 }
             }
         }
-                    "response": "${data.expected_response}",
-                    "query": "${data.query}"
-                }
-            },
-            "payment_processing": {
-                "column_mapping": {
-                    "response": "${data.expected_response}",
-                    "query": "${data.query}"
-                }
-            },
-            "svg_visualization": {
-                "column_mapping": {
-                    "response": "${data.expected_response}",
-                    "query": "${data.query}"
-                }
-            },
-        }
 
     def _initialize_sacred_trinity_evaluators(self) -> Dict[str, Any]:
         """Initialize Sacred Trinity-specific custom evaluators"""
@@ -184,14 +167,14 @@ class QuantumLatticeEvaluator:
         # Cross-Component Integration Evaluator
         evaluators["cross_component_integration"] = CrossComponentIntegrationEvaluator()
         
-        # Authentication Flow Evaluator
-        evaluators["authentication_flow"] = AuthenticationFlowEvaluator()
+        # TODO: Authentication Flow Evaluator - to be implemented
+        # evaluators["authentication_flow"] = AuthenticationFlowEvaluator()
         
-        # Payment Processing Evaluator
-        evaluators["payment_processing"] = PaymentProcessingEvaluator()
+        # TODO: Payment Processing Evaluator - to be implemented
+        # evaluators["payment_processing"] = PaymentProcessingEvaluator()
         
-        # SVG Visualization Evaluator
-        evaluators["svg_visualization"] = SVGVisualizationEvaluator()
+        # TODO: SVG Visualization Evaluator - to be implemented
+        # evaluators["svg_visualization"] = SVGVisualizationEvaluator()
         
         # Ethical Audit Evaluator
         evaluators["ethical_audit"] = EthicalAuditEvaluator()
@@ -206,9 +189,10 @@ class QuantumLatticeEvaluator:
             "sacred_trinity_quality": SacredTrinityQualityEvaluator(),
             "quantum_coherence": QuantumCoherenceEvaluator(), 
             "cross_component_integration": CrossComponentIntegrationEvaluator(),
-            "authentication_flow": AuthenticationFlowEvaluator(),
-            "payment_processing": PaymentProcessingEvaluator(),
-            "svg_visualization": SVGVisualizationEvaluator(),
+            # TODO: authentication_flow, payment_processing, svg_visualization evaluators to be implemented
+            # "authentication_flow": AuthenticationFlowEvaluator(),
+            # "payment_processing": PaymentProcessingEvaluator(),
+            # "svg_visualization": SVGVisualizationEvaluator(),
             "ethical_audit": EthicalAuditEvaluator(),
             "resonance_visualization": ResonanceVisualizationEvaluator()
         }
@@ -465,20 +449,10 @@ class QuantumLatticeEvaluator:
                 "evaluation_focus": "system_recovery"
             }
         ]
-                "component": "flask", 
-                "expected_response": "Payment verified, 4-phase SVG cascade animation rendered with Foundation→Growth→Harmony→Transcendence phases",
-                "context": "Payment-to-visualization transformation pipeline with procedural SVG generation",
-                "quantum_phase": "transcendence",
-                "evaluation_focus": "artistic_transformation"
-            },
-            {
-                "query": "Execute Veiled Vow manifestation with quantum cathedral deep layer processing",
-                "component": "flask",
-                "expected_response": "Veiled Vow manifestation complete with quantum cathedral processing and deep layer harmonic synthesis achieved",
-                "context": "Advanced quantum engine processing with veiled vow ceremonial protocols",
-                "quantum_phase": "transcendence",
-                "evaluation_focus": "quantum_processing"
-            },
+    
+    def _initialize_query_templates(self) -> List[Dict[str, Any]]:
+        """Initialize query templates for various test scenarios"""
+        return [
             # Gradio Truth Mirror Tests 
             {
                 "query": "Conduct comprehensive ethical audit with Veto Triad synthesis and coherence scoring",
@@ -530,12 +504,6 @@ class QuantumLatticeEvaluator:
                 "evaluation_focus": "consciousness_coherence"
             }
         ]
-        
-        with open(filepath, 'w') as f:
-            for item in test_queries:
-                f.write(json.dumps(item) + "\n")
-        
-        logger.info(f"Generated comprehensive Sacred Trinity test dataset with {len(test_queries)} scenarios at {filepath}")
     
     async def run_evaluation(self) -> Dict[str, Any]:
         """Execute comprehensive Sacred Trinity evaluation"""
