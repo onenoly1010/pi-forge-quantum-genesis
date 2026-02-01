@@ -63,7 +63,7 @@ class QuantumEngine:
             'creator': ['innovation_burst_1', 'artistic_resonance_1'],
             'guardian': [
                 'protection_shield_1', 'ethical_anchor_1'
-            
+            ]
         }
 
     def process_pioneer_engagement(self, engagement: Dict[str, Any]) -> Dict[str, Any]:
