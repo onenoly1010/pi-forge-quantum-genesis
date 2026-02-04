@@ -1,0 +1,115 @@
+name: Ledger API CI
+
+on:
+  push:
+    branches: [ main, 'infra/**', 'copilot/**' ]
+    paths:
+      - 'ledger-api/**'
+      - '.github/workflows/ledger-api-ci.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'ledger-api/**'
+      - '.github/workflows/ledger-api-ci.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('ledger-api/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install dependencies
+      working-directory: ./ledger-api
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Run linting (if flake8 is added)
+      working-directory: ./ledger-api
+      run: |
+        pip install flake8
+        flake8 ledger_api --count --select=E9,F63,F7,F82 --show-source --statistics || true
+        flake8 ledger_api --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics || true
+      continue-on-error: true
+    
+    - name: Run unit tests (SQLite in-memory)
+      working-directory: ./ledger-api
+      env:
+        GUARDIAN_JWT_SECRET: test-secret-key-at-least-32-characters-long-for-ci-testing
+        NFT_MINT_VALUE: 0
+        APP_ENVIRONMENT: testnet
+      run: |
+        pytest ledger_api/tests/ -v --tb=short --cov=ledger_api --cov-report=term-missing
+    
+    - name: Run integration tests (PostgreSQL)
+      working-directory: ./ledger-api
+      env:
+        DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
+        GUARDIAN_JWT_SECRET: test-secret-key-at-least-32-characters-long-for-ci-testing
+        NFT_MINT_VALUE: 0
+        APP_ENVIRONMENT: testnet
+        AUTO_CREATE_TABLES: "true"
+      run: |
+        pytest ledger_api/tests/ -v --tb=short
+    
+    - name: Test Docker build
+      working-directory: ./ledger-api
+      run: |
+        docker build -t ledger-api:test .
+    
+    - name: Security check - verify NFT_MINT_VALUE=0
+      working-directory: ./ledger-api
+      run: |
+        if grep -r "NFT_MINT_VALUE.*[1-9]" . --exclude-dir=.git --exclude-dir=tests --exclude="*.md" --exclude=".env.example"; then
+          echo "ERROR: Non-zero NFT_MINT_VALUE found in code"
+          exit 1
+        fi
+        echo "✓ NFT_MINT_VALUE=0 security check passed"
+
+  analyze:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: python
+        queries: security-and-quality
+    
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2

@@ -45,7 +45,13 @@ CREATE TABLE IF NOT EXISTS ledger_transactions (
         'EXTERNAL_WITHDRAWAL', 
         'INTERNAL_ALLOCATION', 
         'INTERNAL_TRANSFER'
-    ))
+    )),
+    CONSTRAINT valid_account_flow CHECK (
+        (transaction_type = 'EXTERNAL_DEPOSIT' AND from_account_id IS NULL AND to_account_id IS NOT NULL) OR
+        (transaction_type = 'EXTERNAL_WITHDRAWAL' AND from_account_id IS NOT NULL AND to_account_id IS NULL) OR
+        (transaction_type = 'INTERNAL_ALLOCATION' AND from_account_id IS NULL AND to_account_id IS NOT NULL) OR
+        (transaction_type = 'INTERNAL_TRANSFER' AND from_account_id IS NOT NULL AND to_account_id IS NOT NULL)
+    )
 );
 
 -- Index for faster lookups
