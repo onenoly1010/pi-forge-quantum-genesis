@@ -20,8 +20,8 @@ jobs:
       - name: Set variables
         run: |
           BRANCH="fix/upgrade-fastapi-$(date +%s)"
-          echo "BRANCH=$BRANCH" > $GITHUB_ENV
-          echo "COMMIT_MSG=chore(server): bump fastapi to >=0.109.0 to resolve Gradio dependency conflict" > $GITHUB_ENV
+          echo "BRANCH=$BRANCH" >> $GITHUB_ENV
+          echo "COMMIT_MSG=chore(server): bump fastapi to >=0.109.0 to resolve Gradio dependency conflict" >> $GITHUB_ENV
 
       - name: Create branch
         run: |
