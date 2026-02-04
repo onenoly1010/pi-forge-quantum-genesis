@@ -74,7 +74,7 @@ class LedgerTransaction(Base):
     updated_at = Column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
     completed_at = Column(DateTime(timezone=True))
     
-    # Relationships
+    tx_metadata = Column("metadata", Text)  # JSON string for SQLite compatibility, stored in `metadata` column
     from_account = relationship(
         "LogicalAccount",
         foreign_keys=[from_account_id],
