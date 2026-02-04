@@ -7,7 +7,6 @@ from sqlalchemy import (
     Column, Integer, String, Numeric, Boolean, DateTime, Text,
     ForeignKey, CheckConstraint, Index, func
 )
-from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.types import JSON
 from sqlalchemy.orm import relationship
 from datetime import datetime
@@ -69,7 +68,7 @@ class LedgerTransaction(Base):
     status = Column(String(50), nullable=False, default="PENDING", index=True)
     purpose = Column(String(255))
     parent_transaction_id = Column(Integer, ForeignKey("ledger_transactions.id"), index=True)
-    meta_data = Column(JSON, default={})
+    meta_data = Column("metadata", JSON, default={})  # Maps to 'metadata' column in database
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow, index=True)
     updated_at = Column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
     completed_at = Column(DateTime(timezone=True))
