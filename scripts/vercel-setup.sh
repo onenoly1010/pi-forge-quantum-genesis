@@ -77,6 +77,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo "Adding environment variables..."
     echo "You can also add them later via:"
     echo "  - Vercel Dashboard: https://vercel.com/dashboard"
+    
     echo "  - CLI: vercel env add <name> <environment>"
     echo ""
     
