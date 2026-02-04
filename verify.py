@@ -132,9 +132,11 @@ def check_backend_structure():
     """Check backend code structure and imports"""
     print_header("Backend Structure Check")
     
+    # Save original directory before try block
+    original_dir = os.getcwd()
+    
     try:
         # Change to backend directory
-        original_dir = os.getcwd()
         backend_dir = Path('backend')
         
         if backend_dir.exists():

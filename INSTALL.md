@@ -84,7 +84,24 @@ The application will be available at `http://localhost:5000`
 
 #### Step 1: Install Docker
 
-Follow instructions at https://docs.docker.com/get-docker/
+Follow the official Docker installation instructions for your platform:
+
+**Linux (Ubuntu/Debian):**
+```bash
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+sudo usermod -aG docker $USER
+```
+
+**macOS:**
+- Download Docker Desktop from https://docs.docker.com/desktop/install/mac-install/
+- Or install via Homebrew: `brew install --cask docker`
+
+**Windows:**
+- Download Docker Desktop from https://docs.docker.com/desktop/install/windows-install/
+- Requires WSL 2 for best performance
+
+For detailed instructions, visit https://docs.docker.com/get-docker/
 
 #### Step 2: Build the Image
 
