@@ -143,6 +143,23 @@ This repository includes complete autonomous deployment capabilities:
 - **Rollback Support**: One-click rollback to previous versions
 - **Agent Oversight**: See [Autonomous Deployment Handoff](./AUTONOMOUS_DEPLOYMENT_HANDOFF.md)
 
+### 📊 Live Deployment Health Dashboard
+
+Real-time deployment status and health metrics are automatically tracked and updated:
+
+- **📈 [CLEANUP_STATUS_DASHBOARD.md](./CLEANUP_STATUS_DASHBOARD.md)** — Live deployment health tracking
+- **Auto-Updated**: Dashboard refreshes every 6 hours via GitHub Actions
+- **Health Checks**: Monitors Public Site, Backend API, and Resonance Engine
+- **Repository Metrics**: Tracks issues, PRs, commits, and workflow status
+
+**What's Monitored:**
+- Service availability and response times for all production deployments
+- Repository activity metrics (commits, issues, pull requests)
+- Automated cleanup workflow status (branch cleanup, stale PR management)
+- Next scheduled update timestamps
+
+The dashboard is maintained by the [`deployment-health-dashboard.yml`](.github/workflows/deployment-health-dashboard.yml) workflow, ensuring you always have current deployment status without manual intervention.
+
 ---
 
 ## 📚 Documentation
@@ -178,6 +195,8 @@ pytest tests/test_vercel_build.py -v
 - **Production**: https://pi-forge-quantum-genesis.vercel.app
 - **Backend API**: https://quantumpiforge.com
 - **Documentation**: https://github.com/onenoly1010/pi-forge-quantum-genesis
+
+**📊 Real-Time Status**: Check [CLEANUP_STATUS_DASHBOARD.md](./CLEANUP_STATUS_DASHBOARD.md) for live deployment health and monitoring data.
 
 ---
 
