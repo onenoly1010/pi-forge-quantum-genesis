@@ -143,6 +143,32 @@ This repository includes complete autonomous deployment capabilities:
 - **Rollback Support**: One-click rollback to previous versions
 - **Agent Oversight**: See [Autonomous Deployment Handoff](./AUTONOMOUS_DEPLOYMENT_HANDOFF.md)
 
+### 🛡️ Guardian Decision System
+
+Human-in-the-loop oversight for critical autonomous decisions:
+
+- **Decision Requests**: Structured process for requesting Guardian approval
+- **CLI Tool**: `scripts/create_guardian_decision.py` for creating decision requests
+- **Python API**: Programmatic integration with autonomous systems
+- **Documentation**: See [Guardian Decision README](./GUARDIAN_DECISION_README.md)
+
+**Quick Example:**
+```bash
+python scripts/create_guardian_decision.py \
+  --decision-id deployment_$(date +%s) \
+  --decision-type Deployment \
+  --priority High \
+  --confidence 0.75 \
+  --action "Deploy version X.Y.Z" \
+  --reason "Requires Guardian review"
+```
+
+**Guardian Resources:**
+- [Guardian Playbook](./docs/GUARDIAN_PLAYBOOK.md) - Complete operations guide
+- [Guardian Quick Reference](./docs/GUARDIAN_QUICK_REFERENCE.md) - Fast decision-making
+- [Guardian Decision Workflow](./docs/GUARDIAN_DECISION_WORKFLOW.md) - Process documentation
+- [Example Guardian Decision](./docs/GUARDIAN_DECISION_EXAMPLE.md) - Sample approved request
+
 ### 📊 Live Deployment Health Dashboard
 
 Real-time deployment status and health metrics are automatically tracked and updated:

@@ -73,7 +73,7 @@ class LedgerTransaction(Base):
     updated_at = Column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
     completed_at = Column(DateTime(timezone=True))
     
-    # Relationships
+    tx_metadata = Column("metadata", Text)  # JSON string for SQLite compatibility, stored in `metadata` column
     from_account = relationship(
         "LogicalAccount",
         foreign_keys=[from_account_id],
@@ -99,6 +99,13 @@ class LedgerTransaction(Base):
         CheckConstraint(
             "transaction_type IN ('EXTERNAL_DEPOSIT', 'EXTERNAL_WITHDRAWAL', 'INTERNAL_ALLOCATION', 'INTERNAL_TRANSFER')",
             name='valid_transaction_type'
+        ),
+        CheckConstraint(
+            """(transaction_type = 'EXTERNAL_DEPOSIT' AND from_account_id IS NULL AND to_account_id IS NOT NULL) OR
+               (transaction_type = 'EXTERNAL_WITHDRAWAL' AND from_account_id IS NOT NULL AND to_account_id IS NULL) OR
+               (transaction_type = 'INTERNAL_ALLOCATION' AND from_account_id IS NULL AND to_account_id IS NOT NULL) OR
+               (transaction_type = 'INTERNAL_TRANSFER' AND from_account_id IS NOT NULL AND to_account_id IS NOT NULL)""",
+            name='valid_account_flow'
         ),
     )
     
