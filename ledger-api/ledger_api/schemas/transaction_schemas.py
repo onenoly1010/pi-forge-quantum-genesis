@@ -33,6 +33,45 @@ class TransactionCreate(BaseModel):
             raise ValueError(f'status must be one of {valid_statuses}')
         return v
     
+    @validator('to_account_id', always=True)
+    def validate_account_flow(cls, to_account_id, values):
+        """Validate that account flow matches transaction type business rules."""
+        transaction_type = values.get('transaction_type')
+        from_account_id = values.get('from_account_id')
+        
+        if not transaction_type:
+            return to_account_id
+        
+        # EXTERNAL_DEPOSIT: no from_account, must have to_account
+        if transaction_type == 'EXTERNAL_DEPOSIT':
+            if from_account_id is not None:
+                raise ValueError('EXTERNAL_DEPOSIT must not have from_account_id (funds come from external source)')
+            if to_account_id is None:
+                raise ValueError('EXTERNAL_DEPOSIT must have to_account_id (destination account)')
+        
+        # EXTERNAL_WITHDRAWAL: must have from_account, no to_account
+        elif transaction_type == 'EXTERNAL_WITHDRAWAL':
+            if from_account_id is None:
+                raise ValueError('EXTERNAL_WITHDRAWAL must have from_account_id (source account)')
+            if to_account_id is not None:
+                raise ValueError('EXTERNAL_WITHDRAWAL must not have to_account_id (funds go to external destination)')
+        
+        # INTERNAL_ALLOCATION: no from_account, must have to_account
+        elif transaction_type == 'INTERNAL_ALLOCATION':
+            if from_account_id is not None:
+                raise ValueError('INTERNAL_ALLOCATION must not have from_account_id (system allocation)')
+            if to_account_id is None:
+                raise ValueError('INTERNAL_ALLOCATION must have to_account_id (destination account)')
+        
+        # INTERNAL_TRANSFER: must have both from_account and to_account
+        elif transaction_type == 'INTERNAL_TRANSFER':
+            if from_account_id is None:
+                raise ValueError('INTERNAL_TRANSFER must have from_account_id (source account)')
+            if to_account_id is None:
+                raise ValueError('INTERNAL_TRANSFER must have to_account_id (destination account)')
+        
+        return to_account_id
+    
     class Config:
         json_schema_extra = {
             "example": {
