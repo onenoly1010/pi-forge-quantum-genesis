@@ -15,6 +15,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 import httpx
+import re
 from fastapi import (Depends, FastAPI, HTTPException, Request, WebSocket,
                      WebSocketDisconnect, status)
 from fastapi.middleware.cors import CORSMiddleware
@@ -314,6 +315,19 @@ class MemorialGenerationRequest(BaseModel):
 
 # --- CYBER SAMURAI GUARDIAN STATE ---
 # --- PI NETWORK API INTEGRATION HELPERS ---
+def validate_payment_id(payment_id: str) -> None:
+    """
+    Validate a Pi Network payment ID to prevent path manipulation in API requests.
+
+    Restricts the ID to a conservative set of characters so it cannot alter the
+    path structure (no slashes, dots, spaces, etc.).
+    """
+    if not isinstance(payment_id, str):
+        raise HTTPException(status_code=400, detail="Invalid payment ID type")
+    # Allow only URL-safe token characters, with a reasonable maximum length.
+    if not re.fullmatch(r"[A-Za-z0-9_-]{1,128}", payment_id):
+        raise HTTPException(status_code=400, detail="Invalid payment ID format")
+
 async def call_pi_network_api(endpoint: str, method: str = "GET", data: Optional[Dict] = None) -> Dict[str, Any]:
     """Make authenticated API calls to Pi Network"""
     url = f"{PI_NETWORK_CONFIG['api_endpoint']}/{endpoint}"
@@ -797,6 +811,8 @@ async def approve_payment(payment: PaymentApprovalRequest, current_user = Depend
     start_time = time.perf_counter_ns()
     
     try:
+        # Validate payment ID format before using it in downstream API requests
+        validate_payment_id(payment.payment_id)
         logger.info(f"💳 Approving payment: {payment.payment_id} for {payment.amount} Pi")
         
         # Get payment details from Pi Network to verify
@@ -858,8 +874,9 @@ async def complete_payment(payment: PaymentCompletionRequest):
     This endpoint verifies the blockchain transaction and finalizes the payment
     """
     start_time = time.perf_counter_ns()
-    
     try:
+        # Validate payment ID format before using it in downstream API requests
+        validate_payment_id(payment.payment_id)
         logger.info(f"🎉 Completing payment: {payment.payment_id} with txid: {payment.txid}")
         
         # Complete payment with Pi Network API
@@ -915,6 +932,8 @@ async def handle_incomplete_payment(payment: IncompletePaymentRequest):
     Handle incomplete payment found during user authentication
     Pi SDK calls this when a payment was interrupted (user closed app, etc.)
     """
+        # Validate payment ID format before using it in downstream API requests
+        validate_payment_id(payment.payment_id)
     try:
         logger.info(f"🔄 Handling incomplete payment: {payment.payment_id}")
         
@@ -1016,7 +1035,9 @@ async def verify_payment(payment: PaymentVerification, current_user = Depends(ge
     Note: Use /api/payments/approve and /api/payments/complete for new integrations
     """
     start_time = time.perf_counter_ns()
-    
+
+        # Validate payment ID format before using it in downstream API requests
+        validate_payment_id(payment.payment_id)
     try:
         # Generate verification hash
         verification_data = f"{payment.payment_id}{payment.amount}{time.time()}"
