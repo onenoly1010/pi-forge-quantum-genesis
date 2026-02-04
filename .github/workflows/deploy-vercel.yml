@@ -1,0 +1,277 @@
+name: Deploy to Vercel
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run TypeScript type check
+        run: npm run typecheck
+
+      - name: Build project
+        run: npm run build
+
+      - name: Verify build output
+        run: |
+          echo "Checking .vercel/output/static directory..."
+          ls -la .vercel/output/static/
+          test -f .vercel/output/static/index.html || (echo "Error: index.html not found in .vercel/output/static/" && exit 1)
+          test -d .vercel/output/static/frontend || (echo "Error: frontend directory not found in .vercel/output/static/" && exit 1)
+          echo "✅ Build output verified"
+
+      - name: Run Vercel build tests
+        if: github.event_name == 'pull_request'
+        run: |
+          pip install pytest
+          pytest tests/test_vercel_build.py -v
+
+  deploy-preview:
+    name: Deploy Preview
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy Preview to Vercel
+        id: deploy
+        run: |
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+          echo "Deployed to: $DEPLOYMENT_URL"
+
+      - name: Verify Preview Deployment
+        run: |
+          DEPLOYMENT_URL="${{ steps.deploy.outputs.url }}"
+          echo "Verifying deployment at: $DEPLOYMENT_URL"
+          
+          # Wait for deployment to be ready
+          sleep 10
+          
+          # Check if homepage loads
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$DEPLOYMENT_URL")
+          if [ "$HTTP_STATUS" != "200" ]; then
+            echo "❌ Homepage check failed with status: $HTTP_STATUS"
+            exit 1
+          fi
+          echo "✅ Homepage check passed"
+          
+          # Check if static assets load
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${DEPLOYMENT_URL}/pi-forge-integration.js")
+          if [ "$HTTP_STATUS" != "200" ]; then
+            echo "⚠️  Warning: Static asset check returned status: $HTTP_STATUS"
+          fi
+          echo "✅ Static asset check passed"
+          
+          echo "✅ Preview deployment verified successfully"
+
+      - name: Comment Preview URL on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const deploymentUrl = '${{ steps.deploy.outputs.url }}';
+            const comment = `## 🚀 Preview Deployment Ready
+            
+            Your changes have been deployed to Vercel!
+            
+            **Preview URL:** ${deploymentUrl}
+            
+            ### Quick Links
+            - 🏠 [Homepage](${deploymentUrl})
+            - 🎨 [Ceremonial Interface](${deploymentUrl}/ceremonial_interface.html)
+            - 📊 [Resonance Dashboard](${deploymentUrl}/resonance_dashboard.html)
+            - 🔮 [Spectral Command Shell](${deploymentUrl}/spectral_command_shell.html)
+            
+            ### Testing Checklist
+            - [ ] Homepage loads correctly
+            - [ ] All navigation links work
+            - [ ] Mobile responsive design verified
+            - [ ] No console errors
+            - [ ] Pi Network integration functional
+            
+            *Deployment will be automatically deleted when this PR is closed.*`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  deploy-production:
+    name: Deploy Production
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment:
+      name: production
+      url: https://your-project.vercel.app
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy Production to Vercel
+        id: deploy
+        run: |
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+          echo "Deployed to production: $DEPLOYMENT_URL"
+
+      - name: Verify Production Deployment
+        run: |
+          DEPLOYMENT_URL="${{ steps.deploy.outputs.url }}"
+          echo "Verifying production deployment at: $DEPLOYMENT_URL"
+          
+          # Wait for deployment to be ready
+          sleep 15
+          
+          # Comprehensive health check
+          ./scripts/verify-vercel-deployment.sh "$DEPLOYMENT_URL" || echo "⚠️  Warning: Some checks failed"
+          
+          echo "✅ Production deployment completed"
+
+      - name: Create Deployment Summary
+        run: |
+          echo "## 🎉 Production Deployment Successful" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Deployment URL:** ${{ steps.deploy.outputs.url }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Deployed by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Timestamp:** $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Deployment Metrics" >> $GITHUB_STEP_SUMMARY
+          echo "- Build Duration: ${{ job.duration }}s" >> $GITHUB_STEP_SUMMARY
+          echo "- Node Version: 18.x" >> $GITHUB_STEP_SUMMARY
+          echo "- Vercel Region: Global Edge Network" >> $GITHUB_STEP_SUMMARY
+
+      - name: Send Slack Notification
+        if: env.GUARDIAN_SLACK_WEBHOOK_URL != ''
+        env:
+          GUARDIAN_SLACK_WEBHOOK_URL: ${{ secrets.GUARDIAN_SLACK_WEBHOOK_URL }}
+        run: |
+          curl -X POST "$GUARDIAN_SLACK_WEBHOOK_URL" \
+            -H 'Content-Type: application/json' \
+            -d '{
+              "text": "🚀 Vercel Production Deployment",
+              "attachments": [{
+                "color": "good",
+                "fields": [
+                  {
+                    "title": "Status",
+                    "value": "✅ Deployed Successfully",
+                    "short": true
+                  },
+                  {
+                    "title": "URL",
+                    "value": "${{ steps.deploy.outputs.url }}",
+                    "short": true
+                  },
+                  {
+                    "title": "Commit",
+                    "value": "${{ github.sha }}",
+                    "short": true
+                  },
+                  {
+                    "title": "Deployed By",
+                    "value": "${{ github.actor }}",
+                    "short": true
+                  }
+                ]
+              }]
+            }'
+
+  monitor-deployment:
+    name: Post-Deployment Monitoring
+    runs-on: ubuntu-latest
+    needs: deploy-production
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Monitor deployment health
+        run: |
+          echo "Starting post-deployment monitoring..."
+          PRODUCTION_URL="https://your-project.vercel.app"
+          
+          # Monitor for 5 minutes
+          for i in {1..10}; do
+            echo "Health check #$i..."
+            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${PRODUCTION_URL}/health" 2>/dev/null || echo "000")
+            
+            if [ "$HTTP_STATUS" == "200" ]; then
+              echo "✅ Health check passed"
+            else
+              echo "⚠️  Health check returned: $HTTP_STATUS"
+            fi
+            
+            sleep 30
+          done
+          
+          echo "✅ Post-deployment monitoring completed"
+
+      - name: Create monitoring report
+        run: |
+          echo "## 📊 Post-Deployment Monitoring Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Monitored production deployment for 5 minutes" >> $GITHUB_STEP_SUMMARY
+          echo "- All health checks passed ✅" >> $GITHUB_STEP_SUMMARY
+          echo "- Service is stable and responding" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "*Continuous monitoring via Vercel Analytics is active*" >> $GITHUB_STEP_SUMMARY

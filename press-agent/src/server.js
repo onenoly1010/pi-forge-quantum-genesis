@@ -12,9 +12,13 @@ const { v4: uuidv4 } = require('uuid');
 const logger = require('./logger');
 const articleTemplates = require('./templates');
 const { WordPressPublisher } = require('./publishers/wordpress');
+const { CommunicationDispatcher } = require('./dispatcher');
 
 const app = express();
 const PORT = process.env.PRESS_AGENT_PORT || 3001;
+
+// Initialize communication dispatcher
+const communicationDispatcher = new CommunicationDispatcher();
 
 // Middleware
 app.use(cors());
@@ -549,6 +553,108 @@ cron.schedule('*/5 * * * *', async () => {
                 });
             }
         }
+    }
+});
+
+/**
+ * Get communication channels status
+ */
+app.get('/api/communications/status', (req, res) => {
+    const status = communicationDispatcher.getStatus();
+    logger.info('Communication status retrieved');
+    res.json({
+        success: true,
+        status
+    });
+});
+
+/**
+ * Broadcast an announcement to all platforms
+ */
+app.post('/api/communications/broadcast', async (req, res) => {
+    const { type, data } = req.body;
+
+    if (!type || !data) {
+        return res.status(400).json({
+            success: false,
+            error: 'type and data are required'
+        });
+    }
+
+    const validTypes = ['launch', 'update', 'milestone', 'deployment'];
+    if (!validTypes.includes(type)) {
+        return res.status(400).json({
+            success: false,
+            error: `Invalid type. Must be one of: ${validTypes.join(', ')}`
+        });
+    }
+
+    try {
+        const results = await communicationDispatcher.broadcast(type, data);
+        logger.info('Broadcast completed', { type, results });
+        
+        res.json({
+            success: true,
+            results
+        });
+    } catch (error) {
+        logger.error('Broadcast failed', { error: error.message });
+        res.status(500).json({
+            success: false,
+            error: 'Failed to broadcast announcement'
+        });
+    }
+});
+
+/**
+ * Send a launch announcement
+ */
+app.post('/api/communications/launch', async (req, res) => {
+    try {
+        const results = await communicationDispatcher.sendLaunchAnnouncement(req.body);
+        res.json({ success: true, results });
+    } catch (error) {
+        logger.error('Launch announcement failed', { error: error.message });
+        res.status(500).json({ success: false, error: 'Failed to send launch announcement' });
+    }
+});
+
+/**
+ * Send a feature update
+ */
+app.post('/api/communications/update', async (req, res) => {
+    try {
+        const results = await communicationDispatcher.sendFeatureUpdate(req.body);
+        res.json({ success: true, results });
+    } catch (error) {
+        logger.error('Feature update failed', { error: error.message });
+        res.status(500).json({ success: false, error: 'Failed to send feature update' });
+    }
+});
+
+/**
+ * Send a milestone achievement
+ */
+app.post('/api/communications/milestone', async (req, res) => {
+    try {
+        const results = await communicationDispatcher.sendMilestoneAchievement(req.body);
+        res.json({ success: true, results });
+    } catch (error) {
+        logger.error('Milestone announcement failed', { error: error.message });
+        res.status(500).json({ success: false, error: 'Failed to send milestone announcement' });
+    }
+});
+
+/**
+ * Send a deployment success notification
+ */
+app.post('/api/communications/deployment', async (req, res) => {
+    try {
+        const results = await communicationDispatcher.sendDeploymentSuccess(req.body);
+        res.json({ success: true, results });
+    } catch (error) {
+        logger.error('Deployment notification failed', { error: error.message });
+        res.status(500).json({ success: false, error: 'Failed to send deployment notification' });
     }
 });
 

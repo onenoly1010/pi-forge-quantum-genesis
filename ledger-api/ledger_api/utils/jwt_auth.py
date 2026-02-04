@@ -1,148 +1,145 @@
 """
-JWT authentication for guardian-protected endpoints
+JWT authentication utilities for Guardian role authorization.
+Uses HS256 algorithm with GUARDIAN_JWT_SECRET.
 """
-from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from jose import JWTError, jwt
-from typing import Optional
+
 import os
 import logging
+from datetime import datetime, timedelta
+from typing import Optional, Dict, Any
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+import jwt
 
 logger = logging.getLogger(__name__)
-
-# JWT configuration
-GUARDIAN_JWT_SECRET = os.getenv("GUARDIAN_JWT_SECRET")
-ALGORITHM = "HS256"
 
 # Security scheme
 security = HTTPBearer()
 
+# JWT configuration
+GUARDIAN_JWT_SECRET = os.environ.get("GUARDIAN_JWT_SECRET")
+if not GUARDIAN_JWT_SECRET:
+    logger.warning("⚠️  GUARDIAN_JWT_SECRET not set - authentication will fail")
 
-class JWTPayload:
-    """JWT token payload"""
-    def __init__(self, sub: str, role: str, **kwargs):
-        self.sub = sub  # Subject (user identifier)
-        self.role = role  # User role
-        self.extra = kwargs  # Additional claims
+JWT_ALGORITHM = os.environ.get("JWT_ALGORITHM", "HS256")
+JWT_ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ.get("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
 
 
-def verify_jwt_token(token: str) -> JWTPayload:
+def create_guardian_token(
+    user_id: str,
+    role: str = "guardian",
+    expires_delta: Optional[timedelta] = None
+) -> str:
     """
-    Verify and decode JWT token.
+    Create a JWT token for Guardian authentication.
+    
+    Args:
+        user_id: User identifier
+        role: User role (default: 'guardian')
+        expires_delta: Token expiration time
+    
+    Returns:
+        str: Encoded JWT token
+    """
+    if not GUARDIAN_JWT_SECRET:
+        raise ValueError("GUARDIAN_JWT_SECRET not configured")
+    
+    if expires_delta is None:
+        expires_delta = timedelta(minutes=JWT_ACCESS_TOKEN_EXPIRE_MINUTES)
+    
+    expire = datetime.utcnow() + expires_delta
+    
+    payload = {
+        "sub": user_id,
+        "role": role,
+        "exp": expire,
+        "iat": datetime.utcnow()
+    }
+    
+    token = jwt.encode(payload, GUARDIAN_JWT_SECRET, algorithm=JWT_ALGORITHM)
+    return token
+
+
+def verify_guardian_token(token: str) -> Dict[str, Any]:
+    """
+    Verify and decode a Guardian JWT token.
     
     Args:
         token: JWT token string
-        
+    
     Returns:
-        JWTPayload with decoded claims
-        
+        Dict: Decoded token payload
+    
     Raises:
         HTTPException: If token is invalid or expired
     """
     if not GUARDIAN_JWT_SECRET:
-        logger.error("GUARDIAN_JWT_SECRET not configured")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="JWT authentication not properly configured"
+            detail="Authentication not configured"
         )
-
-    if len(GUARDIAN_JWT_SECRET) < 32:
-        logger.error("GUARDIAN_JWT_SECRET is too short (must be at least 32 characters)")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="JWT authentication not properly configured"
-        )
-
+    
     try:
-        payload = jwt.decode(token, GUARDIAN_JWT_SECRET, algorithms=[ALGORITHM])
-        
-        # Extract required claims
-        sub = payload.get("sub")
-        role = payload.get("role")
-        
-        if not sub:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid token: missing subject"
-            )
-        
-        if not role:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid token: missing role"
-            )
-        
-        return JWTPayload(sub=sub, role=role, **payload)
-        
-    except JWTError as e:
-        logger.warning(f"JWT verification failed: {e}")
+        payload = jwt.decode(
+            token,
+            GUARDIAN_JWT_SECRET,
+            algorithms=[JWT_ALGORITHM]
+        )
+        return payload
+    except jwt.ExpiredSignatureError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
-            headers={"WWW-Authenticate": "Bearer"},
+            detail="Token has expired",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    except jwt.InvalidTokenError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Invalid token: {str(e)}",
+            headers={"WWW-Authenticate": "Bearer"}
         )
 
 
 def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security)
-) -> JWTPayload:
+) -> Dict[str, Any]:
     """
-    Dependency to get current authenticated user from JWT token.
+    FastAPI dependency to get current authenticated user.
+    Validates JWT token and extracts user information.
     
     Args:
-        credentials: HTTP authorization credentials
-        
-    Returns:
-        JWTPayload with user information
-    """
-    return verify_jwt_token(credentials.credentials)
-
-
-def require_guardian_role(
-    current_user: JWTPayload = Depends(get_current_user)
-) -> JWTPayload:
-    """
-    Dependency to require guardian role.
+        credentials: HTTP Bearer credentials
     
-    Args:
-        current_user: Current user from JWT token
-        
     Returns:
-        JWTPayload if user has guardian role
-        
+        Dict: User information from token payload
+    
     Raises:
-        HTTPException: If user doesn't have guardian role
+        HTTPException: If authentication fails
     """
-    if current_user.role != "guardian":
-        logger.warning(f"User {current_user.sub} attempted guardian action with role {current_user.role}")
+    token = credentials.credentials
+    payload = verify_guardian_token(token)
+    
+    # Verify user has guardian role
+    if payload.get("role") != "guardian":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Guardian role required for this operation"
+            detail="Insufficient permissions - guardian role required"
         )
     
-    return current_user
+    return payload
 
 
-# Helper function to create JWT tokens (for testing/development)
-def create_jwt_token(sub: str, role: str, **extra_claims) -> str:
+def require_guardian(
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+) -> Dict[str, Any]:
     """
-    Create a JWT token (for testing purposes).
+    FastAPI dependency that requires guardian role.
+    Alias for get_current_user for clarity.
     
     Args:
-        sub: Subject (user identifier)
-        role: User role
-        **extra_claims: Additional claims to include
-        
-    Returns:
-        JWT token string
-    """
-    if not GUARDIAN_JWT_SECRET:
-        raise ValueError("GUARDIAN_JWT_SECRET not configured")
-
-    payload = {
-        "sub": sub,
-        "role": role,
-        **extra_claims
-    }
+        credentials: HTTP Bearer credentials
     
-    return jwt.encode(payload, GUARDIAN_JWT_SECRET, algorithm=ALGORITHM)
+    Returns:
+        Dict: User information from token payload
+    """
+    return get_current_user(credentials)

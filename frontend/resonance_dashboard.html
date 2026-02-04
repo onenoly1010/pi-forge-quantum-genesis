@@ -164,7 +164,10 @@
             const anomaliesListEl = document.getElementById('anomalies-list');
 
             function connectWebSocket() {
-                const ws = new WebSocket('ws://127.0.0.1:8000/ws/collective-insight');
+                // Use secure WebSocket (wss://) in production, fallback to ws:// for local development
+                const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                const wsUrl = wsProtocol + '//' + window.location.host + '/ws/collective-insight';
+                const ws = new WebSocket(wsUrl);
 
                 ws.onopen = function() {
                     console.log('Connected to QVM Resonance Bridge.');
@@ -201,10 +204,12 @@
                 harmonyEl.textContent = data.harmony_index?.toFixed(3) || '--';
                 trendEl.textContent = data.resonance_trend?.toFixed(2) || '--';
                 confidenceEl.textContent = data.forecast_confidence?.toFixed(3) || '--';
-                timestampEl.textContent = new Date(data.timestamp * 1000).toLocaleTimeString();
+                timestampEl.textContent = (data.timestamp && typeof data.timestamp === 'number' && data.timestamp > 0) 
+                    ? new Date(data.timestamp * 1000).toLocaleTimeString() 
+                    : '--';
 
                 // Update Sovereign Actions
-                actionsListEl.innerHTML = '';
+                actionsListEl.replaceChildren(); // Clear existing content
                 if (data.sovereign_actions && data.sovereign_actions.length > 0) {
                     data.sovereign_actions.forEach(action => {
                         const li = document.createElement('li');
@@ -212,20 +217,35 @@
                         actionsListEl.appendChild(li);
                     });
                 } else {
-                    actionsListEl.innerHTML = '<li>No specific actions recommended.</li>';
+                    const li = document.createElement('li');
+                    li.textContent = 'No specific actions recommended.';
+                    actionsListEl.appendChild(li);
                 }
 
                 // Update Temporal Anomalies
-                anomaliesListEl.innerHTML = '';
+                anomaliesListEl.replaceChildren(); // Clear existing content
                 if (data.temporal_anomalies && data.temporal_anomalies.length > 0) {
                     data.temporal_anomalies.forEach(anomaly => {
                         const li = document.createElement('li');
-                        li.className = `anomaly-${anomaly.severity?.toLowerCase()}`;
-                        li.innerHTML = `<strong>${anomaly.type}:</strong> ${anomaly.recommended_action} (Impact: ${anomaly.projected_impact})`;
+                        li.className = `anomaly-${(anomaly.severity || 'low').toLowerCase()}`;
+                        
+                        // Use DOM methods to prevent XSS
+                        const typeStrong = document.createElement('strong');
+                        typeStrong.textContent = anomaly.type || 'Unknown';
+                        
+                        li.appendChild(typeStrong);
+                        li.appendChild(document.createTextNode(': '));
+                        li.appendChild(document.createTextNode(anomaly.recommended_action || 'No action'));
+                        li.appendChild(document.createTextNode(' (Impact: '));
+                        li.appendChild(document.createTextNode(anomaly.projected_impact || 'Unknown'));
+                        li.appendChild(document.createTextNode(')'));
+                        
                         anomaliesListEl.appendChild(li);
                     });
                 } else {
-                    anomaliesListEl.innerHTML = '<li>No anomalies detected.</li>';
+                    const li = document.createElement('li');
+                    li.textContent = 'No anomalies detected.';
+                    anomaliesListEl.appendChild(li);
                 }
             }
 

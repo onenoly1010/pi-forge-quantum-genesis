@@ -1,453 +1,527 @@
-# Ledger API v1.0
+# Pi Forge Quantum Genesis - Ledger API
 
-Multi-Account Treasury System with Atomic Allocations for Pi Forge Quantum Genesis
+**Version:** 1.0.0  
+**Status:** Testnet-Only (NFT_MINT_VALUE=0 enforced)
 
 ## Overview
 
-The Ledger API is a standalone FastAPI service that implements a sophisticated multi-account treasury system with:
+The Ledger API is a standalone financial transaction ledger service for Pi Forge Quantum Genesis. It provides a single source of truth for all treasury operations, automatic fund allocations, reconciliation, and audit trails.
 
-- **Atomic Allocations**: Automatically split external deposits according to configurable rules
-- **Idempotent Operations**: Safe to retry without creating duplicates
-- **Audit Trail**: Complete immutable record of all changes
-- **Reconciliation**: Compare external wallet balances with internal accounts
-- **Guardian Security**: JWT-based authentication for administrative operations
+### Key Features
 
-## Architecture
-
-```
-ledger-api/
-├── sql/schema/           # SQL schema definitions
-├── migrations/           # Alembic database migrations
-├── ledger_api/
-│   ├── main.py          # FastAPI application entry point
-│   ├── db.py            # Database connection and session management
-│   ├── models/          # SQLAlchemy ORM models
-│   ├── schemas/         # Pydantic request/response models
-│   ├── services/        # Business logic (allocation, audit, reconciliation)
-│   ├── api/v1/          # API endpoint handlers
-│   ├── utils/           # JWT auth, Pi Network stubs
-│   └── tests/           # Pytest unit and integration tests
-├── Dockerfile
-├── docker-compose.yml   # Development environment
-├── docker-compose.test.yml  # CI test environment
-└── requirements.txt
-```
+- ✅ **Complete Transaction Ledger**: Track all deposits, withdrawals, and internal allocations
+- ✅ **Automatic Allocation Engine**: Atomically distribute funds based on configurable rules
+- ✅ **Treasury Management**: Real-time balance tracking across logical accounts
+- ✅ **Reconciliation**: Compare internal ledger with external blockchain state
+- ✅ **Audit Trail**: Complete logging of all financial operations
+- ✅ **Guardian Authentication**: JWT-based access control for sensitive operations
+- ✅ **Testnet Safety**: Enforced NFT_MINT_VALUE=0 with runtime checks
 
 ## Quick Start
 
-### Using Docker Compose (Recommended)
+### Prerequisites
+
+- Python 3.11+
+- PostgreSQL 15+ (or SQLite for development)
+- Docker and Docker Compose (optional)
+
+### Local Development Setup
+
+1. **Clone and navigate to ledger-api:**
+   ```bash
+   cd ledger-api
+   ```
+
+2. **Create virtual environment:**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Set up environment variables:**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
+
+5. **Initialize database:**
+   ```bash
+   # For SQLite (development)
+   python -c "from ledger_api.db import init_db; init_db()"
+   
+   # For PostgreSQL (see docker-compose.yml)
+   docker-compose up -d postgres
+   ```
+
+6. **Run the API:**
+   ```bash
+   uvicorn ledger_api.main:app --reload --port 8001
+   ```
+
+7. **Access API documentation:**
+   - Interactive docs: http://localhost:8001/docs
+   - ReDoc: http://localhost:8001/redoc
+   - Health check: http://localhost:8001/health
+
+### Docker Development
 
 ```bash
-# Clone repository and navigate to ledger-api
-cd ledger-api
+# Start all services (PostgreSQL + API)
+docker-compose up
 
-# Copy environment template
-cp .env.example .env
-
-# Edit .env and set GUARDIAN_JWT_SECRET (at least 32 characters)
-nano .env
-
-# Start services (PostgreSQL + Ledger API)
+# Run in background
 docker-compose up -d
 
 # View logs
 docker-compose logs -f ledger-api
 
-# API will be available at http://localhost:8001
+# Stop services
+docker-compose down
 ```
 
-### Manual Setup
+## Environment Variables
 
-```bash
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+### Required
 
-# Install dependencies
-pip install -r requirements.txt
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `DATABASE_URL` | Database connection string | `postgresql://user:pass@localhost:5432/ledger_db` |
+| `GUARDIAN_JWT_SECRET` | JWT secret (min 32 chars) | `your-secure-secret-min-32-chars` |
 
-# Set environment variables
-export DATABASE_URL="postgresql://ledger_user:ledger_password@localhost:5432/ledger_db"
-export GUARDIAN_JWT_SECRET="your-secure-secret-at-least-32-characters-long"
-export NFT_MINT_VALUE=0
-export APP_ENVIRONMENT=testnet
+### Optional
 
-# Run database migrations
-# Option 1: Use Alembic (production)
-alembic upgrade head
-
-# Option 2: Auto-create tables (development only)
-export AUTO_CREATE_TABLES=true
-
-# Start the API
-uvicorn ledger_api.main:app --reload --port 8001
-```
-
-## Database Setup
-
-### Using Docker Compose
-
-The `docker-compose.yml` automatically initializes PostgreSQL with the schema from `sql/schema/001_initial_ledger.sql`.
-
-### Manual PostgreSQL Setup
-
-```bash
-# Create database
-createdb ledger_db
-
-# Create user
-psql -c "CREATE USER ledger_user WITH PASSWORD 'ledger_password';"
-psql -c "GRANT ALL PRIVILEGES ON DATABASE ledger_db TO ledger_user;"
-
-# Apply schema
-psql -U ledger_user -d ledger_db -f sql/schema/001_initial_ledger.sql
-```
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `APP_ENVIRONMENT` | Environment mode | `testnet` |
+| `NFT_MINT_VALUE` | **Must be 0** for testnet | `0` |
+| `SERVICE_PORT` | API server port | `8001` |
+| `JWT_ALGORITHM` | JWT signing algorithm | `HS256` |
+| `JWT_ACCESS_TOKEN_EXPIRE_MINUTES` | Token expiration | `30` |
+| `LOG_LEVEL` | Logging level | `INFO` |
+| `CORS_ORIGINS` | Allowed CORS origins | `*` |
 
 ## API Endpoints
 
-### Transactions
+### Public Endpoints (No Authentication)
 
-**POST /api/v1/transactions** - Create a transaction
-- When creating a COMPLETED EXTERNAL_DEPOSIT, allocations are automatically applied
-- Request body:
-  ```json
+#### Health Check
+```bash
+GET /health
+```
+
+**Response:**
+```json
+{
+  "status": "healthy",
+  "service": "ledger-api",
+  "version": "v1",
+  "environment": "testnet",
+  "database": "connected",
+  "nft_mint_value": 0
+}
+```
+
+#### List Transactions
+```bash
+GET /api/v1/transactions/?limit=50&offset=0
+
+# With filters
+GET /api/v1/transactions/?transaction_type=EXTERNAL_DEPOSIT&status=COMPLETED
+```
+
+**Response:**
+```json
+[
   {
+    "id": 1,
+    "transaction_hash": "0x123...",
     "transaction_type": "EXTERNAL_DEPOSIT",
+    "amount": 100.0,
     "status": "COMPLETED",
-    "amount": "100.00000000",
-    "to_account_id": "account-uuid",
-    "external_tx_hash": "0xabc123",
-    "description": "External deposit",
-    "performed_by": "user@example.com"
+    "created_at": "2024-01-01T00:00:00Z"
   }
-  ```
+]
+```
 
-**GET /api/v1/transactions** - List transactions
-- Query params: `transaction_type`, `status`, `from_account_id`, `to_account_id`, `page`, `page_size`
+#### Create Transaction
+```bash
+POST /api/v1/transactions/
+Content-Type: application/json
 
-**GET /api/v1/transactions/{id}** - Get specific transaction
+{
+  "transaction_type": "EXTERNAL_DEPOSIT",
+  "to_account_id": 1,
+  "amount": 100.0,
+  "status": "COMPLETED",
+  "purpose": "Initial deposit"
+}
+```
 
-**GET /api/v1/transactions/{id}/allocations** - Get allocation results for a transaction
-
-### Treasury
-
-**GET /api/v1/treasury/status** - Get current treasury status
-- Returns all account balances and total
-
-**POST /api/v1/treasury/reconcile** - Perform reconciliation
-- Request body:
-  ```json
-  {
-    "external_wallet_balance": "1000.50000000",
-    "external_source": "Pi Network Wallet",
-    "performed_by": "admin@example.com"
+**Response:**
+```json
+{
+  "parent_transaction": {
+    "id": 123,
+    "transaction_type": "EXTERNAL_DEPOSIT",
+    "amount": 100.0,
+    "status": "COMPLETED"
+  },
+  "allocation_result": {
+    "parent_transaction_id": 123,
+    "child_transaction_ids": [124, 125, 126, 127],
+    "total_allocated": 100.0,
+    "allocations": [
+      {
+        "account_id": 1,
+        "account_name": "Reserve Treasury",
+        "amount": 40.0,
+        "percentage": 40.0
+      }
+    ]
   }
-  ```
+}
+```
 
-### Allocation Rules
+#### Treasury Status
+```bash
+GET /api/v1/treasury/status
+```
 
-**GET /api/v1/allocation-rules** - List allocation rules (public)
-- Query params: `active_only` (default: true)
-
-**GET /api/v1/allocation-rules/{id}** - Get specific rule (public)
-
-**POST /api/v1/allocation-rules** - Create allocation rule (requires Guardian JWT)
-- Request body:
-  ```json
-  {
-    "rule_name": "custom_allocation",
-    "is_active": true,
-    "priority": 100,
-    "allocation_config": [
-      {"account_name": "main_operating", "percentage": 50},
-      {"account_name": "reserve_fund", "percentage": 30},
-      {"account_name": "rewards_pool", "percentage": 20}
-    ],
-    "description": "Custom allocation rule"
+**Response:**
+```json
+{
+  "total_balance": 10000.0,
+  "accounts": [
+    {
+      "id": 1,
+      "account_name": "Reserve Treasury",
+      "account_type": "RESERVE",
+      "current_balance": 4000.0,
+      "allocation_percentage": 40.0,
+      "is_active": true
+    }
+  ],
+  "reserve_status": {
+    "reserve_percentage": 40.0,
+    "reserve_balance": 4000.0,
+    "is_healthy": true
   }
-  ```
-- **Important**: Percentages must sum to exactly 100%
-- Requires: `Authorization: Bearer <guardian-jwt-token>`
+}
+```
 
-**DELETE /api/v1/allocation-rules/{id}** - Deactivate rule (requires Guardian JWT)
+#### List Allocation Rules
+```bash
+GET /api/v1/allocation_rules/
+```
+
+### Guardian Endpoints (Require JWT Authentication)
+
+#### Create Allocation Rule
+```bash
+POST /api/v1/allocation_rules/
+Authorization: Bearer <guardian_token>
+Content-Type: application/json
+
+{
+  "rule_name": "Custom Allocation",
+  "trigger_transaction_type": "EXTERNAL_DEPOSIT",
+  "allocations": [
+    {"account_id": 1, "percentage": 50.0},
+    {"account_id": 2, "percentage": 50.0}
+  ],
+  "is_active": true,
+  "priority": 1
+}
+```
+
+#### Reconcile Treasury
+```bash
+POST /api/v1/treasury/reconcile
+Authorization: Bearer <guardian_token>
+Content-Type: application/json
+
+{
+  "external_wallet_address": "GXXX...XXX",
+  "external_wallet_balance": 10000.50,
+  "notes": "Monthly reconciliation"
+}
+```
+
+**Response:**
+```json
+{
+  "id": 1,
+  "external_wallet_balance": 10000.50,
+  "internal_ledger_balance": 10000.50,
+  "discrepancy": 0.0,
+  "status": "MATCHED"
+}
+```
 
 ## Authentication
 
-### Guardian JWT
+### Generating a Guardian JWT Token
 
-Protected endpoints require a JWT token with `role: "guardian"`.
-
-**Generate a Guardian Token (Development/Testing)**
+For testing, you can generate a JWT token using Python:
 
 ```python
-from ledger_api.utils.jwt_auth import create_jwt_token
+from ledger_api.utils.jwt_auth import create_guardian_token
 
-token = create_jwt_token(
-    sub="guardian@example.com",
-    role="guardian"
-)
-print(token)
+token = create_guardian_token(user_id="admin", role="guardian")
+print(f"Bearer {token}")
 ```
 
-**Using the Token**
+Or using OpenSSL and Python:
 
 ```bash
-curl -X POST http://localhost:8001/api/v1/allocation-rules \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{...}'
+# Generate JWT secret
+openssl rand -base64 32
+
+# Create token (Python)
+python -c "
+from datetime import timedelta
+from ledger_api.utils.jwt_auth import create_guardian_token
+token = create_guardian_token('admin', 'guardian', timedelta(hours=1))
+print('Bearer', token)
+"
 ```
 
-## Example Workflows
-
-### Complete Deposit and Allocation Flow
+### Using JWT in Requests
 
 ```bash
-# 1. Check treasury status before deposit
-curl http://localhost:8001/api/v1/treasury/status
+# Export token as variable
+export GUARDIAN_TOKEN="eyJ..."
 
-# 2. Create a COMPLETED EXTERNAL_DEPOSIT (triggers automatic allocation)
-curl -X POST http://localhost:8001/api/v1/transactions \
+# Use in curl
+curl -H "Authorization: Bearer $GUARDIAN_TOKEN" \
+  http://localhost:8001/api/v1/allocation_rules/ \
+  -X POST \
   -H "Content-Type: application/json" \
-  -d '{
-    "transaction_type": "EXTERNAL_DEPOSIT",
-    "status": "COMPLETED",
-    "amount": "100.00000000",
-    "to_account_id": "YOUR_ACCOUNT_ID",
-    "external_tx_hash": "0xabc123",
-    "description": "Deposit from Pi wallet",
-    "performed_by": "user@pi.network"
-  }'
-
-# 3. Check allocation results (save transaction ID from step 2)
-curl http://localhost:8001/api/v1/transactions/{TRANSACTION_ID}/allocations
-
-# 4. Verify treasury status after allocation
-curl http://localhost:8001/api/v1/treasury/status
-
-# 5. Perform reconciliation
-curl -X POST http://localhost:8001/api/v1/treasury/reconcile \
-  -H "Content-Type: application/json" \
-  -d '{
-    "external_wallet_balance": "100.00000000",
-    "external_source": "Pi Network Wallet",
-    "performed_by": "admin@example.com"
-  }'
+  -d '{"rule_name": "Test", ...}'
 ```
 
-### Create Custom Allocation Rule
+## Running Tests
+
+### Unit Tests (SQLite)
 
 ```bash
-# Generate guardian token first (see Authentication section)
-TOKEN="your-guardian-jwt-token"
-
-# Create allocation rule
-curl -X POST http://localhost:8001/api/v1/allocation-rules \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "rule_name": "large_deposit_allocation",
-    "is_active": true,
-    "priority": 50,
-    "allocation_config": [
-      {"account_name": "main_operating", "percentage": 40},
-      {"account_name": "reserve_fund", "percentage": 35},
-      {"account_name": "rewards_pool", "percentage": 15},
-      {"account_name": "development_fund", "percentage": 10}
-    ],
-    "min_amount": "1000.00000000",
-    "description": "Special allocation for deposits > 1000 Pi"
-  }'
-```
-
-## Testing
-
-### Run Unit Tests
-
-```bash
-# Using pytest directly
+# Run all tests
 pytest ledger_api/tests/ -v
 
-# With coverage
-pytest ledger_api/tests/ -v --cov=ledger_api --cov-report=html
+# Run with coverage
+pytest ledger_api/tests/ --cov=ledger_api --cov-report=term-missing
 
 # Run specific test file
 pytest ledger_api/tests/test_allocation.py -v
 ```
 
-### Run Integration Tests with Docker
+### Integration Tests (PostgreSQL)
 
 ```bash
-# Run tests in PostgreSQL environment
+# Using docker-compose
 docker-compose -f docker-compose.test.yml up --abort-on-container-exit
 
-# Cleanup
-docker-compose -f docker-compose.test.yml down -v
+# Or manually with PostgreSQL running
+DATABASE_URL=postgresql://user:pass@localhost:5432/test_db \
+  pytest ledger_api/tests/ -v
 ```
 
-## Atomic Allocation Engine
+## Database Migrations
 
-The allocation engine implements the following guarantees:
-
-1. **Atomicity**: All child allocations are created in a single database transaction. If any allocation fails, the entire operation is rolled back.
-
-2. **Idempotency**: Calling the allocation engine multiple times with the same parent transaction ID returns the same results without creating duplicates.
-
-3. **Balance Updates**: Account balances are updated atomically with the transaction creation.
-
-4. **Audit Trail**: All allocations are logged in the audit_log table.
-
-### Allocation Flow
-
-```
-EXTERNAL_DEPOSIT (COMPLETED) created
-    ↓
-Allocation engine triggered automatically
-    ↓
-Find applicable allocation rule (by amount, priority)
-    ↓
-For each allocation in rule:
-    - Create INTERNAL_ALLOCATION child transaction
-    - Update source account balance (deduct)
-    - Update target account balance (add)
-    - Create audit log entry
-    ↓
-Commit all changes atomically
-```
-
-## Security
-
-### Environment Variables
-
-**Required**:
-- `GUARDIAN_JWT_SECRET` - JWT secret for guardian authentication (min 32 chars)
-- `DATABASE_URL` - PostgreSQL connection string
-
-**Security Constraints**:
-- `NFT_MINT_VALUE` must be `0` for testnet/development
-- `APP_ENVIRONMENT` must be set correctly (development, testnet, mainnet)
-
-### No Secrets in Repository
-
-This repository contains **NO secrets**. All sensitive configuration is in `.env.example` as templates.
-
-**Never commit**:
-- Actual JWT secrets
-- Database credentials
-- Private keys
-- API keys
-
-### Pi Network Integration
-
-Pi wallet verification is currently stubbed in `utils/pi_auth.py`. Future implementation will include:
-- Signature verification for Pi wallet addresses
-- Payment validation against Pi Network API
-- Balance queries from Pi Network
-
-## Deployment
-
-### Testnet Deployment
-
-1. Set up PostgreSQL database
-2. Configure environment variables
-3. Run Alembic migrations: `alembic upgrade head`
-4. Deploy with Docker or directly with uvicorn
-5. Verify health: `GET /health`
-
-### Mainnet Deployment
-
-**IMPORTANT**: Mainnet deployment requires:
-- 5/5 Guardian approvals
-- Separate mainnet PR and review process
-- Production-grade database setup
-- Proper secret management
-- On-chain integration testing
-
-## Monitoring
-
-### Health Checks
+### Using Alembic
 
 ```bash
-# Basic health
-curl http://localhost:8001/health
+# Generate migration
+alembic revision --autogenerate -m "Description"
 
-# API info
-curl http://localhost:8001/
+# Apply migrations
+alembic upgrade head
+
+# Rollback migration
+alembic downgrade -1
+
+# View migration history
+alembic history
 ```
 
-### Logs
+### Using SQL Schema Directly
 
 ```bash
-# Docker Compose
-docker-compose logs -f ledger-api
-
-# Direct run (logs to stdout)
-# Configure LOG_LEVEL environment variable
+# Apply schema to PostgreSQL
+psql -U ledger_user -d ledger_db -f sql/schema/001_initial_ledger.sql
 ```
 
-## Future Enhancements
+## Architecture
 
-### Planned Features
+### Database Schema
 
-1. **Streamlit Dashboard**: Visual interface for treasury management
-2. **On-chain Integration**: Full Pi Network payment verification
-3. **Advanced Reconciliation**: Automated discrepancy resolution
-4. **Multi-currency Support**: Support for multiple token types
-5. **Scheduled Allocations**: Time-based automatic allocations
-6. **Webhook Notifications**: Real-time alerts for transactions
+- **logical_accounts**: Internal treasury accounts (Reserve, Development, Community, Operations)
+- **ledger_transactions**: All financial transactions (deposits, withdrawals, allocations)
+- **allocation_rules**: Rules for automatic fund distribution
+- **audit_log**: Audit trail of all changes
+- **reconciliation_log**: Reconciliation records between internal/external state
 
-### Pi Network Integration Roadmap
+### Allocation Engine
 
-- [ ] Implement signature verification
-- [ ] Integrate Pi Network SDK
-- [ ] Add payment status polling
-- [ ] Implement wallet balance queries
-- [ ] Add smart contract interaction
+The allocation engine automatically distributes funds when a COMPLETED EXTERNAL_DEPOSIT transaction is created:
+
+1. Transaction created with status=COMPLETED
+2. Engine finds active allocation rules matching EXTERNAL_DEPOSIT
+3. Validates allocations sum to 100%
+4. Creates child INTERNAL_ALLOCATION transactions atomically
+5. Updates account balances
+6. Records audit trail
+
+**Idempotency**: Running allocations twice for the same transaction is safe (no duplicates).
+
+## Safety & Security
+
+### Testnet-Only Enforcement
+
+- `NFT_MINT_VALUE=0` enforced at module level
+- Runtime checks prevent production on-chain operations
+- Pi Network integrations stubbed (TODO for future)
+
+### Authentication
+
+- JWT tokens signed with HS256 algorithm
+- Guardian role required for sensitive operations
+- Tokens expire after 30 minutes (configurable)
+
+### Validation
+
+- All allocation rules must sum to 100%
+- Positive amounts only
+- Account existence verified
+- Transaction atomicity guaranteed
 
 ## Troubleshooting
 
-### Database Connection Issues
+### Database Connection Errors
 
 ```bash
 # Check PostgreSQL is running
 docker-compose ps
 
-# Check database logs
+# View PostgreSQL logs
 docker-compose logs postgres
 
 # Test connection
-psql -U ledger_user -d ledger_db -h localhost
+psql postgresql://ledger_user:ledger_pass@localhost:5432/ledger_db -c "SELECT 1"
 ```
 
-### JWT Authentication Errors
+### Import Errors
 
-- Ensure `GUARDIAN_JWT_SECRET` is set and at least 32 characters
-- Verify token includes both `sub` and `role` claims
-- Check token hasn't expired (if exp claim is set)
+```bash
+# Ensure ledger-api is in PYTHONPATH
+export PYTHONPATH="${PYTHONPATH}:/path/to/ledger-api"
 
-### Allocation Not Triggering
+# Or run from ledger-api directory
+cd ledger-api
+python -m ledger_api.main
+```
 
-- Verify transaction has `transaction_type: "EXTERNAL_DEPOSIT"`
-- Ensure status is `"COMPLETED"`
-- Check an active allocation rule exists for the amount range
-- Review logs for error messages
+### JWT Token Issues
+
+```bash
+# Verify secret is set and long enough
+python -c "import os; print(len(os.environ.get('GUARDIAN_JWT_SECRET', '')))"
+
+# Must be >= 32 characters
+```
+
+## Development
+
+### Code Style
+
+```bash
+# Format code
+black ledger_api/
+
+# Sort imports
+isort ledger_api/
+
+# Lint
+flake8 ledger_api/
+```
+
+### Adding a New Endpoint
+
+1. Create route in `ledger_api/api/v1/your_endpoint.py`
+2. Define Pydantic schemas in `ledger_api/schemas/`
+3. Add business logic in `ledger_api/services/`
+4. Register router in `ledger_api/main.py`
+5. Add tests in `ledger_api/tests/`
+
+## Deployment
+
+### Production Checklist
+
+- [ ] Set strong GUARDIAN_JWT_SECRET (min 32 chars)
+- [ ] Use PostgreSQL (not SQLite)
+- [ ] Set DATABASE_URL with production credentials
+- [ ] Configure CORS_ORIGINS appropriately
+- [ ] Set LOG_LEVEL=WARNING or ERROR
+- [ ] Verify NFT_MINT_VALUE=0
+- [ ] Enable HTTPS/TLS
+- [ ] Set up database backups
+- [ ] Configure monitoring and alerts
+- [ ] Review audit logs regularly
+
+### Environment-Specific Configs
+
+**Development:**
+```env
+DATABASE_URL=sqlite:///./ledger.db
+DEBUG=true
+RELOAD=true
+```
+
+**Testnet:**
+```env
+DATABASE_URL=postgresql://...
+APP_ENVIRONMENT=testnet
+NFT_MINT_VALUE=0
+DEBUG=false
+```
+
+**Production:**
+```env
+DATABASE_URL=postgresql://...
+APP_ENVIRONMENT=production
+NFT_MINT_VALUE=0
+DEBUG=false
+LOG_LEVEL=WARNING
+```
 
 ## Contributing
 
-See the main repository [CONTRIBUTING.md](../CONTRIBUTING.md) for guidelines.
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes
+4. Add tests for new functionality
+5. Ensure all tests pass (`pytest`)
+6. Format code (`black`, `isort`)
+7. Commit changes (`git commit -m 'Add amazing feature'`)
+8. Push to branch (`git push origin feature/amazing-feature`)
+9. Open a Pull Request
 
 ## License
 
-See the main repository [LICENSE](../LICENSE) file.
+Copyright (c) 2025 Pi Forge Collective - Quantum Genesis Initiative
 
 ## Support
 
-For issues and questions:
-- GitHub Issues: [pi-forge-quantum-genesis/issues](https://github.com/onenoly1010/pi-forge-quantum-genesis/issues)
-- Tag issues with `ledger-api` label
+For issues or questions:
+- Open an issue on GitHub
+- Review API documentation at `/docs`
+- Check logs for detailed error messages
 
 ---
 
-**Version**: 1.0.0  
-**Status**: Testnet Ready  
-**Last Updated**: 2025-12-11
+**⚠️ IMPORTANT**: This service is currently in testnet-only mode. All on-chain operations are stubbed. Do not use with real Pi Network mainnet transactions without proper implementation of Pi wallet verification and on-chain integration.

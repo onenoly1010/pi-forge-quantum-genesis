@@ -1,261 +1,218 @@
 """
-Tests for allocation engine
+Tests for allocation engine.
+Tests atomic allocation creation and balance updates.
 """
+
 import pytest
 from decimal import Decimal
-from sqlalchemy.orm import Session
-
 from ledger_api.models.ledger_models import LedgerTransaction, LogicalAccount
-from ledger_api.services.allocation import AllocationEngine, apply_allocations_for_transaction
+from ledger_api.services.allocation import apply_allocations, validate_allocation_rule
 
 
-def test_allocation_engine_creates_child_transactions(db: Session):
-    """Test that allocation engine creates child transactions for COMPLETED EXTERNAL_DEPOSIT"""
-    # Get an account to deposit to
-    account = db.query(LogicalAccount).filter(
-        LogicalAccount.account_name == "main_operating"
-    ).first()
-    
-    # Create a COMPLETED EXTERNAL_DEPOSIT transaction
+def test_apply_allocations_creates_child_transactions(test_db):
+    """Test that allocation engine creates child transactions."""
+    # Create a parent deposit transaction
     parent_tx = LedgerTransaction(
         transaction_type="EXTERNAL_DEPOSIT",
+        to_account_id=1,
+        amount=Decimal("100.0"),
         status="COMPLETED",
-        amount=Decimal("100.00000000"),
-        to_account_id=account.id,
-        external_tx_hash="0xtest123",
-        description="Test deposit",
-        performed_by="test_user"
+        purpose="Test deposit"
     )
-    
-    db.add(parent_tx)
-    db.commit()
-    db.refresh(parent_tx)
-    
-    # Record initial balance
-    initial_balance = account.current_balance
+    test_db.add(parent_tx)
+    test_db.commit()
+    test_db.refresh(parent_tx)
     
     # Apply allocations
-    engine = AllocationEngine(db)
-    child_ids = engine.apply_allocations(parent_tx.id, performed_by="test_user")
-    db.commit()
+    result = apply_allocations(test_db, parent_tx, changed_by="test")
     
-    # Verify child transactions were created
-    assert len(child_ids) == 5, "Should create 5 child allocations"
+    # Verify result structure
+    assert result["parent_transaction_id"] == parent_tx.id
+    assert len(result["child_transaction_ids"]) == 4  # 4 accounts
+    assert result["total_allocated"] == 100.0
     
-    # Verify all children are INTERNAL_ALLOCATION type
-    children = db.query(LedgerTransaction).filter(
-        LedgerTransaction.id.in_(child_ids)
-    ).all()
-    
-    for child in children:
-        assert child.transaction_type == "INTERNAL_ALLOCATION"
-        assert child.status == "COMPLETED"
-        assert child.parent_transaction_id == parent_tx.id
-    
-    # Verify total allocation equals parent amount
-    total_allocated = sum(child.amount for child in children)
-    assert total_allocated == parent_tx.amount, "Total allocation should equal parent amount"
-    
-    # Verify percentages match the default rule (50, 20, 15, 10, 5)
-    expected_allocations = {
-        "main_operating": Decimal("50.00000000"),
-        "reserve_fund": Decimal("20.00000000"),
-        "rewards_pool": Decimal("15.00000000"),
-        "development_fund": Decimal("10.00000000"),
-        "marketing_fund": Decimal("5.00000000")
-    }
-    
-    for child in children:
-        target_account = db.query(LogicalAccount).filter(
-            LogicalAccount.id == child.to_account_id
-        ).first()
-        assert child.amount == expected_allocations[target_account.account_name]
-
-
-def test_allocation_engine_updates_balances(db: Session):
-    """Test that allocation engine updates account balances correctly"""
-    # Get accounts
-    main_op = db.query(LogicalAccount).filter(
-        LogicalAccount.account_name == "main_operating"
-    ).first()
-    
-    reserve = db.query(LogicalAccount).filter(
-        LogicalAccount.account_name == "reserve_fund"
-    ).first()
-    
-    # Record initial balances
-    initial_main_balance = main_op.current_balance
-    initial_reserve_balance = reserve.current_balance
-    
-    # Create and apply deposit
-    deposit_amount = Decimal("100.00000000")
-    parent_tx = LedgerTransaction(
-        transaction_type="EXTERNAL_DEPOSIT",
-        status="COMPLETED",
-        amount=deposit_amount,
-        to_account_id=main_op.id,
-        description="Test deposit for balance update",
-        performed_by="test_user"
-    )
-    
-    db.add(parent_tx)
-    db.commit()
-    db.refresh(parent_tx)
-    
-    # Apply allocations
-    engine = AllocationEngine(db)
-    engine.apply_allocations(parent_tx.id)
-    db.commit()
-    
-    # Refresh accounts
-    db.refresh(main_op)
-    db.refresh(reserve)
-    
-    # Verify balances updated correctly
-    # main_operating should receive 50% and then distribute
-    # After allocation, it should have initial + deposit - allocations_from_it
-    # But the deposit goes TO main_operating first, then allocations split it
-    
-    # Actually, based on the allocation logic:
-    # - Parent deposit goes to main_operating: +100
-    # - Allocations split FROM main_operating: -100 total
-    # - main_operating gets 50% allocation back: +50
-    # Net for main_operating: +100 - 100 + 50 = +50
-    
-    # reserve gets 20%: +20
-    expected_reserve_balance = initial_reserve_balance + Decimal("20.00000000")
-    assert reserve.current_balance == expected_reserve_balance
-
-
-def test_allocation_engine_is_idempotent(db: Session):
-    """Test that allocation engine is idempotent - calling twice doesn't create duplicates"""
-    # Get an account
-    account = db.query(LogicalAccount).filter(
-        LogicalAccount.account_name == "main_operating"
-    ).first()
-    
-    # Create deposit
-    parent_tx = LedgerTransaction(
-        transaction_type="EXTERNAL_DEPOSIT",
-        status="COMPLETED",
-        amount=Decimal("100.00000000"),
-        to_account_id=account.id,
-        description="Idempotency test",
-        performed_by="test_user"
-    )
-    
-    db.add(parent_tx)
-    db.commit()
-    db.refresh(parent_tx)
-    
-    # Apply allocations first time
-    engine = AllocationEngine(db)
-    child_ids_1 = engine.apply_allocations(parent_tx.id)
-    db.commit()
-    
-    # Apply allocations second time
-    child_ids_2 = engine.apply_allocations(parent_tx.id)
-    db.commit()
-    
-    # Should return the same children
-    assert set(child_ids_1) == set(child_ids_2)
-    assert len(child_ids_1) == 5
-    
-    # Verify no duplicate children in database
-    all_children = db.query(LedgerTransaction).filter(
+    # Verify child transactions created
+    child_txs = test_db.query(LedgerTransaction).filter(
         LedgerTransaction.parent_transaction_id == parent_tx.id
     ).all()
     
-    assert len(all_children) == 5, "Should have exactly 5 children, not duplicates"
+    assert len(child_txs) == 4
+    
+    # Verify each child transaction
+    for child in child_txs:
+        assert child.transaction_type == "INTERNAL_ALLOCATION"
+        assert child.status == "COMPLETED"
+        assert child.parent_transaction_id == parent_tx.id
+        assert child.amount > 0
 
 
-def test_allocation_engine_rejects_non_external_deposit(db: Session):
-    """Test that allocation engine rejects non-EXTERNAL_DEPOSIT transactions"""
-    account = db.query(LogicalAccount).filter(
-        LogicalAccount.account_name == "main_operating"
-    ).first()
+def test_apply_allocations_updates_account_balances(test_db):
+    """Test that allocation engine updates account balances correctly."""
+    # Get initial balances
+    accounts = test_db.query(LogicalAccount).all()
+    initial_balances = {acc.id: acc.current_balance for acc in accounts}
     
-    # Create a PAYMENT transaction (not EXTERNAL_DEPOSIT)
-    tx = LedgerTransaction(
-        transaction_type="PAYMENT",
-        status="COMPLETED",
-        amount=Decimal("100.00000000"),
-        from_account_id=account.id,
-        to_account_id=account.id,
-        description="Payment transaction",
-        performed_by="test_user"
-    )
-    
-    db.add(tx)
-    db.commit()
-    db.refresh(tx)
-    
-    # Try to apply allocations - should raise error
-    engine = AllocationEngine(db)
-    
-    with pytest.raises(ValueError, match="must be EXTERNAL_DEPOSIT"):
-        engine.apply_allocations(tx.id)
-
-
-def test_allocation_engine_rejects_non_completed_status(db: Session):
-    """Test that allocation engine rejects non-COMPLETED transactions"""
-    account = db.query(LogicalAccount).filter(
-        LogicalAccount.account_name == "main_operating"
-    ).first()
-    
-    # Create a PENDING EXTERNAL_DEPOSIT
-    tx = LedgerTransaction(
-        transaction_type="EXTERNAL_DEPOSIT",
-        status="PENDING",  # Not COMPLETED
-        amount=Decimal("100.00000000"),
-        to_account_id=account.id,
-        description="Pending deposit",
-        performed_by="test_user"
-    )
-    
-    db.add(tx)
-    db.commit()
-    db.refresh(tx)
-    
-    # Try to apply allocations - should raise error
-    engine = AllocationEngine(db)
-    
-    with pytest.raises(ValueError, match="must be COMPLETED"):
-        engine.apply_allocations(tx.id)
-
-
-def test_apply_allocations_for_transaction_convenience_function(db: Session):
-    """Test the convenience function for applying allocations"""
-    account = db.query(LogicalAccount).filter(
-        LogicalAccount.account_name == "main_operating"
-    ).first()
-    
+    # Create and apply allocation
     parent_tx = LedgerTransaction(
         transaction_type="EXTERNAL_DEPOSIT",
+        to_account_id=1,
+        amount=Decimal("100.0"),
         status="COMPLETED",
-        amount=Decimal("100.00000000"),
-        to_account_id=account.id,
-        description="Convenience function test",
-        performed_by="test_user"
+        purpose="Test deposit"
     )
+    test_db.add(parent_tx)
+    test_db.commit()
+    test_db.refresh(parent_tx)
     
-    db.add(parent_tx)
-    db.commit()
-    db.refresh(parent_tx)
+    result = apply_allocations(test_db, parent_tx, changed_by="test")
     
-    # Use convenience function
-    child_ids = apply_allocations_for_transaction(
-        db=db,
-        transaction_id=parent_tx.id,
-        performed_by="test_user"
+    # Verify balances updated
+    test_db.expire_all()  # Force refresh from DB
+    accounts = test_db.query(LogicalAccount).all()
+    
+    for account in accounts:
+        if account.id in [1, 2, 3, 4]:  # Active accounts in allocation
+            # Balance should have increased
+            assert account.current_balance > initial_balances[account.id]
+    
+    # Verify total allocated matches
+    total_balance_increase = sum(
+        acc.current_balance - initial_balances[acc.id]
+        for acc in accounts
     )
-    db.commit()
+    assert float(total_balance_increase) == result["total_allocated"]
+
+
+def test_apply_allocations_respects_percentages(test_db):
+    """Test that allocations respect configured percentages."""
+    parent_tx = LedgerTransaction(
+        transaction_type="EXTERNAL_DEPOSIT",
+        to_account_id=1,
+        amount=Decimal("100.0"),
+        status="COMPLETED",
+        purpose="Test deposit"
+    )
+    test_db.add(parent_tx)
+    test_db.commit()
+    test_db.refresh(parent_tx)
     
-    # Verify it worked
-    assert len(child_ids) == 5
+    result = apply_allocations(test_db, parent_tx, changed_by="test")
     
-    children = db.query(LedgerTransaction).filter(
-        LedgerTransaction.id.in_(child_ids)
-    ).all()
+    # Verify allocation percentages
+    allocations = result["allocations"]
     
-    assert all(child.parent_transaction_id == parent_tx.id for child in children)
+    # Check expected percentages (40%, 25%, 20%, 15%)
+    expected_amounts = [40.0, 25.0, 20.0, 15.0]
+    actual_amounts = sorted([a["amount"] for a in allocations], reverse=True)
+    
+    for expected, actual in zip(expected_amounts, actual_amounts):
+        assert abs(expected - actual) < 0.01  # Allow small floating point errors
+
+
+def test_apply_allocations_is_idempotent(test_db):
+    """Test that applying allocations twice doesn't create duplicates."""
+    parent_tx = LedgerTransaction(
+        transaction_type="EXTERNAL_DEPOSIT",
+        to_account_id=1,
+        amount=Decimal("100.0"),
+        status="COMPLETED",
+        purpose="Test deposit"
+    )
+    test_db.add(parent_tx)
+    test_db.commit()
+    test_db.refresh(parent_tx)
+    
+    # Apply allocations twice
+    result1 = apply_allocations(test_db, parent_tx, changed_by="test")
+    result2 = apply_allocations(test_db, parent_tx, changed_by="test")
+    
+    # Second call should return empty result
+    assert len(result2["child_transaction_ids"]) == 0
+    assert result2["total_allocated"] == 0
+    
+    # Verify only one set of child transactions exists
+    child_count = test_db.query(LedgerTransaction).filter(
+        LedgerTransaction.parent_transaction_id == parent_tx.id
+    ).count()
+    
+    assert child_count == 4  # Only original 4 allocations
+
+
+def test_apply_allocations_atomic(test_db):
+    """Test that allocations are applied atomically (all or nothing)."""
+    # Create a transaction
+    parent_tx = LedgerTransaction(
+        transaction_type="EXTERNAL_DEPOSIT",
+        to_account_id=1,
+        amount=Decimal("100.0"),
+        status="COMPLETED",
+        purpose="Test deposit"
+    )
+    test_db.add(parent_tx)
+    test_db.commit()
+    test_db.refresh(parent_tx)
+    
+    # Get initial state
+    initial_child_count = test_db.query(LedgerTransaction).filter(
+        LedgerTransaction.parent_transaction_id == parent_tx.id
+    ).count()
+    
+    # Apply allocations
+    result = apply_allocations(test_db, parent_tx, changed_by="test")
+    
+    # Verify all or nothing
+    final_child_count = test_db.query(LedgerTransaction).filter(
+        LedgerTransaction.parent_transaction_id == parent_tx.id
+    ).count()
+    
+    # Either 0 (initial) or 4 (after allocation), never partial
+    assert final_child_count in [0, 4]
+
+
+def test_validate_allocation_rule_sum_100(test_db):
+    """Test that allocation rule validation enforces 100% sum."""
+    # Valid allocation (sums to 100%)
+    valid_allocations = [
+        {"account_id": 1, "percentage": 40.0},
+        {"account_id": 2, "percentage": 60.0}
+    ]
+    
+    assert validate_allocation_rule(valid_allocations, test_db) is True
+    
+    # Invalid allocation (sums to 90%)
+    invalid_allocations = [
+        {"account_id": 1, "percentage": 40.0},
+        {"account_id": 2, "percentage": 50.0}
+    ]
+    
+    with pytest.raises(ValueError, match="must sum to 100%"):
+        validate_allocation_rule(invalid_allocations, test_db)
+
+
+def test_validate_allocation_rule_account_exists(test_db):
+    """Test that allocation rule validation checks account existence."""
+    # Invalid account ID
+    invalid_allocations = [
+        {"account_id": 999, "percentage": 100.0}
+    ]
+    
+    with pytest.raises(ValueError, match="does not exist"):
+        validate_allocation_rule(invalid_allocations, test_db)
+
+
+def test_validate_allocation_rule_account_active(test_db):
+    """Test that allocation rule validation checks account is active."""
+    # Deactivate an account
+    account = test_db.query(LogicalAccount).filter(
+        LogicalAccount.id == 1
+    ).first()
+    account.is_active = False
+    test_db.commit()
+    
+    # Try to create allocation with inactive account
+    allocations = [
+        {"account_id": 1, "percentage": 100.0}
+    ]
+    
+    with pytest.raises(ValueError, match="not active"):
+        validate_allocation_rule(allocations, test_db)

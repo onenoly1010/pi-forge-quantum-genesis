@@ -1,45 +1,113 @@
 """
-Database configuration and SQLAlchemy setup for Ledger API
+Database connection and session management for Ledger API.
+Supports both PostgreSQL (production) and SQLite (development/testing).
 """
+
 import os
-from sqlalchemy import create_engine
+from typing import Generator
+from sqlalchemy import create_engine, event
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-from dotenv import load_dotenv
+from sqlalchemy.orm import sessionmaker, Session
+from contextlib import contextmanager
+import logging
 
-# Load environment variables
-load_dotenv()
+logger = logging.getLogger(__name__)
 
-# Database URL from environment
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./ledger.db")
+# Get database URL from environment
+DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///./ledger.db")
 
-# Create SQLAlchemy engine
-# SQLite compatibility: use check_same_thread=False for SQLite
-connect_args = {}
+# SQLite-specific settings
 if DATABASE_URL.startswith("sqlite"):
-    connect_args = {"check_same_thread": False}
+    engine = create_engine(
+        DATABASE_URL,
+        connect_args={"check_same_thread": False},
+        echo=os.environ.get("DEBUG", "false").lower() == "true"
+    )
+    
+    # Enable foreign key support for SQLite
+    @event.listens_for(engine, "connect")
+    def set_sqlite_pragma(dbapi_conn, connection_record):
+        cursor = dbapi_conn.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
+else:
+    # PostgreSQL settings
+    engine = create_engine(
+        DATABASE_URL,
+        pool_pre_ping=True,
+        pool_size=5,
+        max_overflow=10,
+        echo=os.environ.get("DEBUG", "false").lower() == "true"
+    )
 
-engine = create_engine(
-    DATABASE_URL,
-    connect_args=connect_args,
-    pool_pre_ping=True,
-    echo=os.getenv("SQL_ECHO", "false").lower() == "true"
-)
-
-# Create SessionLocal class
+# Session factory
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Create Base class for models
+# Base class for SQLAlchemy models
 Base = declarative_base()
 
-# Dependency for getting DB session
-def get_db():
+
+def get_db() -> Generator[Session, None, None]:
     """
-    Database session dependency for FastAPI routes.
-    Yields a database session and ensures proper cleanup.
+    Dependency function to get database session.
+    Use with FastAPI Depends.
+    
+    Yields:
+        Session: Database session
     """
     db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
+
+
+@contextmanager
+def get_db_context():
+    """
+    Context manager for database session.
+    Use in service functions that need database access.
+    
+    Yields:
+        Session: Database session
+    """
+    db = SessionLocal()
+    try:
+        yield db
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Database error: {e}")
+        raise
+    finally:
+        db.close()
+
+
+def init_db():
+    """
+    Initialize database tables.
+    Creates all tables defined in models.
+    """
+    from ledger_api.models import ledger_models  # Import models to register them
+    Base.metadata.create_all(bind=engine)
+    logger.info("Database tables created successfully")
+
+
+def drop_db():
+    """
+    Drop all database tables.
+    WARNING: This will delete all data!
+    Use only for testing.
+    """
+    Base.metadata.drop_all(bind=engine)
+    logger.warning("All database tables dropped")
+
+
+def get_engine():
+    """
+    Get the database engine instance.
+    
+    Returns:
+        Engine: SQLAlchemy engine
+    """
+    return engine

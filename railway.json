@@ -1,1 +1,0 @@
-{"build": {"builder": "DOCKERFILE"}, "deploy": {"numReplicas": 1}, "start": "uvicorn server.main:app --host 0.0.0.0 --port $PORT"}

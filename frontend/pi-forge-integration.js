@@ -1,488 +1,405 @@
 /**
- * PiForge Integration Module - Production Mainnet Ready
- * Comprehensive Pi Network integration for Quantum Genesis platform
- * Version: 2.0.0 - Mainnet Ready
+ * Pi Forge Integration SDK
+ * 
+ * JavaScript SDK for browser-based Pi Network interactions with the Pi Forge Quantum Genesis platform.
+ * 
+ * Features:
+ * - Pi SDK integration
+ * - Payment flow orchestration
+ * - Real-time resonance visualization
+ * - Session management
+ * 
+ * @version 1.0.0
+ * @requires Pi SDK (https://sdk.minepi.com/pi-sdk.js)
  */
 
-const PiForge = {
-    // Configuration
-    config: {
-        apiBase: window.location.origin,
-        network: 'mainnet', // 'testnet' or 'mainnet'
-        version: '2.0.0',
-        debug: false
-    },
-
-    // Authentication state
-    auth: {
-        user: null,
-        accessToken: null,
-        isAuthenticated: false
-    },
-
-    // Payment state
-    payments: {
-        pending: new Map(),
-        completed: [],
-        failed: []
-    },
+(function(window) {
+    'use strict';
 
     /**
-     * Initialize PiForge with Pi Network SDK
-     * @param {Object} options - Configuration options
+     * PiForge SDK Class
      */
-    async initialize(options = {}) {
-        this.config = { ...this.config, ...options };
-        
-        if (this.config.debug) {
-            console.log('🌌 PiForge Quantum Genesis initializing...');
+    class PiForgeSDK {
+        constructor() {
+            this.config = {
+                network: 'testnet',
+                debug: false,
+                apiBase: typeof window !== 'undefined' && window.location.protocol === 'https:' 
+                    ? 'https://localhost:8000' 
+                    : 'http://localhost:8000',
+                apiPath: '/api/pi-network'
+            };
+            this.initialized = false;
+            this.sessionId = null;
+            this.user = null;
+            this.Pi = null;
+            this.BOOST_COST_PER_PERCENT = 0.01; // Cost in Pi per 1% boost
         }
 
-        // Check if Pi SDK is available
-        if (typeof Pi === 'undefined') {
-            console.warn('⚠️ Pi SDK not available - running in demo mode');
-            return { success: true, mode: 'demo' };
-        }
-
-        try {
-            // Initialize Pi SDK
-            await Pi.init({ version: "2.0", sandbox: this.config.network === 'testnet' });
+        /**
+         * Initialize the Pi Forge SDK
+         * @param {Object} options - Configuration options
+         * @param {string} options.network - Network mode: 'testnet' or 'mainnet'
+         * @param {boolean} options.debug - Enable debug logging
+         * @param {string} options.apiBase - Base URL for API endpoints
+         */
+        async initialize(options = {}) {
+            this.config = { ...this.config, ...options };
             
             if (this.config.debug) {
-                console.log('✅ Pi SDK initialized for', this.config.network);
+                console.log('[PiForge] Initializing with config:', this.config);
             }
 
-            return { success: true, mode: this.config.network };
-        } catch (error) {
-            console.error('❌ Pi SDK initialization failed:', error);
-            return { success: false, error: error.message };
-        }
-    },
+            // Check if Pi SDK is loaded
+            if (typeof window.Pi === 'undefined') {
+                throw new Error('Pi SDK not loaded. Please ensure the Pi SDK is included before this script. See documentation for the current SDK URL.');
+            }
 
-    /**
-     * Authenticate user with Pi Network
-     * @param {Array} scopes - Authentication scopes ['payments', 'username', 'wallet_address']
-     */
-    async authenticate(scopes = ['payments', 'username']) {
-        if (typeof Pi === 'undefined') {
-            // Demo mode authentication
-            this.auth = {
-                user: { username: 'demo_pioneer', uid: 'demo_uid_' + Date.now() },
-                accessToken: 'demo_token_' + Date.now(),
-                isAuthenticated: true
-            };
-            return this.auth;
-        }
-
-        try {
-            const authResult = await Pi.authenticate(scopes, this._onIncompletePaymentFound.bind(this));
-            
-            this.auth = {
-                user: authResult.user,
-                accessToken: authResult.accessToken,
-                isAuthenticated: true
-            };
+            this.Pi = window.Pi;
+            this.initialized = true;
 
             if (this.config.debug) {
-                console.log('✅ User authenticated:', this.auth.user.username);
+                console.log('[PiForge] Initialization complete');
             }
 
-            // Notify backend of authentication
-            await this._notifyBackendAuth();
-
-            return this.auth;
-        } catch (error) {
-            console.error('❌ Authentication failed:', error);
-            this.auth.isAuthenticated = false;
-            throw error;
-        }
-    },
-
-    /**
-     * Create a Pi Network payment
-     * @param {Object} paymentData - Payment configuration
-     */
-    async createPayment(paymentData) {
-        const { amount, memo, metadata = {} } = paymentData;
-
-        if (!amount || amount <= 0) {
-            throw new Error('Invalid payment amount');
+            return this;
         }
 
-        const paymentConfig = {
-            amount: parseFloat(amount.toFixed(7)), // Pi supports up to 7 decimals
-            memo: memo || `PiForge Payment - ${new Date().toISOString()}`,
-            metadata: {
-                ...metadata,
-                timestamp: Date.now(),
-                platform: 'piforge_quantum_genesis',
-                version: this.config.version
-            }
-        };
+        /**
+         * Authenticate user with Pi Network
+         * @param {Array<string>} scopes - Requested permission scopes (e.g., ['payments', 'username'])
+         * @returns {Object} Authentication result with user info and session
+         */
+        async authenticate(scopes = ['payments', 'username']) {
+            this._ensureInitialized();
 
-        if (typeof Pi === 'undefined') {
-            // Demo mode payment simulation
-            return this._simulatePayment(paymentConfig);
-        }
-
-        return new Promise((resolve, reject) => {
-            Pi.createPayment(paymentConfig, {
-                onReadyForServerApproval: async (paymentId) => {
-                    if (this.config.debug) {
-                        console.log('📝 Payment ready for server approval:', paymentId);
-                    }
-                    
-                    this.payments.pending.set(paymentId, { ...paymentConfig, status: 'pending' });
-                    
-                    try {
-                        // Send to backend for approval
-                        const approvalResult = await this._requestServerApproval(paymentId, paymentConfig);
-                        if (!approvalResult.approved) {
-                            throw new Error(approvalResult.message || 'Server rejected payment');
-                        }
-                    } catch (error) {
-                        console.error('❌ Server approval failed:', error);
-                        reject(error);
-                    }
-                },
-
-                onReadyForServerCompletion: async (paymentId, txid) => {
-                    if (this.config.debug) {
-                        console.log('✅ Payment ready for completion:', paymentId, txid);
-                    }
-
-                    try {
-                        // Complete payment on backend
-                        const completionResult = await this._completePayment(paymentId, txid);
-                        
-                        this.payments.pending.delete(paymentId);
-                        this.payments.completed.push({
-                            paymentId,
-                            txid,
-                            ...paymentConfig,
-                            completedAt: Date.now()
-                        });
-
-                        // Trigger resonance visualization
-                        this.renderResonanceViz({ txid, ...metadata });
-
-                        resolve({
-                            success: true,
-                            paymentId,
-                            txid,
-                            ...completionResult
-                        });
-                    } catch (error) {
-                        console.error('❌ Payment completion failed:', error);
-                        reject(error);
-                    }
-                },
-
-                onCancel: (paymentId) => {
-                    if (this.config.debug) {
-                        console.log('❌ Payment cancelled:', paymentId);
-                    }
-                    this.payments.pending.delete(paymentId);
-                    reject(new Error('Payment cancelled by user'));
-                },
-
-                onError: (error, payment) => {
-                    console.error('❌ Payment error:', error);
-                    if (payment?.identifier) {
-                        this.payments.pending.delete(payment.identifier);
-                        this.payments.failed.push({
-                            paymentId: payment.identifier,
-                            error: error.message,
-                            failedAt: Date.now()
-                        });
-                    }
-                    reject(error);
-                }
-            });
-        });
-    },
-
-    /**
-     * Activate Mining Boost via Pi payment
-     * @param {number} boostPercent - Boost percentage (1-100)
-     */
-    async activateMiningBoost(boostPercent) {
-        if (boostPercent < 1 || boostPercent > 100) {
-            throw new Error('Boost percent must be between 1 and 100');
-        }
-
-        try {
-            const paymentResult = await this.createPayment({
-                amount: (boostPercent / 100) * 0.15,
-                memo: `PiForge Boost: ${boostPercent}% Ethical Resonance Activated`,
-                metadata: { 
-                    type: 'mining_boost',
-                    boostPercent,
-                    userId: this.auth.user?.uid
-                }
-            });
-
-            // Update UI
-            const statusEl = document.getElementById('status');
-            if (statusEl) {
-                statusEl.textContent += ` | Boost Activated: +${boostPercent}% Mining!`;
-            }
-
-            return paymentResult;
-        } catch (error) {
-            console.error('❌ Mining Boost Failed:', error);
-            throw error;
-        }
-    },
-
-    /**
-     * Render quantum resonance visualization (4-phase SVG cascade)
-     * @param {Object} metadata - Payment/transaction metadata
-     */
-    renderResonanceViz(metadata = {}) {
-        // Remove any existing visualization
-        const existing = document.getElementById('piforge-resonance-viz');
-        if (existing) existing.remove();
-
-        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.id = 'piforge-resonance-viz';
-        svg.setAttribute('width', '300');
-        svg.setAttribute('height', '300');
-        svg.setAttribute('viewBox', '0 0 300 300');
-        svg.style.cssText = 'position:fixed;top:10px;right:10px;z-index:10000;pointer-events:none;';
-
-        // 4-phase quantum cascade
-        const phases = [
-            { name: 'foundation', radius: 50, color: 'hsl(0, 100%, 50%)', duration: '2s' },
-            { name: 'growth', radius: 80, color: 'hsl(90, 100%, 50%)', duration: '3s' },
-            { name: 'harmony', radius: 110, color: 'hsl(180, 100%, 50%)', duration: '4s' },
-            { name: 'transcendence', radius: 140, color: 'hsl(270, 100%, 50%)', duration: '5s' }
-        ];
-
-        phases.forEach((phase, i) => {
-            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-            circle.setAttribute('cx', '150');
-            circle.setAttribute('cy', '150');
-            circle.setAttribute('r', phase.radius);
-            circle.setAttribute('fill', 'none');
-            circle.setAttribute('stroke', phase.color);
-            circle.setAttribute('stroke-width', '2');
-            circle.setAttribute('opacity', '0.7');
-            circle.style.animation = `piforge-resonate-${i} ${phase.duration} ease-in-out infinite`;
-            circle.style.transformOrigin = 'center';
-            svg.appendChild(circle);
-        });
-
-        // Center indicator
-        const centerCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        centerCircle.setAttribute('cx', '150');
-        centerCircle.setAttribute('cy', '150');
-        centerCircle.setAttribute('r', '20');
-        centerCircle.setAttribute('fill', 'rgba(255, 215, 0, 0.8)');
-        centerCircle.style.animation = 'piforge-pulse 1s ease-in-out infinite';
-        svg.appendChild(centerCircle);
-
-        document.body.appendChild(svg);
-
-        // Inject CSS animations
-        if (!document.getElementById('piforge-resonance-styles')) {
-            const style = document.createElement('style');
-            style.id = 'piforge-resonance-styles';
-            style.textContent = `
-                @keyframes piforge-resonate-0 {
-                    0% { transform: scale(1) rotate(0deg); opacity: 0.7; }
-                    50% { transform: scale(1.3) rotate(180deg); opacity: 0.3; }
-                    100% { transform: scale(1) rotate(360deg); opacity: 0.7; }
-                }
-                @keyframes piforge-resonate-1 {
-                    0% { transform: scale(0.9) rotate(0deg); opacity: 0.6; }
-                    50% { transform: scale(1.4) rotate(270deg); opacity: 0.2; }
-                    100% { transform: scale(0.9) rotate(360deg); opacity: 0.6; }
-                }
-                @keyframes piforge-resonate-2 {
-                    0% { transform: scale(1.1) rotate(180deg); opacity: 0.5; }
-                    50% { transform: scale(1.5) rotate(90deg); opacity: 0.2; }
-                    100% { transform: scale(1.1) rotate(540deg); opacity: 0.5; }
-                }
-                @keyframes piforge-resonate-3 {
-                    0% { transform: scale(0.85) rotate(270deg); opacity: 0.4; }
-                    50% { transform: scale(1.6) rotate(0deg); opacity: 0.15; }
-                    100% { transform: scale(0.85) rotate(630deg); opacity: 0.4; }
-                }
-                @keyframes piforge-pulse {
-                    0%, 100% { transform: scale(1); opacity: 0.8; }
-                    50% { transform: scale(1.2); opacity: 1; }
-                }
-            `;
-            document.head.appendChild(style);
-        }
-
-        // Auto-remove after 10 seconds
-        setTimeout(() => {
-            svg.style.opacity = '0';
-            svg.style.transition = 'opacity 1s';
-            setTimeout(() => svg.remove(), 1000);
-        }, 10000);
-    },
-
-    /**
-     * Compute ethical resonance score
-     * @param {number} ethicalScore - Ethical compliance score (0-100)
-     * @param {number} qualiaImpact - Qualia impact score (0-100)
-     */
-    computeResonance(ethicalScore, qualiaImpact) {
-        const resonance = Math.floor((ethicalScore * 0.7 + qualiaImpact * 3) / 10);
-        
-        if (resonance >= 80) return { level: 'Transcendent', color: '#8B5CF6', score: resonance };
-        if (resonance >= 60) return { level: 'Harmonic', color: '#3B82F6', score: resonance };
-        if (resonance >= 40) return { level: 'Growing', color: '#10B981', score: resonance };
-        return { level: 'Foundation', color: '#EF4444', score: resonance };
-    },
-
-    /**
-     * Get Guardian status from backend
-     */
-    async getGuardianStatus() {
-        try {
-            const response = await fetch(`${this.config.apiBase}/api/guardian/status`);
-            return await response.json();
-        } catch (error) {
-            console.error('❌ Failed to get Guardian status:', error);
-            throw error;
-        }
-    },
-
-    /**
-     * Trigger Guardian security scan
-     */
-    async triggerGuardianScan() {
-        try {
-            const response = await fetch(`${this.config.apiBase}/api/guardian/scan`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            });
-            return await response.json();
-        } catch (error) {
-            console.error('❌ Guardian scan failed:', error);
-            throw error;
-        }
-    },
-
-    /**
-     * Request ethical audit
-     * @param {string} transactionId - Transaction to audit
-     * @param {number} amount - Transaction amount
-     */
-    async requestEthicalAudit(transactionId, amount) {
-        try {
-            const response = await fetch(`${this.config.apiBase}/api/ethical-audit`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    transaction_id: transactionId,
-                    amount: amount,
-                    user_context: this.auth.user?.username || 'anonymous'
-                })
-            });
-            return await response.json();
-        } catch (error) {
-            console.error('❌ Ethical audit failed:', error);
-            throw error;
-        }
-    },
-
-    // Private helper methods
-
-    async _notifyBackendAuth() {
-        try {
-            // Optionally notify backend of successful authentication
-            // This could create/update user records in Supabase
             if (this.config.debug) {
-                console.log('📡 Backend notified of authentication');
+                console.log('[PiForge] Authenticating with scopes:', scopes);
             }
-        } catch (error) {
-            console.warn('⚠️ Backend notification failed:', error);
-        }
-    },
 
-    async _requestServerApproval(paymentId, paymentConfig) {
-        const response = await fetch(`${this.config.apiBase}/api/verify-payment`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': this.auth.accessToken ? `Bearer ${this.auth.accessToken}` : ''
-            },
-            body: JSON.stringify({
-                payment_id: paymentId,
-                amount: paymentConfig.amount,
-                metadata: paymentConfig.metadata
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error(`Server approval failed: ${response.status}`);
-        }
-
-        return await response.json();
-    },
-
-    async _completePayment(paymentId, txid) {
-        // In production, this would complete the payment on the backend
-        // and update transaction records in Supabase
-        return {
-            completed: true,
-            paymentId,
-            txid,
-            timestamp: Date.now()
-        };
-    },
-
-    _onIncompletePaymentFound(payment) {
-        if (this.config.debug) {
-            console.log('📌 Incomplete payment found:', payment);
-        }
-        // Handle incomplete payments (e.g., show recovery dialog)
-        this.payments.pending.set(payment.identifier, {
-            ...payment,
-            status: 'incomplete',
-            foundAt: Date.now()
-        });
-    },
-
-    async _simulatePayment(paymentConfig) {
-        // Demo mode payment simulation
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                const paymentId = 'demo_' + Date.now();
-                const txid = 'demo_tx_' + Math.random().toString(36).substring(7);
+            try {
+                // Authenticate with Pi SDK
+                const authResult = await this.Pi.authenticate(scopes, this._onIncompletePaymentFound.bind(this));
                 
-                this.payments.completed.push({
-                    paymentId,
-                    txid,
-                    ...paymentConfig,
-                    completedAt: Date.now(),
-                    mode: 'demo'
+                if (this.config.debug) {
+                    console.log('[PiForge] Pi SDK authentication successful:', authResult);
+                }
+
+                // Register session with backend
+                const response = await this._apiRequest('POST', '/authenticate', {
+                    pi_uid: authResult.user.uid,
+                    username: authResult.user.username,
+                    access_token: authResult.accessToken
                 });
 
-                this.renderResonanceViz({ txid, demo: true });
+                this.sessionId = response.session_id;
+                this.user = authResult.user;
 
-                resolve({
-                    success: true,
-                    paymentId,
-                    txid,
-                    mode: 'demo'
+                if (this.config.debug) {
+                    console.log('[PiForge] Backend session created:', this.sessionId);
+                }
+
+                return {
+                    user: this.user,
+                    accessToken: authResult.accessToken,
+                    sessionId: this.sessionId
+                };
+            } catch (error) {
+                console.error('[PiForge] Authentication failed:', error);
+                throw new Error(`Authentication failed: ${error.message}`);
+            }
+        }
+
+        /**
+         * Create a payment
+         * @param {Object} paymentData - Payment details
+         * @param {number} paymentData.amount - Payment amount in Pi
+         * @param {string} paymentData.memo - Payment description
+         * @param {Object} paymentData.metadata - Additional metadata
+         * @returns {Object} Payment result with paymentId and transaction hash
+         */
+        async createPayment(paymentData) {
+            this._ensureInitialized();
+            this._ensureAuthenticated();
+
+            const { amount, memo, metadata = {} } = paymentData;
+
+            if (!amount || amount <= 0) {
+                throw new Error('Payment amount must be greater than 0');
+            }
+
+            if (!memo) {
+                throw new Error('Payment memo is required');
+            }
+
+            if (this.config.debug) {
+                console.log('[PiForge] Creating payment:', paymentData);
+            }
+
+            try {
+                // Create payment record on backend
+                const backendPayment = await this._apiRequest('POST', '/payments/create', {
+                    amount: parseFloat(amount),
+                    memo: memo,
+                    user_id: this.user.uid,
+                    metadata: metadata
                 });
-            }, 1500);
-        });
+
+                if (this.config.debug) {
+                    console.log('[PiForge] Backend payment created:', backendPayment);
+                }
+
+                // Create payment with Pi SDK
+                const piPayment = await this.Pi.createPayment({
+                    amount: amount,
+                    memo: memo,
+                    metadata: { 
+                        ...metadata, 
+                        paymentId: backendPayment.payment_id 
+                    }
+                }, {
+                    onReadyForServerApproval: (paymentId) => this._onReadyForServerApproval(paymentId),
+                    onReadyForServerCompletion: (paymentId, txid) => this._onReadyForServerCompletion(paymentId, txid),
+                    onCancel: (paymentId) => this._onPaymentCancelled(paymentId),
+                    onError: (error, payment) => this._onPaymentError(error, payment)
+                });
+
+                if (this.config.debug) {
+                    console.log('[PiForge] Pi SDK payment created:', piPayment);
+                }
+
+                // Trigger resonance visualization if payment completed
+                if (piPayment.status === 'completed') {
+                    this._triggerResonanceVisualization(piPayment);
+                }
+
+                return {
+                    paymentId: backendPayment.payment_id,
+                    txid: piPayment.transaction?.txid,
+                    status: piPayment.status,
+                    amount: amount,
+                    memo: memo
+                };
+            } catch (error) {
+                console.error('[PiForge] Payment creation failed:', error);
+                throw new Error(`Payment creation failed: ${error.message}`);
+            }
+        }
+
+        /**
+         * Activate mining boost (convenience method)
+         * @param {number} boostPercent - Boost percentage (e.g., 50 for +50%)
+         * @returns {Object} Payment result
+         */
+        async activateMiningBoost(boostPercent) {
+            const amount = this._calculateBoostCost(boostPercent);
+            
+            return this.createPayment({
+                amount: amount,
+                memo: `Mining boost activation: +${boostPercent}%`,
+                metadata: {
+                    type: 'mining_boost',
+                    boostPercent: boostPercent,
+                    duration: '24h'
+                }
+            });
+        }
+
+        /**
+         * Get payment history
+         * @param {number} limit - Maximum number of records to return
+         * @returns {Array} List of payments
+         */
+        async getPaymentHistory(limit = 10) {
+            this._ensureInitialized();
+            this._ensureAuthenticated();
+
+            try {
+                const response = await this._apiRequest('GET', `/payments/history?user_id=${this.user.uid}&limit=${limit}`);
+                return response.payments || [];
+            } catch (error) {
+                console.error('[PiForge] Failed to get payment history:', error);
+                throw error;
+            }
+        }
+
+        /**
+         * Verify a payment
+         * @param {string} paymentId - Payment ID to verify
+         * @param {string} txid - Transaction hash
+         * @returns {Object} Verification result
+         */
+        async verifyPayment(paymentId, txid) {
+            this._ensureInitialized();
+
+            try {
+                const response = await this._apiRequest('POST', '/payments/verify', {
+                    payment_id: paymentId,
+                    tx_hash: txid
+                });
+                return response;
+            } catch (error) {
+                console.error('[PiForge] Payment verification failed:', error);
+                throw error;
+            }
+        }
+
+        /**
+         * Get system status
+         * @returns {Object} System status information
+         */
+        async getStatus() {
+            this._ensureInitialized();
+
+            try {
+                const response = await this._apiRequest('GET', '/status');
+                return response;
+            } catch (error) {
+                console.error('[PiForge] Failed to get status:', error);
+                throw error;
+            }
+        }
+
+        // Private methods
+
+        _ensureInitialized() {
+            if (!this.initialized) {
+                throw new Error('PiForge SDK not initialized. Call PiForge.initialize() first.');
+            }
+        }
+
+        _ensureAuthenticated() {
+            if (!this.sessionId || !this.user) {
+                throw new Error('User not authenticated. Call PiForge.authenticate() first.');
+            }
+        }
+
+        async _apiRequest(method, endpoint, data = null) {
+            const url = `${this.config.apiBase}${this.config.apiPath}${endpoint}`;
+            
+            const options = {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+
+            if (this.sessionId) {
+                options.headers['X-Session-ID'] = this.sessionId;
+            }
+
+            if (data && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
+                options.body = JSON.stringify(data);
+            }
+
+            if (this.config.debug) {
+                console.log(`[PiForge] API ${method} ${url}`, data);
+            }
+
+            const response = await fetch(url, options);
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
+                throw new Error(errorData.detail || `HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            return response.json();
+        }
+
+        async _onReadyForServerApproval(paymentId) {
+            if (this.config.debug) {
+                console.log('[PiForge] Payment ready for approval:', paymentId);
+            }
+
+            try {
+                await this._apiRequest('POST', '/payments/approve', {
+                    payment_id: paymentId
+                });
+                if (this.config.debug) {
+                    console.log('[PiForge] Payment approved:', paymentId);
+                }
+            } catch (error) {
+                console.error('[PiForge] Payment approval failed:', error);
+                throw error;
+            }
+        }
+
+        async _onReadyForServerCompletion(paymentId, txid) {
+            if (this.config.debug) {
+                console.log('[PiForge] Payment ready for completion:', paymentId, txid);
+            }
+
+            try {
+                await this._apiRequest('POST', '/payments/complete', {
+                    payment_id: paymentId,
+                    tx_hash: txid
+                });
+                if (this.config.debug) {
+                    console.log('[PiForge] Payment completed:', paymentId);
+                }
+
+                // Trigger resonance visualization
+                this._triggerResonanceVisualization({ paymentId, txid });
+            } catch (error) {
+                console.error('[PiForge] Payment completion failed:', error);
+                throw error;
+            }
+        }
+
+        async _onPaymentCancelled(paymentId) {
+            if (this.config.debug) {
+                console.log('[PiForge] Payment cancelled:', paymentId);
+            }
+
+            try {
+                await this._apiRequest('POST', '/payments/cancel', {
+                    payment_id: paymentId
+                });
+            } catch (error) {
+                console.error('[PiForge] Payment cancellation handling failed:', error);
+            }
+        }
+
+        _onPaymentError(error, payment) {
+            console.error('[PiForge] Payment error:', error, payment);
+            
+            // Emit custom event for error handling
+            window.dispatchEvent(new CustomEvent('piforge:payment:error', {
+                detail: { error, payment }
+            }));
+        }
+
+        async _onIncompletePaymentFound(payment) {
+            if (this.config.debug) {
+                console.log('[PiForge] Incomplete payment found:', payment);
+            }
+
+            // Handle incomplete payment - this gets called during authentication
+            // if there's a previous payment that wasn't completed
+            return payment.paymentId;
+        }
+
+        _triggerResonanceVisualization(payment) {
+            if (this.config.debug) {
+                console.log('[PiForge] Triggering resonance visualization for payment:', payment);
+            }
+
+            // Emit custom event for resonance visualization
+            window.dispatchEvent(new CustomEvent('piforge:resonance', {
+                detail: { payment }
+            }));
+        }
+
+        _calculateBoostCost(boostPercent) {
+            // Cost calculation using configured rate
+            return Math.round(boostPercent * this.BOOST_COST_PER_PERCENT * 100) / 100;
+        }
     }
-};
 
-// Export for global use
-window.PiForge = PiForge;
+    // Create global PiForge instance
+    window.PiForge = new PiForgeSDK();
 
-// Auto-initialize if DOM is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => PiForge.initialize());
-} else {
-    PiForge.initialize();
-}
+    // Log SDK load
+    console.log('[PiForge] SDK loaded. Call PiForge.initialize() to begin.');
+
+})(window);

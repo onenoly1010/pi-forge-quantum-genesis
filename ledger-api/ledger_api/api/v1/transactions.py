@@ -1,231 +1,227 @@
 """
-Transaction API endpoints
+Transaction API endpoints.
+Handles creating and querying ledger transactions.
 """
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
-from typing import Optional, List
-from datetime import datetime
-import json
+
 import logging
+from typing import List, Optional
+from datetime import datetime
+from fastapi import APIRouter, Depends, HTTPException, status, Query
+from sqlalchemy.orm import Session
+from sqlalchemy import and_, or_
 
 from ledger_api.db import get_db
-from ledger_api.models.ledger_models import LedgerTransaction
-from ledger_api.schemas.transaction import (
+from ledger_api.models.ledger_models import LedgerTransaction, LogicalAccount
+from ledger_api.schemas.transaction_schemas import (
     TransactionCreate,
     TransactionResponse,
-    TransactionListResponse,
     AllocationResult
 )
-from ledger_api.services.allocation import apply_allocations_for_transaction
+from ledger_api.services.allocation import apply_allocations
 from ledger_api.services.audit import create_audit_log
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/v1/transactions", tags=["transactions"])
+router = APIRouter(prefix="/transactions", tags=["transactions"])
 
 
-@router.post("", response_model=TransactionResponse, status_code=201)
-def create_transaction(
+@router.post("/", response_model=dict, status_code=status.HTTP_201_CREATED)
+async def create_transaction(
     transaction: TransactionCreate,
     db: Session = Depends(get_db)
-) -> TransactionResponse:
+):
     """
-    Create a new transaction.
+    Create a new ledger transaction.
     
-    If the transaction is a COMPLETED EXTERNAL_DEPOSIT, the allocation engine
-    will automatically run to split the funds according to allocation rules.
+    If the transaction is COMPLETED and type is EXTERNAL_DEPOSIT,
+    automatically triggers allocation engine to create internal allocations.
+    
+    Returns:
+        - parent_transaction: The created transaction
+        - allocation_result: Details of allocations if applied
     """
-    # Convert metadata dict to JSON string for storage
-    metadata_json = json.dumps(transaction.metadata) if transaction.metadata else None
-
-    # Create the transaction
-    db_transaction = LedgerTransaction(
-        transaction_type=transaction.transaction_type,
-        status=transaction.status,
-        amount=transaction.amount,
-        from_account_id=transaction.from_account_id,
-        to_account_id=transaction.to_account_id,
-        parent_transaction_id=transaction.parent_transaction_id,
-        external_tx_hash=transaction.external_tx_hash,
-        pi_payment_id=transaction.pi_payment_id,
-        description=transaction.description,
-        tx_metadata=metadata_json,
-        performed_by=transaction.performed_by
-    )
-
-    # Set completed_at if status is COMPLETED
-    if transaction.status == "COMPLETED":
-        db_transaction.completed_at = datetime.utcnow()
-
     try:
+        # Validate accounts exist if specified
+        if transaction.from_account_id:
+            from_account = db.query(LogicalAccount).filter(
+                LogicalAccount.id == transaction.from_account_id
+            ).first()
+            if not from_account:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"From account {transaction.from_account_id} not found"
+                )
+        
+        if transaction.to_account_id:
+            to_account = db.query(LogicalAccount).filter(
+                LogicalAccount.id == transaction.to_account_id
+            ).first()
+            if not to_account:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"To account {transaction.to_account_id} not found"
+                )
+        
+        # Create transaction
+        db_transaction = LedgerTransaction(
+            transaction_hash=transaction.transaction_hash,
+            transaction_type=transaction.transaction_type,
+            from_account_id=transaction.from_account_id,
+            to_account_id=transaction.to_account_id,
+            amount=transaction.amount,
+            status=transaction.status,
+            purpose=transaction.purpose,
+            meta_data=transaction.meta_data,
+            created_at=datetime.utcnow()
+        )
+        
+        # Set completed_at if status is COMPLETED
+        if transaction.status == "COMPLETED":
+            db_transaction.completed_at = datetime.utcnow()
+        
         db.add(db_transaction)
         db.flush()
-
+        
         # Create audit log
         create_audit_log(
             db=db,
-            entity_type="ledger_transaction",
-            entity_id=db_transaction.id,
-            action="CREATE",
-            old_value=None,
-            new_value={
+            table_name="ledger_transactions",
+            record_id=db_transaction.id,
+            operation="CREATE",
+            new_values={
                 "transaction_type": transaction.transaction_type,
-                "status": transaction.status,
-                "amount": str(transaction.amount)
+                "amount": float(transaction.amount),
+                "status": transaction.status
             },
-            performed_by=transaction.performed_by or "system"
+            changed_by="api"
         )
-
-        # Apply allocations if this is a COMPLETED EXTERNAL_DEPOSIT
-        if (transaction.transaction_type == "EXTERNAL_DEPOSIT" and 
-            transaction.status == "COMPLETED"):
-            try:
-                child_ids = apply_allocations_for_transaction(
-                    db=db,
-                    transaction_id=db_transaction.id,
-                    performed_by=transaction.performed_by
-                )
-                logger.info(f"Applied allocations for transaction {db_transaction.id}: {len(child_ids)} children created")
-            except Exception as e:
-                logger.error(f"Failed to apply allocations: {e}")
-                # Rollback the entire transaction including the parent
-                db.rollback()
-                raise HTTPException(
-                    status_code=500,
-                    detail=f"Failed to apply allocations: {str(e)}"
-                )
-
-        # Commit the transaction
+        
         db.commit()
         db.refresh(db_transaction)
-
-        # Parse tx_metadata back to dict for response
-        if db_transaction.tx_metadata:
-            db_transaction.metadata = json.loads(db_transaction.tx_metadata)
-        else:
-            db_transaction.metadata = None
-
-        return db_transaction
-
+        
+        # Check if allocations should be applied
+        allocation_result = None
+        if (transaction.status == "COMPLETED" and 
+            transaction.transaction_type == "EXTERNAL_DEPOSIT"):
+            
+            logger.info(f"Applying allocations for COMPLETED EXTERNAL_DEPOSIT {db_transaction.id}")
+            
+            try:
+                allocation_result = apply_allocations(
+                    db=db,
+                    parent_transaction=db_transaction,
+                    changed_by="api"
+                )
+            except Exception as e:
+                logger.error(f"Error applying allocations: {e}", exc_info=True)
+                # Don't fail the transaction creation if allocations fail
+                allocation_result = {
+                    "error": str(e),
+                    "parent_transaction_id": db_transaction.id
+                }
+        
+        response = {
+            "parent_transaction": TransactionResponse.from_orm(db_transaction),
+            "allocation_result": allocation_result
+        }
+        
+        logger.info(f"Transaction created: {db_transaction.id}")
+        return response
+        
+    except HTTPException:
+        raise
     except Exception as e:
         db.rollback()
-        logger.error(f"Error creating transaction: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Error creating transaction: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create transaction: {str(e)}"
+        )
 
 
-@router.get("", response_model=TransactionListResponse)
-def list_transactions(
+@router.get("/", response_model=List[TransactionResponse])
+async def list_transactions(
     transaction_type: Optional[str] = Query(None, description="Filter by transaction type"),
     status: Optional[str] = Query(None, description="Filter by status"),
-    from_account_id: Optional[str] = Query(None, description="Filter by source account"),
-    to_account_id: Optional[str] = Query(None, description="Filter by destination account"),
-    parent_transaction_id: Optional[str] = Query(None, description="Filter by parent transaction"),
-    page: int = Query(1, ge=1, description="Page number"),
-    page_size: int = Query(50, ge=1, le=100, description="Page size"),
+    from_account_id: Optional[int] = Query(None, description="Filter by from account"),
+    to_account_id: Optional[int] = Query(None, description="Filter by to account"),
+    start_date: Optional[datetime] = Query(None, description="Filter by start date"),
+    end_date: Optional[datetime] = Query(None, description="Filter by end date"),
+    limit: int = Query(100, ge=1, le=1000, description="Maximum results"),
+    offset: int = Query(0, ge=0, description="Offset for pagination"),
     db: Session = Depends(get_db)
-) -> TransactionListResponse:
+):
     """
     List transactions with optional filters.
+    
+    Supports filtering by:
+    - transaction_type
+    - status
+    - from_account_id
+    - to_account_id
+    - date range (start_date, end_date)
+    
+    Results are paginated using limit and offset.
     """
-    # Build query
-    query = db.query(LedgerTransaction)
-
-    # Apply filters
-    if transaction_type:
-        query = query.filter(LedgerTransaction.transaction_type == transaction_type)
-    
-    if status:
-        query = query.filter(LedgerTransaction.status == status)
-    
-    if from_account_id:
-        query = query.filter(LedgerTransaction.from_account_id == from_account_id)
-    
-    if to_account_id:
-        query = query.filter(LedgerTransaction.to_account_id == to_account_id)
-    
-    if parent_transaction_id:
-        query = query.filter(LedgerTransaction.parent_transaction_id == parent_transaction_id)
-
-    # Get total count
-    total = query.count()
-
-    # Apply pagination
-    offset = (page - 1) * page_size
-    transactions = query.order_by(LedgerTransaction.created_at.desc()).offset(offset).limit(page_size).all()
-
-    # Parse metadata for each transaction
-    for tx in transactions:
-        if tx.tx_metadata:
-            try:
-                tx.metadata = json.loads(tx.tx_metadata)
-            except json.JSONDecodeError:
-                tx.metadata = {}
-        else:
-            tx.metadata = None
-
-    return TransactionListResponse(
-        transactions=transactions,
-        total=total,
-        page=page,
-        page_size=page_size
-    )
+    try:
+        query = db.query(LedgerTransaction)
+        
+        # Apply filters
+        filters = []
+        
+        if transaction_type:
+            filters.append(LedgerTransaction.transaction_type == transaction_type)
+        
+        if status:
+            filters.append(LedgerTransaction.status == status)
+        
+        if from_account_id:
+            filters.append(LedgerTransaction.from_account_id == from_account_id)
+        
+        if to_account_id:
+            filters.append(LedgerTransaction.to_account_id == to_account_id)
+        
+        if start_date:
+            filters.append(LedgerTransaction.created_at >= start_date)
+        
+        if end_date:
+            filters.append(LedgerTransaction.created_at <= end_date)
+        
+        if filters:
+            query = query.filter(and_(*filters))
+        
+        # Order by created_at descending (most recent first)
+        query = query.order_by(LedgerTransaction.created_at.desc())
+        
+        # Apply pagination
+        transactions = query.offset(offset).limit(limit).all()
+        
+        return transactions
+        
+    except Exception as e:
+        logger.error(f"Error listing transactions: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to list transactions: {str(e)}"
+        )
 
 
 @router.get("/{transaction_id}", response_model=TransactionResponse)
-def get_transaction(
-    transaction_id: str,
+async def get_transaction(
+    transaction_id: int,
     db: Session = Depends(get_db)
-) -> TransactionResponse:
+):
     """
     Get a specific transaction by ID.
     """
     transaction = db.query(LedgerTransaction).filter(
         LedgerTransaction.id == transaction_id
     ).first()
-
-    if not transaction:
-        raise HTTPException(status_code=404, detail="Transaction not found")
-
-    # Parse metadata
-    if transaction.tx_metadata:
-        try:
-            transaction.metadata = json.loads(transaction.tx_metadata)
-        except json.JSONDecodeError:
-            transaction.metadata = {}
-    else:
-        transaction.metadata = None
-
-    return transaction
-
-
-@router.get("/{transaction_id}/allocations", response_model=AllocationResult)
-def get_transaction_allocations(
-    transaction_id: str,
-    db: Session = Depends(get_db)
-) -> AllocationResult:
-    """
-    Get allocation results for a transaction.
-    Returns child transactions created by the allocation engine.
-    """
-    # Get parent transaction
-    parent_tx = db.query(LedgerTransaction).filter(
-        LedgerTransaction.id == transaction_id
-    ).first()
-
-    if not parent_tx:
-        raise HTTPException(status_code=404, detail="Transaction not found")
-
-    # Get child allocations
-    children = db.query(LedgerTransaction).filter(
-        LedgerTransaction.parent_transaction_id == transaction_id,
-        LedgerTransaction.transaction_type == "INTERNAL_ALLOCATION"
-    ).all()
-
-    total_allocated = sum(child.amount for child in children)
     
-    return AllocationResult(
-        parent_transaction_id=transaction_id,
-        child_transaction_ids=[child.id for child in children],
-        total_allocated=total_allocated,
-        allocation_count=len(children)
-    )
+    if not transaction:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Transaction {transaction_id} not found"
+        )
+    
+    return transaction

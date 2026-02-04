@@ -1,255 +1,330 @@
 """
-Allocation Rules API endpoints
+Allocation Rules API endpoints.
+Manages allocation rules for automatic fund distribution.
 """
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
-import json
+
 import logging
+from typing import List
+from fastapi import APIRouter, Depends, HTTPException, status, Query
+from sqlalchemy.orm import Session
 
 from ledger_api.db import get_db
 from ledger_api.models.ledger_models import AllocationRule
-from ledger_api.schemas.allocation_rule import (
+from ledger_api.schemas.allocation_schemas import (
     AllocationRuleCreate,
-    AllocationRuleResponse,
-    AllocationRuleListResponse,
-    AllocationItem
+    AllocationRuleResponse
 )
+from ledger_api.services.allocation import validate_allocation_rule
 from ledger_api.services.audit import create_audit_log
-from ledger_api.utils.jwt_auth import require_guardian_role, JWTPayload
+from ledger_api.utils.jwt_auth import require_guardian
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/v1/allocation-rules", tags=["allocation-rules"])
+router = APIRouter(prefix="/allocation_rules", tags=["allocation_rules"])
 
 
-@router.get("", response_model=AllocationRuleListResponse)
-def list_allocation_rules(
-    active_only: bool = True,
+@router.get("/", response_model=List[AllocationRuleResponse])
+async def list_allocation_rules(
+    include_inactive: bool = Query(False, description="Include inactive rules"),
     db: Session = Depends(get_db)
-) -> AllocationRuleListResponse:
+):
     """
     List all allocation rules.
-    Public endpoint - no authentication required for viewing.
+    
+    This endpoint is public (no authentication required) for read-only access.
+    
+    Args:
+        include_inactive: Include inactive rules in results
+    
+    Returns:
+        List of allocation rules
     """
-    query = db.query(AllocationRule)
-
-    if active_only:
-        query = query.filter(AllocationRule.is_active == True)
-
-    rules = query.order_by(AllocationRule.priority, AllocationRule.created_at).all()
-
-    # Parse allocation_config JSON for each rule
-    parsed_rules = []
-    for rule in rules:
-        try:
-            config = json.loads(rule.allocation_config)
-            # Convert to AllocationItem objects
-            allocation_items = [
-                AllocationItem(
-                    account_name=item['account_name'],
-                    percentage=item['percentage']
-                )
-                for item in config
-            ]
-            
-            # Create response object
-            rule_response = AllocationRuleResponse(
-                id=rule.id,
-                rule_name=rule.rule_name,
-                is_active=rule.is_active,
-                priority=rule.priority,
-                allocation_config=allocation_items,
-                min_amount=rule.min_amount,
-                max_amount=rule.max_amount,
-                description=rule.description,
-                created_by=rule.created_by,
-                created_at=rule.created_at,
-                updated_at=rule.updated_at
-            )
-            parsed_rules.append(rule_response)
-        except (json.JSONDecodeError, KeyError) as e:
-            logger.error(f"Error parsing allocation config for rule {rule.id}: {e}")
-            # Skip invalid rules
-            continue
-
-    return AllocationRuleListResponse(
-        rules=parsed_rules,
-        total=len(parsed_rules)
-    )
+    try:
+        query = db.query(AllocationRule)
+        
+        if not include_inactive:
+            query = query.filter(AllocationRule.is_active == True)
+        
+        rules = query.order_by(
+            AllocationRule.priority.desc(),
+            AllocationRule.created_at.desc()
+        ).all()
+        
+        return rules
+        
+    except Exception as e:
+        logger.error(f"Error listing allocation rules: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to list allocation rules: {str(e)}"
+        )
 
 
 @router.get("/{rule_id}", response_model=AllocationRuleResponse)
-def get_allocation_rule(
-    rule_id: str,
+async def get_allocation_rule(
+    rule_id: int,
     db: Session = Depends(get_db)
-) -> AllocationRuleResponse:
+):
     """
     Get a specific allocation rule by ID.
-    Public endpoint - no authentication required for viewing.
+    
+    Public endpoint (no authentication required).
     """
-    rule = db.query(AllocationRule).filter(AllocationRule.id == rule_id).first()
-
+    rule = db.query(AllocationRule).filter(
+        AllocationRule.id == rule_id
+    ).first()
+    
     if not rule:
-        raise HTTPException(status_code=404, detail="Allocation rule not found")
-
-    # Parse allocation_config
-    try:
-        config = json.loads(rule.allocation_config)
-        allocation_items = [
-            AllocationItem(
-                account_name=item['account_name'],
-                percentage=item['percentage']
-            )
-            for item in config
-        ]
-    except (json.JSONDecodeError, KeyError) as e:
-        logger.error(f"Error parsing allocation config: {e}")
-        raise HTTPException(status_code=500, detail="Invalid allocation configuration")
-
-    return AllocationRuleResponse(
-        id=rule.id,
-        rule_name=rule.rule_name,
-        is_active=rule.is_active,
-        priority=rule.priority,
-        allocation_config=allocation_items,
-        min_amount=rule.min_amount,
-        max_amount=rule.max_amount,
-        description=rule.description,
-        created_by=rule.created_by,
-        created_at=rule.created_at,
-        updated_at=rule.updated_at
-    )
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Allocation rule {rule_id} not found"
+        )
+    
+    return rule
 
 
-@router.post("", response_model=AllocationRuleResponse, status_code=201)
-def create_allocation_rule(
+@router.post("/", response_model=AllocationRuleResponse, status_code=status.HTTP_201_CREATED)
+async def create_allocation_rule(
     rule: AllocationRuleCreate,
-    current_user: JWTPayload = Depends(require_guardian_role),
-    db: Session = Depends(get_db)
-) -> AllocationRuleResponse:
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(require_guardian)
+):
     """
     Create a new allocation rule.
     
-    **Requires Guardian JWT authentication.**
+    Requires Guardian authentication.
     
-    Validates that allocation percentages sum to 100%.
+    Validates:
+    - Allocations sum to 100%
+    - All target accounts exist and are active
+    - Rule name is unique
+    
+    Returns:
+        Created allocation rule
     """
-    # Convert allocation_config to JSON string
-    config_dict = [
-        {
-            "account_name": item.account_name,
-            "percentage": str(item.percentage)
-        }
-        for item in rule.allocation_config
-    ]
-    config_json = json.dumps(config_dict)
-
-    # Create the allocation rule
-    db_rule = AllocationRule(
-        rule_name=rule.rule_name,
-        is_active=rule.is_active,
-        priority=rule.priority,
-        allocation_config=config_json,
-        min_amount=rule.min_amount,
-        max_amount=rule.max_amount,
-        description=rule.description,
-        created_by=current_user.sub  # From JWT token
-    )
-
     try:
+        # Check if rule name already exists
+        existing_rule = db.query(AllocationRule).filter(
+            AllocationRule.rule_name == rule.rule_name
+        ).first()
+        
+        if existing_rule:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Allocation rule with name '{rule.rule_name}' already exists"
+            )
+        
+        # Validate allocations
+        allocations_dict = [
+            {"account_id": entry.account_id, "percentage": float(entry.percentage)}
+            for entry in rule.allocations
+        ]
+        
+        validate_allocation_rule(allocations_dict, db)
+        
+        # Create rule
+        created_by = current_user.get("sub", "guardian")
+        
+        db_rule = AllocationRule(
+            rule_name=rule.rule_name,
+            trigger_transaction_type=rule.trigger_transaction_type,
+            purpose=rule.purpose,
+            allocations=allocations_dict,
+            is_active=rule.is_active,
+            priority=rule.priority,
+            created_by=created_by
+        )
+        
         db.add(db_rule)
         db.flush()
-
+        
         # Create audit log
         create_audit_log(
             db=db,
-            entity_type="allocation_rule",
-            entity_id=db_rule.id,
-            action="CREATE",
-            old_value=None,
-            new_value={
+            table_name="allocation_rules",
+            record_id=db_rule.id,
+            operation="CREATE",
+            new_values={
                 "rule_name": rule.rule_name,
-                "allocation_config": config_dict,
+                "trigger_transaction_type": rule.trigger_transaction_type,
+                "allocations": allocations_dict,
                 "is_active": rule.is_active
             },
-            performed_by=current_user.sub
+            changed_by=created_by
         )
-
+        
         db.commit()
         db.refresh(db_rule)
-
-        # Return with parsed config
-        return AllocationRuleResponse(
-            id=db_rule.id,
-            rule_name=db_rule.rule_name,
-            is_active=db_rule.is_active,
-            priority=db_rule.priority,
-            allocation_config=rule.allocation_config,  # Already validated
-            min_amount=db_rule.min_amount,
-            max_amount=db_rule.max_amount,
-            description=db_rule.description,
-            created_by=db_rule.created_by,
-            created_at=db_rule.created_at,
-            updated_at=db_rule.updated_at
-        )
-
-    except IntegrityError as e:
-        db.rollback()
-        logger.error(f"Integrity error creating allocation rule: {e}")
+        
+        logger.info(f"Allocation rule created: {db_rule.rule_name} by {created_by}")
+        
+        return db_rule
+        
+    except HTTPException:
+        raise
+    except ValueError as e:
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Allocation rule with this name already exists"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
         )
     except Exception as e:
         db.rollback()
-        logger.error(f"Error creating allocation rule: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Error creating allocation rule: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create allocation rule: {str(e)}"
+        )
 
 
-@router.delete("/{rule_id}", status_code=204)
-def delete_allocation_rule(
-    rule_id: str,
-    current_user: JWTPayload = Depends(require_guardian_role),
-    db: Session = Depends(get_db)
+@router.put("/{rule_id}", response_model=AllocationRuleResponse)
+async def update_allocation_rule(
+    rule_id: int,
+    rule_update: AllocationRuleCreate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(require_guardian)
+):
+    """
+    Update an existing allocation rule.
+    
+    Requires Guardian authentication.
+    
+    Validates:
+    - Allocations sum to 100%
+    - All target accounts exist and are active
+    
+    Returns:
+        Updated allocation rule
+    """
+    try:
+        # Get existing rule
+        db_rule = db.query(AllocationRule).filter(
+            AllocationRule.id == rule_id
+        ).first()
+        
+        if not db_rule:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Allocation rule {rule_id} not found"
+            )
+        
+        # Save old values for audit
+        old_values = {
+            "rule_name": db_rule.rule_name,
+            "allocations": db_rule.allocations,
+            "is_active": db_rule.is_active,
+            "priority": db_rule.priority
+        }
+        
+        # Validate new allocations
+        allocations_dict = [
+            {"account_id": entry.account_id, "percentage": float(entry.percentage)}
+            for entry in rule_update.allocations
+        ]
+        
+        validate_allocation_rule(allocations_dict, db)
+        
+        # Update rule
+        db_rule.rule_name = rule_update.rule_name
+        db_rule.trigger_transaction_type = rule_update.trigger_transaction_type
+        db_rule.purpose = rule_update.purpose
+        db_rule.allocations = allocations_dict
+        db_rule.is_active = rule_update.is_active
+        db_rule.priority = rule_update.priority
+        
+        # Create audit log
+        changed_by = current_user.get("sub", "guardian")
+        create_audit_log(
+            db=db,
+            table_name="allocation_rules",
+            record_id=db_rule.id,
+            operation="UPDATE",
+            old_values=old_values,
+            new_values={
+                "rule_name": db_rule.rule_name,
+                "allocations": db_rule.allocations,
+                "is_active": db_rule.is_active,
+                "priority": db_rule.priority
+            },
+            changed_by=changed_by
+        )
+        
+        db.commit()
+        db.refresh(db_rule)
+        
+        logger.info(f"Allocation rule updated: {db_rule.rule_name} by {changed_by}")
+        
+        return db_rule
+        
+    except HTTPException:
+        raise
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Error updating allocation rule: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update allocation rule: {str(e)}"
+        )
+
+
+@router.delete("/{rule_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_allocation_rule(
+    rule_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(require_guardian)
 ):
     """
     Delete (deactivate) an allocation rule.
     
-    **Requires Guardian JWT authentication.**
+    Requires Guardian authentication.
     
-    Note: This actually deactivates the rule rather than deleting it,
-    to preserve audit history.
+    Note: This sets is_active to False rather than deleting the record.
     """
-    rule = db.query(AllocationRule).filter(AllocationRule.id == rule_id).first()
-
-    if not rule:
-        raise HTTPException(status_code=404, detail="Allocation rule not found")
-
     try:
-        # Store old value for audit
-        old_value = {
-            "rule_name": rule.rule_name,
-            "is_active": rule.is_active
+        db_rule = db.query(AllocationRule).filter(
+            AllocationRule.id == rule_id
+        ).first()
+        
+        if not db_rule:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Allocation rule {rule_id} not found"
+            )
+        
+        # Save old values for audit
+        old_values = {
+            "is_active": db_rule.is_active
         }
-
-        # Deactivate instead of delete
-        rule.is_active = False
-
+        
+        # Deactivate rule
+        db_rule.is_active = False
+        
         # Create audit log
+        changed_by = current_user.get("sub", "guardian")
         create_audit_log(
             db=db,
-            entity_type="allocation_rule",
-            entity_id=rule_id,
-            action="DELETE",
-            old_value=old_value,
-            new_value={"is_active": False},
-            performed_by=current_user.sub
+            table_name="allocation_rules",
+            record_id=db_rule.id,
+            operation="UPDATE",
+            old_values=old_values,
+            new_values={"is_active": False},
+            changed_by=changed_by
         )
-
+        
         db.commit()
-
+        
+        logger.info(f"Allocation rule deactivated: {db_rule.rule_name} by {changed_by}")
+        
+    except HTTPException:
+        raise
     except Exception as e:
         db.rollback()
-        logger.error(f"Error deleting allocation rule: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Error deleting allocation rule: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete allocation rule: {str(e)}"
+        )

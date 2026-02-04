@@ -14,7 +14,8 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# Ignore Python lib directories but not scripts/verification/lib/
+/lib/
 lib64/
 parts/
 sdist/
@@ -124,7 +125,6 @@ yarn-debug.log*
 yarn-error.log*
 .npm
 *.tgz
-package-lock.json
 yarn.lock
 
 # Press Agent logs
@@ -140,6 +140,8 @@ node_modules/
 # Build artifacts
 build/
 artifacts/
+public/
+dist/
 
 # IDE/Editor settings
 .vs/
@@ -148,3 +150,28 @@ artifacts/
 # OS files
 .DS_Store
 Thumbs.db
+deployment_log.json
+
+# Guardian approval system data
+.guardian_approvals/
+
+# Vercel build output
+.vercel/
+
+# Solidity / Foundry
+contracts/cache/
+contracts/out/
+contracts/broadcast/
+contracts/.env
+contracts/lib/
+*.sol.d
+*.abi
+*.bin
+
+# Verification Reports
+reports/*.json
+reports/*.html
+.env.verification
+
+# Vercel build output
+.vercel/

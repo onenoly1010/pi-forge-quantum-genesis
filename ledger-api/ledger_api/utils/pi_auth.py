@@ -1,129 +1,156 @@
 """
-Pi Network wallet signature verification (STUB)
-This module is a placeholder for future Pi Network integration
+Pi Network wallet signature verification stub.
+TODO: Implement actual Pi Network signature verification.
+
+This is a placeholder for future Pi Network integration.
+Currently returns a stubbed response for testnet-only operation.
 """
-from typing import Optional
+
+import os
 import logging
+from typing import Dict, Any, Optional
 
 logger = logging.getLogger(__name__)
 
+# Enforce testnet-only operation
+NFT_MINT_VALUE = int(os.environ.get("NFT_MINT_VALUE", "0"))
+APP_ENVIRONMENT = os.environ.get("APP_ENVIRONMENT", "testnet")
 
-class PiWalletVerificationError(Exception):
-    """Exception raised when Pi wallet verification fails"""
-    pass
+# Safety check
+if NFT_MINT_VALUE != 0:
+    raise RuntimeError(
+        "❌ SAFETY VIOLATION: NFT_MINT_VALUE must be 0 for testnet-only operation. "
+        f"Current value: {NFT_MINT_VALUE}"
+    )
+
+if APP_ENVIRONMENT not in ["testnet", "development"]:
+    logger.warning(
+        f"⚠️  APP_ENVIRONMENT is '{APP_ENVIRONMENT}'. "
+        "Pi wallet verification is not implemented for production."
+    )
 
 
 def verify_pi_signature(
     wallet_address: str,
     signature: str,
-    message: str
-) -> bool:
+    message: str,
+    transaction_hash: Optional[str] = None
+) -> Dict[str, Any]:
     """
-    Verify a signature from a Pi Network wallet.
+    Verify Pi Network wallet signature.
     
-    TODO: Implement actual Pi Network signature verification
-    - Use Pi Network SDK or API
-    - Verify ECDSA signature
-    - Validate wallet address format
-    - Check signature timestamp/nonce
+    TODO: Implement actual signature verification using Pi Network SDK.
+    This is a stub that always returns success for testnet development.
     
     Args:
-        wallet_address: Pi Network wallet address
+        wallet_address: Pi wallet address
         signature: Signature to verify
         message: Original message that was signed
-        
+        transaction_hash: Optional blockchain transaction hash
+    
     Returns:
-        True if signature is valid, False otherwise
-        
+        Dict with verification result
+    
     Raises:
-        PiWalletVerificationError: If verification cannot be performed
+        NotImplementedError: In production environment
     """
-    logger.warning("Pi wallet verification is not implemented - using stub")
+    # Safety check
+    if APP_ENVIRONMENT == "production":
+        raise NotImplementedError(
+            "❌ Pi wallet signature verification is not implemented for production. "
+            "This feature requires Pi Network SDK integration."
+        )
     
-    # STUB: Always return False for safety
-    # In production, implement proper signature verification
-    return False
-
-
-def get_pi_wallet_balance(wallet_address: str) -> Optional[float]:
-    """
-    Get the balance of a Pi Network wallet.
+    logger.warning(
+        f"⚠️  STUB: Pi signature verification called for wallet {wallet_address}. "
+        "Returning stubbed success response (testnet-only)."
+    )
     
-    TODO: Implement actual Pi Network balance query
-    - Use Pi Network API
-    - Handle API rate limits
-    - Cache results appropriately
-    
-    Args:
-        wallet_address: Pi Network wallet address
-        
-    Returns:
-        Wallet balance in Pi, or None if not available
-    """
-    logger.warning("Pi wallet balance query is not implemented - using stub")
-    
-    # STUB: Return None
-    # In production, query actual Pi Network balance
-    return None
-
-
-def validate_pi_payment(
-    payment_id: str,
-    expected_amount: float,
-    expected_recipient: str
-) -> dict:
-    """
-    Validate a Pi Network payment.
-    
-    TODO: Implement actual Pi Network payment verification
-    - Query Pi payment details from Pi Network API
-    - Verify payment status (completed, pending, failed)
-    - Validate amount and recipient
-    - Check for payment uniqueness (prevent replay)
-    
-    Args:
-        payment_id: Pi Network payment ID
-        expected_amount: Expected payment amount
-        expected_recipient: Expected recipient address
-        
-    Returns:
-        Dictionary with payment details and verification status
-    """
-    logger.warning("Pi payment validation is not implemented - using stub")
-    
-    # STUB: Return empty result
-    # In production, verify payment with Pi Network
+    # Stub response for testnet
     return {
-        "verified": False,
-        "status": "unimplemented",
-        "message": "Pi Network integration not yet implemented"
+        "valid": True,
+        "wallet_address": wallet_address,
+        "transaction_hash": transaction_hash,
+        "verified_at": "STUB_TESTNET_ONLY",
+        "note": "This is a stubbed response. Actual Pi Network verification not implemented."
     }
 
 
-# Future integration notes:
-# 
-# 1. Pi Network SDK Integration:
-#    - Install Pi Network Python SDK when available
-#    - Configure API credentials from environment variables
-#    - Handle authentication and rate limiting
-#
-# 2. Signature Verification:
-#    - Use elliptic curve cryptography (secp256k1)
-#    - Verify message format and timestamp
-#    - Implement nonce tracking to prevent replay attacks
-#
-# 3. Payment Verification:
-#    - Query payment status from Pi Network API
-#    - Store payment IDs to prevent double-spending
-#    - Handle payment state transitions (pending -> completed)
-#
-# 4. Wallet Integration:
-#    - Support Pi Browser wallet integration
-#    - Handle wallet connection/disconnection
-#    - Implement proper error handling for network issues
-#
-# 5. Security Considerations:
-#    - Never expose private keys
-#    - Validate all external input
-#    - Use secure random for nonces
-#    - Implement proper logging without exposing sensitive data
+def get_pi_wallet_balance(wallet_address: str) -> Dict[str, Any]:
+    """
+    Get Pi wallet balance from blockchain.
+    
+    TODO: Implement actual Pi Network API call.
+    This is a stub for testnet development.
+    
+    Args:
+        wallet_address: Pi wallet address
+    
+    Returns:
+        Dict with balance information
+    
+    Raises:
+        NotImplementedError: In production environment
+    """
+    if APP_ENVIRONMENT == "production":
+        raise NotImplementedError(
+            "❌ Pi wallet balance check is not implemented for production. "
+            "This feature requires Pi Network API integration."
+        )
+    
+    logger.warning(
+        f"⚠️  STUB: Pi wallet balance check called for {wallet_address}. "
+        "Returning stubbed response (testnet-only)."
+    )
+    
+    # Stub response for testnet
+    return {
+        "wallet_address": wallet_address,
+        "balance": "0.0",
+        "note": "This is a stubbed response. Actual Pi Network API not implemented."
+    }
+
+
+def initiate_pi_payment(
+    recipient_address: str,
+    amount: float,
+    memo: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Initiate a Pi payment (on-chain action).
+    
+    TODO: Implement actual Pi Network payment initiation.
+    This is a stub that logs the request but performs no on-chain action.
+    
+    Args:
+        recipient_address: Pi wallet address to send to
+        amount: Amount to send
+        memo: Optional payment memo
+    
+    Returns:
+        Dict with stubbed payment information
+    
+    Raises:
+        RuntimeError: If NFT_MINT_VALUE is not 0
+    """
+    # Safety check
+    if NFT_MINT_VALUE != 0:
+        raise RuntimeError(
+            f"❌ SAFETY VIOLATION: Cannot initiate payment. NFT_MINT_VALUE must be 0. "
+            f"Current value: {NFT_MINT_VALUE}"
+        )
+    
+    logger.warning(
+        f"⚠️  STUB: Pi payment initiation called: {amount} Pi to {recipient_address}. "
+        "No on-chain action performed (testnet-only)."
+    )
+    
+    # Stub response - no actual payment made
+    return {
+        "success": False,
+        "transaction_hash": None,
+        "recipient_address": recipient_address,
+        "amount": amount,
+        "memo": memo,
+        "note": "STUB: No on-chain action performed. Testnet-only mode (NFT_MINT_VALUE=0)."
+    }
