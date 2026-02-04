@@ -101,6 +101,13 @@ class LedgerTransaction(Base):
             "transaction_type IN ('EXTERNAL_DEPOSIT', 'EXTERNAL_WITHDRAWAL', 'INTERNAL_ALLOCATION', 'INTERNAL_TRANSFER')",
             name='valid_transaction_type'
         ),
+        CheckConstraint(
+            """(transaction_type = 'EXTERNAL_DEPOSIT' AND from_account_id IS NULL AND to_account_id IS NOT NULL) OR
+               (transaction_type = 'EXTERNAL_WITHDRAWAL' AND from_account_id IS NOT NULL AND to_account_id IS NULL) OR
+               (transaction_type = 'INTERNAL_ALLOCATION' AND from_account_id IS NULL AND to_account_id IS NOT NULL) OR
+               (transaction_type = 'INTERNAL_TRANSFER' AND from_account_id IS NOT NULL AND to_account_id IS NOT NULL)""",
+            name='valid_account_flow'
+        ),
     )
     
     def __repr__(self):
