@@ -22,7 +22,7 @@ class TransactionCreate(BaseModel):
     performed_by: Optional[str] = Field(None, description="User who performed the transaction")
 
     @validator('transaction_type')
-    def validate_transaction_type(cls, v):
+    def validate_transaction_type(self, v):
         valid_types = ['EXTERNAL_DEPOSIT', 'EXTERNAL_WITHDRAWAL', 'INTERNAL_ALLOCATION', 
                        'PAYMENT', 'REFUND', 'FEE', 'NFT_MINT', 'REWARD']
         if v not in valid_types:
