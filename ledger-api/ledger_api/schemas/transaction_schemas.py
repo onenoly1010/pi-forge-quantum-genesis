@@ -2,7 +2,7 @@
 Pydantic schemas for transaction-related requests and responses.
 """
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 from typing import Optional, Dict, Any, List
 from datetime import datetime
 from decimal import Decimal
@@ -19,28 +19,31 @@ class TransactionCreate(BaseModel):
     purpose: Optional[str] = Field(None, description="Transaction purpose")
     meta_data: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Additional metadata")
     
-    @validator('transaction_type')
+    @field_validator('transaction_type')
+    @classmethod
     def validate_transaction_type(cls, v):
         valid_types = ['EXTERNAL_DEPOSIT', 'EXTERNAL_WITHDRAWAL', 'INTERNAL_ALLOCATION', 'INTERNAL_TRANSFER']
         if v not in valid_types:
             raise ValueError(f'transaction_type must be one of {valid_types}')
         return v
     
-    @validator('status')
+    @field_validator('status')
+    @classmethod
     def validate_status(cls, v):
         valid_statuses = ['PENDING', 'COMPLETED', 'FAILED', 'CANCELLED']
         if v not in valid_statuses:
             raise ValueError(f'status must be one of {valid_statuses}')
         return v
     
-    @validator('to_account_id', always=True)
-    def validate_account_flow(cls, to_account_id, values):
+    @model_validator(mode='after')
+    def validate_account_flow(self):
         """Validate that account flow matches transaction type business rules."""
-        transaction_type = values.get('transaction_type')
-        from_account_id = values.get('from_account_id')
+        transaction_type = self.transaction_type
+        from_account_id = self.from_account_id
+        to_account_id = self.to_account_id
         
         if not transaction_type:
-            return to_account_id
+            return self
         
         # EXTERNAL_DEPOSIT: no from_account, must have to_account
         if transaction_type == 'EXTERNAL_DEPOSIT':
@@ -70,7 +73,7 @@ class TransactionCreate(BaseModel):
             if to_account_id is None:
                 raise ValueError('INTERNAL_TRANSFER must have to_account_id (destination account)')
         
-        return to_account_id
+        return self
     
     class Config:
         json_schema_extra = {
