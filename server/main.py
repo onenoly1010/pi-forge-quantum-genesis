@@ -932,8 +932,8 @@ async def handle_incomplete_payment(payment: IncompletePaymentRequest):
     Handle incomplete payment found during user authentication
     Pi SDK calls this when a payment was interrupted (user closed app, etc.)
     """
-        # Validate payment ID format before using it in downstream API requests
-        validate_payment_id(payment.payment_id)
+    # Validate payment ID format before using it in downstream API requests
+    validate_payment_id(payment.payment_id)
     try:
         logger.info(f"🔄 Handling incomplete payment: {payment.payment_id}")
         
@@ -1036,8 +1036,8 @@ async def verify_payment(payment: PaymentVerification, current_user = Depends(ge
     """
     start_time = time.perf_counter_ns()
 
-        # Validate payment ID format before using it in downstream API requests
-        validate_payment_id(payment.payment_id)
+    # Validate payment ID format before using it in downstream API requests
+    validate_payment_id(payment.payment_id)
     try:
         # Generate verification hash
         verification_data = f"{payment.payment_id}{payment.amount}{time.time()}"

@@ -1,12 +1,12 @@
 from fastapi.testclient import TestClient
 import pytest
+import sys
+from pathlib import Path
 
-# Import the FastAPI app from server.main
-try:
-    from server.main import app
-except Exception:
-    # Fallback: try top-level import
-    from main import app
+# Add server directory to path if needed
+sys.path.insert(0, str(Path(__file__).parent.parent / "server"))
+
+from main import app
 
 client = TestClient(app)
 
