@@ -6,7 +6,13 @@
   "scripts": {
     "build": "npm run build:static",
     "build:static": "node scripts/build.js",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "contracts:install": "cd contracts/hardhat && npm install",
+    "contracts:compile": "cd contracts/hardhat && npm run compile",
+    "deploy:check": "cd contracts/hardhat && npm run check:balance",
+    "deploy:inft:0g": "cd contracts/hardhat && npm run deploy:0g:inft",
+    "deploy:inft:pi": "cd contracts/hardhat && npm run deploy:pi:inft",
+    "deploy:inft:pi:testnet": "cd contracts/hardhat && npm run deploy:pi:testnet:inft"
   },
   "dependencies": {
     "@vercel/analytics": "^1.4.0",
