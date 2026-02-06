@@ -90,20 +90,24 @@ call_contract_function() {
     local NAME=$3
     local RPC_URL=$4
     
-    # Encode function signature
-    SELECTOR=$(echo -n "$SIGNATURE" | xxd -p | head -c 8)
+    # For basic contract validation, we'll just check if we can call it
+    # Note: Proper function selector requires keccak256 hashing (available via cast)
+    # For this health check, we use cast if available, otherwise skip detailed function tests
     
-    # Call contract
-    RESULT=$(curl -s -X POST "$RPC_URL" \
-        -H "Content-Type: application/json" \
-        -d "{\"jsonrpc\":\"2.0\",\"method\":\"eth_call\",\"params\":[{\"to\":\"$ADDRESS\",\"data\":\"0x$SELECTOR\"},\"latest\"],\"id\":1}" \
-        --max-time 10 | grep -o '"result":"[^"]*"' | cut -d'"' -f4)
-    
-    if [ -n "$RESULT" ] && [ "$RESULT" != "0x" ]; then
-        log_success "$NAME: Function callable"
-        return 0
+    if command -v cast &> /dev/null; then
+        # Use cast to properly call the function
+        # cast handles function selector calculation correctly
+        RESULT=$(cast call "$ADDRESS" "$SIGNATURE" --rpc-url "$RPC_URL" 2>/dev/null || echo "")
+        
+        if [ -n "$RESULT" ] && [ "$RESULT" != "0x" ]; then
+            log_success "$NAME: Function callable"
+            return 0
+        else
+            log_warning "$NAME: Function call failed or returned empty"
+            return 1
+        fi
     else
-        log_warning "$NAME: Function call failed or returned empty"
+        log_warning "$NAME: Cast not available, skipping function call test"
         return 1
     fi
 }

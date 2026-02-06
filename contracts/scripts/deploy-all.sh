@@ -376,7 +376,7 @@ else
     echo ""
     log_info "Next steps:"
     echo "  1. Run: npm run verify:contracts"
-    echo "  2. Run: npm run health:check"
+    echo "  2. Run: npm run deploy:health"
     echo "  3. Update frontend with new addresses"
 fi
 
