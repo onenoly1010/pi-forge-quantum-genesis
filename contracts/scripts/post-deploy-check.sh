@@ -8,6 +8,9 @@
 
 set -e
 
+# Constants
+WEI_TO_ETHER=1000000000000000000
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -163,7 +166,7 @@ if [ -n "$OINIO_TOKEN_ADDRESS" ]; then
             fi
             if [ -n "$TOTAL_SUPPLY" ]; then
                 # Convert from wei to ether
-                SUPPLY_ETHER=$(echo "scale=2; $TOTAL_SUPPLY / 1000000000000000000" | bc)
+                SUPPLY_ETHER=$(echo "scale=2; $TOTAL_SUPPLY / $WEI_TO_ETHER" | bc)
                 log_contract "Total Supply: $SUPPLY_ETHER OINIO"
             fi
         fi

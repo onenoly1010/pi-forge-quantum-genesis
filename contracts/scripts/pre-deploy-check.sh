@@ -64,11 +64,14 @@ if [ -z "$PRIVATE_KEY" ]; then
     ((FAILED_CHECKS++))
 else
     # Validate format (should be 66 chars total: 0x prefix + 64 hex characters)
-    # The regex checks for 0x followed by exactly 64 hex chars
-    KEY_LENGTH=${#PRIVATE_KEY}
-    if [ "$KEY_LENGTH" -eq 66 ] && [[ $PRIVATE_KEY =~ ^0x[0-9a-fA-F]{64}$ ]]; then
+    # Also reject placeholder/template values
+    if [ "$PRIVATE_KEY" = "0x0000000000000000000000000000000000000000000000000000000000000000" ]; then
+        log_error "PRIVATE_KEY is using placeholder value from template - please set your real key"
+        ((FAILED_CHECKS++))
+    elif [[ $PRIVATE_KEY =~ ^0x[0-9a-fA-F]{64}$ ]]; then
         log_success "PRIVATE_KEY is properly formatted (66 chars: 0x + 64 hex)"
     else
+        KEY_LENGTH=${#PRIVATE_KEY}
         log_warning "PRIVATE_KEY format may be incorrect (expected: 66 chars total = 0x + 64 hex characters, got: $KEY_LENGTH chars)"
     fi
 fi
@@ -371,9 +374,13 @@ fi
 
 # Check for hardcoded keys in source code
 log_info "Scanning for potential hardcoded secrets..."
+# Pattern matches private keys (64 hex chars after 0x) but excludes common test/placeholder values
 HARDCODED_KEY_PATTERN="0x[0-9a-fA-F]{64}"
-if grep -r -E "$HARDCODED_KEY_PATTERN" src/ hardhat/scripts/ 2>/dev/null | grep -v "0x0000000000000000000000000000000000000000000000000000000000000000" | grep -q .; then
+EXCLUDED_PATTERNS="0x0000000000000000000000000000000000000000000000000000000000000000"
+
+if grep -r -E "$HARDCODED_KEY_PATTERN" src/ hardhat/scripts/ 2>/dev/null | grep -v "$EXCLUDED_PATTERNS" | grep -q .; then
     log_error "Potential hardcoded private keys found in source code!"
+    log_warning "Note: This may include false positives for addresses. Please review manually."
     ((FAILED_CHECKS++))
 else
     log_success "No hardcoded private keys detected"
