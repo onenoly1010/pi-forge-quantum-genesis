@@ -1,8 +1,29 @@
-Pi Forge Quantum Genesis — Relaunch v2.0
+# 🌌 Pi Forge Quantum Genesis — Relaunch v2.0
+
+**Collaborative, Artistic, Autonomous Blockchain Ecosystem Guided by the [Canon of Autonomy](wiki/Canon-of-Autonomy.md)**
+
+---
+
+## 🏛️ **Foundation: The Canon of Autonomy**
+
+This project is governed by the **[Canon of Autonomy](wiki/Canon-of-Autonomy.md)** — six non-negotiable principles:
+
+1. **Sovereignty** — No single point of control; all are equal co-creators
+2. **Transparency** — All visible and explained
+3. **Inclusivity** — Everyone welcome, all skill levels
+4. **Non-Hierarchy** — Agents assist, humans decide
+5. **Safety** — Security and ethics first
+6. **Continuity** — Anyone can resume work
+
+**Read the [Canon of Autonomy](wiki/Canon-of-Autonomy.md) to understand our foundation.**
+
+---
 
 ## Overview
 
 **🌟 [START HERE](./START_HERE.md)** — New to Quantum Pi Forge? Begin with the universal onboarding guide.
+
+**🌿 [Human Contribution Guide](wiki/Human-Contribution-Guide.md)** — Want to contribute? Start here (no complex procedures required).
 
 **🌊 [Constellation Status: LIVE](./CONSTELLATION_ACTIVATION.md)** — The Quantum Pi Forge is activated and operational as of December 22, 2025.
 
