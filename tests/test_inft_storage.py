@@ -21,6 +21,10 @@ from inft_storage.services.logic_gates import (
     check_memory_health
 )
 
+# Test constants
+TEST_ETH_ADDRESS = "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb1"
+TEST_INFT_ID = "inft_test"
+
 
 class TestConsciousnessCalculation:
     """Tests for consciousness score calculation"""
@@ -400,17 +404,17 @@ class TestModels:
         from inft_storage.models import INFTState
         
         state = INFTState(
-            id="inft_test",
-            owner_address="0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb1",
+            id=TEST_INFT_ID,
+            owner_address=TEST_ETH_ADDRESS,
             consciousness_phase="awakening",
             creation_block=1000000,
             created_at=1704067200,
             updated_at=1704067200
         )
         
-        assert state.id == "inft_test"
+        assert state.id == TEST_INFT_ID
         assert state.consciousness_phase == "awakening"
-        assert state.owner_address == "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb1"
+        assert state.owner_address == TEST_ETH_ADDRESS
     
     def test_event_log_model_validation(self):
         """Test EventLog model validation"""
@@ -418,7 +422,7 @@ class TestModels:
         
         event = EventLog(
             event_id="evt_test",
-            inft_id="inft_test",
+            inft_id=TEST_INFT_ID,
             event_type="interaction",
             timestamp=1704067200
         )
@@ -435,7 +439,7 @@ class TestModels:
         for phase in ["awakening", "evolving", "transcendent"]:
             state = INFTState(
                 id="test",
-                owner_address="0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb1",
+                owner_address=TEST_ETH_ADDRESS,
                 consciousness_phase=phase,
                 creation_block=1,
                 created_at=1,

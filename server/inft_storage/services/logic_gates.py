@@ -150,9 +150,14 @@ def should_transition_phase(
         confidence_factors = []
         
         if meets_consciousness:
-            consciousness_excess = (consciousness_score - requirements['min_consciousness']) / \
-                                 (1.0 - requirements['min_consciousness'])
-            confidence_factors.append(min(1.0, 0.5 + consciousness_excess * 0.5))
+            # Avoid division by zero for transcendent phase (min_consciousness = 1.0)
+            denominator = 1.0 - requirements['min_consciousness']
+            if denominator > 0:
+                consciousness_excess = (consciousness_score - requirements['min_consciousness']) / denominator
+                confidence_factors.append(min(1.0, 0.5 + consciousness_excess * 0.5))
+            else:
+                # For transcendent phase or when at maximum
+                confidence_factors.append(1.0)
         
         if meets_interactions:
             interaction_ratio = min(2.0, interaction_count / requirements['min_interactions'])

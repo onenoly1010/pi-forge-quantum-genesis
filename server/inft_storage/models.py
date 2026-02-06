@@ -8,6 +8,7 @@ consciousness tracking, memory continuity, and 0G Storage integration.
 from typing import Optional, Literal
 from pydantic import BaseModel, Field
 from datetime import datetime
+from decimal import Decimal
 
 
 class INFTState(BaseModel):
@@ -174,12 +175,16 @@ class OracleQuery(BaseModel):
 
 
 class LedgerAllocation(BaseModel):
-    """Financial allocations for iNFT operations"""
+    """Financial allocations for iNFT operations
+    
+    Note: Using Decimal for precise financial calculations.
+    When using with databases, ensure proper decimal handling.
+    """
     allocation_id: str = Field(..., description="Unique allocation identifier")
     inft_id: str = Field(..., description="Associated iNFT ID")
     source_account: str = Field(..., description="Source account address")
     destination_account: str = Field(..., description="Destination account address")
-    amount: float = Field(..., gt=0, description="Allocation amount")
+    amount: Decimal = Field(..., gt=0, description="Allocation amount (uses Decimal for precision)")
     currency: str = Field(default="ETH", description="Currency type")
     allocation_rule: Optional[str] = Field(None, description="Rule that triggered allocation")
     executed_at: int = Field(..., description="Unix timestamp of execution")
@@ -192,7 +197,7 @@ class LedgerAllocation(BaseModel):
                 "inft_id": "inft_0x1234567890abcdef",
                 "source_account": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb1",
                 "destination_account": "0x8ba1f109551bD432803012645Ac136ddd64DBA72",
-                "amount": 0.5,
+                "amount": "0.5",  # String representation for Decimal
                 "currency": "ETH",
                 "allocation_rule": "creator_royalty_5pct",
                 "executed_at": 1704067200,

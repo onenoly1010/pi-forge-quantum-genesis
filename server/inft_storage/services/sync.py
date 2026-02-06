@@ -13,6 +13,9 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# Default 0G Storage endpoint
+DEFAULT_STORAGE_ENDPOINT = "https://storage.0g.ai"
+
 
 class ZeroGStorageClient:
     """
@@ -125,7 +128,7 @@ async def sync_to_0g_storage(
             from server.config import ZERO_G_CONFIG
             storage_client = ZeroGStorageClient(
                 rpc_url=ZERO_G_CONFIG["rpc_url"],
-                storage_endpoint=ZERO_G_CONFIG.get("storage_endpoint", "https://storage.0g.ai")
+                storage_endpoint=ZERO_G_CONFIG.get("storage_endpoint", DEFAULT_STORAGE_ENDPOINT)
             )
         
         # Prepare data for upload
@@ -195,7 +198,7 @@ async def log_event_to_0g(
             from server.config import ZERO_G_CONFIG
             storage_client = ZeroGStorageClient(
                 rpc_url=ZERO_G_CONFIG["rpc_url"],
-                storage_endpoint=ZERO_G_CONFIG.get("storage_endpoint", "https://storage.0g.ai")
+                storage_endpoint=ZERO_G_CONFIG.get("storage_endpoint", DEFAULT_STORAGE_ENDPOINT)
             )
         
         # Determine if batch or single event
@@ -280,7 +283,7 @@ async def restore_from_0g_storage(
             from server.config import ZERO_G_CONFIG
             storage_client = ZeroGStorageClient(
                 rpc_url=ZERO_G_CONFIG["rpc_url"],
-                storage_endpoint=ZERO_G_CONFIG.get("storage_endpoint", "https://storage.0g.ai")
+                storage_endpoint=ZERO_G_CONFIG.get("storage_endpoint", DEFAULT_STORAGE_ENDPOINT)
             )
         
         # Download data from 0G Storage
