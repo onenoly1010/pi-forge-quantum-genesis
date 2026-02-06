@@ -10,6 +10,7 @@ This guide covers deployment of:
 
 ## Table of Contents
 - [Quick Start](#quick-start)
+- [Deployment Orchestration (NEW!)](#deployment-orchestration-new)
 - [Platform-Specific Deployment](#platform-specific-deployment)
   - [Hardhat (TypeScript)](#hardhat-typescript---inft-contracts)
   - [Forge (Solidity)](#forge-solidity---all-contracts)
@@ -17,6 +18,7 @@ This guide covers deployment of:
 - [Environment Configuration](#environment-configuration)
 - [Pre-Deployment Checks](#pre-deployment-checks)
 - [Post-Deployment Verification](#post-deployment-verification)
+- [NPM Scripts Reference](#npm-scripts-reference)
 - [Troubleshooting](#troubleshooting)
 
 ---
@@ -41,6 +43,205 @@ forge install
 
 # Soroban CLI (if needed)
 # See: https://soroban.stellar.org/docs/getting-started/setup
+```
+
+---
+
+## Deployment Orchestration (NEW!)
+
+### 🚀 Unified Deployment System
+
+We now provide a comprehensive deployment orchestration system that handles all contract deployments across multiple chains with automated safety checks.
+
+#### Quick Deployment
+
+**Full Stack Deployment (All Contracts, All Networks):**
+```bash
+# From repository root
+npm run deploy:all
+
+# Or from contracts directory
+cd contracts
+bash scripts/deploy-all.sh
+```
+
+**Testnet Deployment:**
+```bash
+npm run deploy:all:testnet
+```
+
+**Dry Run (Preview without executing):**
+```bash
+npm run deploy:all:dry-run
+```
+
+#### Targeted Deployments
+
+**Deploy iNFT Contracts Only:**
+```bash
+npm run deploy:inft                 # Mainnet
+npm run deploy:inft:testnet         # Testnet
+```
+
+**Deploy DEX Contracts Only (0G):**
+```bash
+npm run deploy:dex
+```
+
+**Deploy Memorial Contract Only (Pi Network):**
+```bash
+npm run deploy:memorial
+```
+
+#### Pre-Deployment Safety Checks
+
+**Always run checks before deploying:**
+```bash
+npm run deploy:check                # Mainnet checks
+npm run deploy:check:testnet        # Testnet checks
+```
+
+This validates:
+- ✅ Environment configuration (.env file)
+- ✅ Private key format and availability
+- ✅ Network connectivity (RPC endpoints)
+- ✅ Wallet balances (sufficient funds)
+- ✅ Contract compilation status
+- ✅ Security checks (no hardcoded keys)
+- ✅ Git status (uncommitted changes warning)
+
+**Example Output:**
+```
+╔═══════════════════════════════════════════════════════════╗
+║   PRE-DEPLOYMENT SAFETY CHECKS                            ║
+╚═══════════════════════════════════════════════════════════╝
+
+Check 1: Environment Configuration
+─────────────────────────────────────
+[✓] .env file exists
+[✓] PRIVATE_KEY is properly formatted
+[✓] Mainnet RPC URLs configured
+
+Check 2: Required Tools Installation
+─────────────────────────────────────
+[✓] Node.js installed: v20.x.x
+[✓] npm installed: 10.x.x
+[✓] Forge installed
+[✓] Cast installed
+[✓] Soroban CLI installed
+
+Check 3: Network Connectivity
+─────────────────────────────────────
+[✓] Pi Network Mainnet connected (Chain ID: 314159)
+[✓] 0G Aristotle Mainnet connected (Chain ID: 16661)
+
+Check 4: Wallet Balances
+─────────────────────────────────────
+[✓] Pi Network balance: 1.5 ETH (minimum: 0.1 ETH)
+[✓] 0G Network balance: 2.0 0G (minimum: 0.5 0G)
+
+✅ All critical checks passed! ✨
+```
+
+#### Post-Deployment Health Checks
+
+**Verify all deployed contracts:**
+```bash
+npm run deploy:health               # Mainnet
+npm run deploy:health:testnet       # Testnet
+```
+
+This performs:
+- ✅ Contract deployment verification (code exists on-chain)
+- ✅ Basic function call tests
+- ✅ Contract metadata retrieval
+- ✅ Integration test simulation
+- ✅ Generates detailed health report
+
+**Example Output:**
+```
+╔═══════════════════════════════════════════════════════════╗
+║   POST-DEPLOYMENT HEALTH CHECK                            ║
+╚═══════════════════════════════════════════════════════════╝
+
+─────────────────────────────────────────────────────────────
+OINIO Token Contract
+─────────────────────────────────────────────────────────────
+[✓] OINIO Token: Deployed (code size: 12543 bytes)
+[CONTRACT] Address: 0x1234567890abcdef...
+[CONTRACT] Name: OINIO
+[CONTRACT] Symbol: OINIO
+[CONTRACT] Total Supply: 1000000000.00 OINIO
+[✓] OINIO Token: HEALTHY ✨
+
+─────────────────────────────────────────────────────────────
+DEX Contracts (0G Network)
+─────────────────────────────────────────────────────────────
+[✓] W0G: Deployed (code size: 8912 bytes)
+[✓] UniswapV2Factory: Deployed (code size: 15234 bytes)
+[✓] UniswapV2Router02: Deployed (code size: 18765 bytes)
+[✓] All DEX contracts: HEALTHY ✨
+
+✅ All contracts are healthy! ✨
+```
+
+### Advanced Usage
+
+#### Custom Deployment Options
+
+The orchestration script supports advanced options:
+
+```bash
+# Deploy specific target to specific network
+cd contracts
+bash scripts/deploy-all.sh --target inft --network mainnet
+
+# Skip pre-deployment checks (not recommended)
+bash scripts/deploy-all.sh --skip-checks
+
+# Dry run with specific target
+bash scripts/deploy-all.sh --target dex --dry-run
+
+# Show help
+bash scripts/deploy-all.sh --help
+```
+
+#### Deployment Flow
+
+The orchestration system follows this flow:
+
+1. **Parse Arguments** → Determine target and network
+2. **Load Environment** → Validate .env configuration
+3. **Pre-Deployment Checks** → Run safety validations (unless skipped)
+4. **Deploy Contracts** → Execute deployment based on target
+   - `all`: Deploy iNFT (Pi + 0G), DEX (0G), Memorial (Pi)
+   - `inft`: Deploy OINIO Token and Registry
+   - `dex`: Deploy W0G, Factory, Router on 0G
+   - `memorial`: Deploy Memorial Bridge on Pi Network via Soroban
+5. **Post-Deployment Verification** → Health checks and status report
+6. **Generate Summary** → Save deployment log with timestamps
+
+#### Environment Setup
+
+**1. Create .env file:**
+```bash
+cd contracts
+cp .env.template .env
+```
+
+**2. Edit .env with your values:**
+```bash
+# Minimum required:
+PRIVATE_KEY=0x...           # Your deployer private key
+PI_MAINNET_RPC=https://...  # Pi Network RPC
+ZERO_G_RPC=https://...      # 0G Network RPC
+```
+
+See [.env.template](contracts/.env.template) for complete configuration options.
+
+**3. Validate configuration:**
+```bash
+npm run deploy:check
 ```
 
 ---
@@ -658,23 +859,99 @@ cast logs --address <CONTRACT_ADDRESS> --rpc-url $RPC_URL
 
 ---
 
-## Package.json Scripts
+## NPM Scripts Reference
 
-Add to root `package.json`:
+### Complete List of Deployment Scripts
 
-```json
-{
-  "scripts": {
-    "deploy:inft:0g": "cd contracts/hardhat && npm run deploy:0g:inft",
-    "deploy:inft:pi": "cd contracts/hardhat && npm run deploy:pi:inft",
-    "deploy:dex:0g": "cd contracts/0g-uniswap-v2 && forge script script/Deploy.s.sol --rpc-url $ZERO_G_RPC --broadcast",
-    "deploy:oinio:pi": "cd contracts && forge script script/Deploy.s.sol --rpc-url $PI_MAINNET_RPC --broadcast",
-    "deploy:memorial:pi": "cd contracts/oinio-memorial-bridge && ./deploy.sh",
-    "check:balance": "cd contracts/hardhat && npm run check:balance",
-    "verify:contracts": "echo 'Run platform-specific verify commands'"
-  }
-}
+All scripts can be run from the repository root using `npm run <script-name>`.
+
+#### Orchestration Scripts (Recommended)
+
+| Script | Description |
+|--------|-------------|
+| `deploy:all` | Deploy all contracts to mainnet (iNFT, DEX, Memorial) |
+| `deploy:all:testnet` | Deploy all contracts to testnet |
+| `deploy:all:dry-run` | Preview deployment without executing |
+| `deploy:inft` | Deploy iNFT contracts (Pi + 0G mainnet) |
+| `deploy:inft:testnet` | Deploy iNFT contracts to testnet |
+| `deploy:dex` | Deploy DEX contracts to 0G mainnet |
+| `deploy:memorial` | Deploy Memorial contract to Pi Network |
+
+#### Safety & Verification Scripts
+
+| Script | Description |
+|--------|-------------|
+| `deploy:check` | Run pre-deployment safety checks (mainnet) |
+| `deploy:check:testnet` | Run pre-deployment safety checks (testnet) |
+| `deploy:health` | Run post-deployment health checks (mainnet) |
+| `deploy:health:testnet` | Run post-deployment health checks (testnet) |
+| `verify:contracts` | Show contract verification instructions |
+
+#### Direct Platform Scripts
+
+| Script | Description |
+|--------|-------------|
+| `deploy:inft:0g` | Deploy iNFT to 0G via Hardhat |
+| `deploy:inft:pi` | Deploy iNFT to Pi Network via Hardhat |
+| `deploy:inft:pi:testnet` | Deploy iNFT to Pi testnet via Hardhat |
+| `deploy:dex:0g` | Deploy DEX to 0G via Forge |
+
+#### Contract Management
+
+| Script | Description |
+|--------|-------------|
+| `contracts:install` | Install Hardhat dependencies |
+| `contracts:compile` | Compile all contracts |
+
+### Usage Examples
+
+**Complete Mainnet Deployment:**
+```bash
+# 1. Check environment and readiness
+npm run deploy:check
+
+# 2. Deploy all contracts
+npm run deploy:all
+
+# 3. Verify deployment health
+npm run deploy:health
 ```
+
+**Testnet Deployment Workflow:**
+```bash
+# 1. Pre-flight checks
+npm run deploy:check:testnet
+
+# 2. Deploy to testnet
+npm run deploy:all:testnet
+
+# 3. Health check
+npm run deploy:health:testnet
+```
+
+**Targeted Deployment:**
+```bash
+# Deploy only iNFT contracts
+npm run deploy:inft
+
+# Deploy only DEX
+npm run deploy:dex
+```
+
+**Safe Exploration:**
+```bash
+# See what would be deployed without executing
+npm run deploy:all:dry-run
+```
+
+### Script Locations
+
+- **Orchestration scripts**: `contracts/scripts/deploy-all.sh`
+- **Pre-deployment checks**: `contracts/scripts/pre-deploy-check.sh`
+- **Post-deployment checks**: `contracts/scripts/post-deploy-check.sh`
+- **Hardhat scripts**: `contracts/hardhat/scripts/`
+- **Forge scripts**: `contracts/script/` and `contracts/0g-uniswap-v2/scripts/`
+- **Soroban scripts**: `contracts/oinio-memorial-bridge/`
 
 ---
 
