@@ -1,0 +1,195 @@
+# 🌟 Pull Request
+
+## 🌿 Welcome, Co-Creator!
+
+Thank you for contributing to the Quantum Pi Forge! You are an **equal co-creator** — your contribution matters.
+
+Before submitting, please review the [Canon of Autonomy](../wiki/Canon-of-Autonomy.md) to ensure alignment.
+
+---
+
+## 📝 Description
+
+**What does this PR do?**
+<!-- Clear description of your changes -->
+
+**Why are these changes needed?**
+<!-- Explain the motivation or problem being solved -->
+
+---
+
+## 🏛️ Canon Alignment Checklist
+
+**Please verify your changes align with the [Canon of Autonomy](../wiki/Canon-of-Autonomy.md):**
+
+- [ ] **Sovereignty** — No single point of control; empowers users
+- [ ] **Transparency** — Logic is clear, documented, and explainable
+- [ ] **Inclusivity** — Accessible to contributors of all skill levels
+- [ ] **Non-Hierarchy** — No gatekeeping; facilitates, doesn't command
+- [ ] **Safety** — Secure, ethical, and no vulnerabilities introduced
+- [ ] **Continuity** — Well-documented so others can maintain/extend it
+
+**Canon compliance:** 
+<!-- Explain how your changes align with Canon principles -->
+
+---
+
+## 🎨 Artistic Element?
+
+Does this PR include artistic/creative work?
+
+- [ ] Yes — Adds or enhances visualizations (Lyrical Lens)
+- [ ] Yes — Includes aesthetic/poetic improvements
+- [ ] No — Purely functional/technical
+- [ ] Both — Functional and artistic
+
+**If artistic:** How does this embody the [Genesis Declaration](../wiki/Genesis-Declaration.md)?
+<!-- Beauty is fundamental, not decorative -->
+
+---
+
+## 📊 Type of Change
+
+- [ ] 🐛 Bug fix (non-breaking change fixing an issue)
+- [ ] ✨ New feature (non-breaking change adding functionality)
+- [ ] 💥 Breaking change (fix or feature causing existing functionality to break)
+- [ ] 📚 Documentation update
+- [ ] 🎨 Artistic/visual enhancement
+- [ ] ♻️ Code refactoring (no functional changes)
+- [ ] 🧪 Test addition or improvement
+- [ ] 🔧 Build/infrastructure change
+
+---
+
+## ⚛️ Sacred Trinity Impact
+
+**Which services does this affect?**
+
+- [ ] **FastAPI** (Port 8000) — The Pulsing Heartbeat
+- [ ] **Flask** (Port 5000) — The Lyrical Lens
+- [ ] **Gradio** (Port 7860) — The Moral Melody
+- [ ] Shared/cross-service
+- [ ] Infrastructure/deployment
+- [ ] Documentation only
+
+**Integration considerations:**
+<!-- If affecting multiple services, explain how they integrate -->
+
+---
+
+## ✅ Testing
+
+**How has this been tested?**
+
+- [ ] Unit tests added/updated
+- [ ] Integration tests added/updated
+- [ ] Manual testing performed
+- [ ] Tested in development environment
+- [ ] Tested in production-like environment
+- [ ] No testing needed (docs/minor changes only)
+
+**Test evidence:**
+<!-- Describe your testing or paste test output -->
+
+---
+
+## 📸 Screenshots (if applicable)
+
+**Visual changes:**
+<!-- Add screenshots showing before/after, especially for UI/artistic changes -->
+
+---
+
+## 🤖 Automation Notice
+
+**Does this PR interact with automation?**
+
+- [ ] Yes — This adds/modifies automated systems
+- [ ] Yes — This requires automation bypass (add `no-automerge` label)
+- [ ] No — No automation interaction
+
+**If adding automation, have you read:**
+- [ ] [Automation Transparency Guide](../wiki/Automation-Transparency-Guide.md)
+- [ ] Automation must be optional, visible, explainable, reversible
+
+---
+
+## 📚 Documentation
+
+**Documentation updates:**
+
+- [ ] Code comments added/updated
+- [ ] README updated (if needed)
+- [ ] Wiki documentation added/updated
+- [ ] API documentation updated (if applicable)
+- [ ] No documentation changes needed
+
+**Related documentation:**
+<!-- Link to relevant docs you've added/updated -->
+
+---
+
+## 🔗 Related Issues
+
+**Closes:** #
+**Related to:** #
+
+<!-- Use "Closes #123" to automatically close issues when merged -->
+
+---
+
+## 👥 Collaboration
+
+**Collaboration approach:**
+- [ ] Solo contribution
+- [ ] Collaborative effort with: 
+- [ ] Based on community discussion: 
+
+**Would you like feedback on:**
+<!-- Specific areas where you'd like review/feedback -->
+
+---
+
+## ✨ Additional Context
+
+**Anything else reviewers should know?**
+<!-- Implementation notes, trade-offs, future considerations -->
+
+---
+
+## 🙏 Acknowledgments
+
+**Credit where due:**
+<!-- If this builds on others' work, acknowledge them -->
+
+---
+
+## 🚀 Deployment Considerations
+
+**Deployment impact:**
+- [ ] No deployment changes needed
+- [ ] Requires environment variable changes
+- [ ] Requires database migrations
+- [ ] Requires infrastructure updates
+- [ ] Breaking changes requiring careful deployment
+
+**Rollback plan:**
+<!-- If this could cause issues, how can it be rolled back? -->
+
+---
+
+## ✅ Pre-Submission Checklist
+
+- [ ] I've read the [Canon of Autonomy](../wiki/Canon-of-Autonomy.md)
+- [ ] I've read the [Human Contribution Guide](../wiki/Human-Contribution-Guide.md)
+- [ ] My code follows the project's style
+- [ ] I've tested my changes
+- [ ] I've updated documentation
+- [ ] My changes don't introduce security vulnerabilities
+- [ ] I'm ready for collaborative review
+
+---
+
+*Thank you for contributing! The community will review this with respect and collaboration.* 🌟
+
+**Remember:** You can always add `no-automerge` label to skip automation and request manual merge.
