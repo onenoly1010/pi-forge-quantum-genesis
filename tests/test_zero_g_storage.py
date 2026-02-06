@@ -179,23 +179,19 @@ class TestZeroGStorageClient:
                 inft_id=inft_id,
                 event=event,
                 auto_batch=True,
-                batch_size=10
+                batch_size=10,
+                log_dir=temp_dir
             )
             
-            # Should not upload yet
-            if i < 9:
-                assert result is None
+            # Should not upload yet (batch size is 10, we only add 5)
+            assert result is None
         
         # Verify log file exists
-        log_path = f"/tmp/inft_{inft_id}_events.jsonl"
+        log_path = os.path.join(temp_dir, f"inft_{inft_id}_events.jsonl")
         assert os.path.exists(log_path)
-        
-        # Clean up
-        if os.path.exists(log_path):
-            os.remove(log_path)
     
     @pytest.mark.asyncio
-    async def test_append_event_log_auto_batch(self, storage_client):
+    async def test_append_event_log_auto_batch(self, storage_client, temp_dir):
         """Test event log auto-batching"""
         inft_id = "test_inft_batch"
         
@@ -207,7 +203,8 @@ class TestZeroGStorageClient:
                 inft_id=inft_id,
                 event=event,
                 auto_batch=True,
-                batch_size=batch_size
+                batch_size=batch_size,
+                log_dir=temp_dir
             )
             
             if i == batch_size - 1:

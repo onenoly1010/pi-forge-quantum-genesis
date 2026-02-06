@@ -6,6 +6,7 @@
 import * as crypto from 'crypto';
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import * as os from 'os';
 import { ethers } from 'ethers';
 
 /**
@@ -311,7 +312,7 @@ export class ZeroGStorageClient {
       inftId,
       fileHash: storageHash,
       checksum,
-      timestamp: Date.now(),
+      timestamp: Math.floor(Date.now() / 1000), // Use seconds for consistency with Python
       sizeBytes: fileSize,
       encryptionKeyId: encrypt ? 'default' : 'none',
       version: 1,
@@ -327,9 +328,11 @@ export class ZeroGStorageClient {
    */
   async loadFrom0gStorage(
     inftId: string,
-    outputDir: string = '/tmp',
+    outputDir?: string,
     verifyChecksum: boolean = true
   ): Promise<string> {
+    // Use system temp directory if not specified
+    const finalOutputDir = outputDir || os.tmpdir();
     // Get storage pointer from chain
     const { storageHash, checksum: expectedChecksum } =
       await this.getInftStoragePointer(inftId);
@@ -337,8 +340,8 @@ export class ZeroGStorageClient {
     console.log(`Loading iNFT ${inftId} from 0G Storage: ${storageHash}`);
 
     // Download from 0G Storage
-    await fs.mkdir(outputDir, { recursive: true });
-    const encryptedPath = path.join(outputDir, `inft_${inftId}.db.encrypted`);
+    await fs.mkdir(finalOutputDir, { recursive: true });
+    const encryptedPath = path.join(finalOutputDir, `inft_${inftId}.db.encrypted`);
 
     await this.downloadFrom0gStorage(storageHash, encryptedPath);
 
@@ -353,7 +356,7 @@ export class ZeroGStorageClient {
     }
 
     // Decrypt if encrypted
-    const finalPath = path.join(outputDir, `inft_${inftId}.db`);
+    const finalPath = path.join(finalOutputDir, `inft_${inftId}.db`);
 
     if (this.encryptionKey) {
       try {
@@ -375,15 +378,22 @@ export class ZeroGStorageClient {
 
   /**
    * Append event to incremental event log with optional auto-batching
+   * 
+   * Note: Archived log files (when batch uploads) are not automatically cleaned up.
+   * Consider implementing a cleanup strategy based on your retention policies.
    */
   async appendEventLog(
     inftId: string,
     event: Record<string, any>,
     autoBatch: boolean = true,
-    batchSize: number = 100
+    batchSize: number = 100,
+    logDir?: string
   ): Promise<string | null> {
+    // Use system temp directory if not specified
+    const finalLogDir = logDir || os.tmpdir();
+    
     // Initialize or load event log
-    const logPath = `/tmp/inft_${inftId}_events.jsonl`;
+    const logPath = path.join(finalLogDir, `inft_${inftId}_events.jsonl`);
 
     // Append event with timestamp
     const eventEntry = {
@@ -402,11 +412,12 @@ export class ZeroGStorageClient {
         // Upload batch
         const { storageHash } = await this.uploadTo0gStorage(logPath);
 
-        // Create new log for next batch
-        const archivePath = `/tmp/inft_${inftId}_events_${Date.now()}.jsonl`;
+        // Archive old log for next batch (user should implement cleanup)
+        const archivePath = path.join(finalLogDir, `inft_${inftId}_events_${Date.now()}.jsonl`);
         await fs.rename(logPath, archivePath);
 
         console.log(`Auto-uploaded event batch for iNFT ${inftId}: ${storageHash}`);
+        console.log(`Archived log to: ${archivePath} (cleanup not automatic)`);
 
         return storageHash;
       }

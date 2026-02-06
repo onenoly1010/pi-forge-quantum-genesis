@@ -8,6 +8,7 @@ import hashlib
 import sqlite3
 import asyncio
 import logging
+import tempfile
 from typing import Dict, List, Optional, Tuple, Union
 from pathlib import Path
 from datetime import datetime
@@ -334,6 +335,7 @@ class ZeroGStorageClient:
         
         # Encrypt if requested
         upload_path = db_path
+        encrypted_path = None
         if encrypt:
             if not self.cipher:
                 raise ValueError("Encryption requested but key not configured")
@@ -358,7 +360,7 @@ class ZeroGStorageClient:
             logger.info(f"Updated on-chain pointer: {tx_result['tx_hash']}")
         
         # Clean up encrypted file if created
-        if encrypt and os.path.exists(encrypted_path):
+        if encrypted_path and os.path.exists(encrypted_path):
             os.remove(encrypted_path)
         
         # Create metadata
@@ -366,7 +368,7 @@ class ZeroGStorageClient:
             inft_id=inft_id,
             file_hash=storage_hash,
             checksum=checksum,
-            timestamp=int(datetime.now().timestamp()),
+            timestamp=int(datetime.now().timestamp()),  # Use seconds for consistency
             size_bytes=file_size,
             encryption_key_id="default" if encrypt else "none"
         )
@@ -378,7 +380,7 @@ class ZeroGStorageClient:
     async def load_from_0g_storage(
         self,
         inft_id: str,
-        output_dir: str = "/tmp",
+        output_dir: Optional[str] = None,
         verify_checksum: bool = True
     ) -> str:
         """
@@ -386,7 +388,7 @@ class ZeroGStorageClient:
         
         Args:
             inft_id: Unique identifier for the iNFT
-            output_dir: Directory to save downloaded database
+            output_dir: Directory to save downloaded database (default: system temp dir)
             verify_checksum: Whether to verify checksum after download
         
         Returns:
@@ -395,6 +397,9 @@ class ZeroGStorageClient:
         Raises:
             ValueError: If checksum verification fails
         """
+        # Use system temp directory if not specified
+        if output_dir is None:
+            output_dir = tempfile.gettempdir()
         # Get storage pointer from chain
         storage_hash, expected_checksum, timestamp = await self.get_inft_storage_pointer(inft_id)
         
@@ -446,7 +451,8 @@ class ZeroGStorageClient:
         inft_id: str,
         event: Dict,
         auto_batch: bool = True,
-        batch_size: int = 100
+        batch_size: int = 100,
+        log_dir: Optional[str] = None
     ) -> Optional[str]:
         """
         Append event to incremental event log with optional auto-batching
@@ -456,12 +462,21 @@ class ZeroGStorageClient:
             event: Event data to append
             auto_batch: Whether to automatically upload when batch size reached
             batch_size: Number of events to batch before auto-upload
+            log_dir: Directory for log files (default: system temp dir)
         
         Returns:
             Storage hash if batch was uploaded, None otherwise
+        
+        Note:
+            Archived log files (when batch uploads) are not automatically cleaned up.
+            Consider implementing a cleanup strategy based on your retention policies.
         """
+        # Use system temp directory if not specified
+        if log_dir is None:
+            log_dir = tempfile.gettempdir()
+        
         # Initialize or load event log
-        log_path = f"/tmp/inft_{inft_id}_events.jsonl"
+        log_path = os.path.join(log_dir, f"inft_{inft_id}_events.jsonl")
         
         # Append event with timestamp
         event_entry = {
@@ -481,11 +496,12 @@ class ZeroGStorageClient:
                 # Upload batch
                 storage_hash, _ = await self.upload_to_0g_storage(log_path)
                 
-                # Create new log for next batch
-                archive_path = f"/tmp/inft_{inft_id}_events_{int(datetime.now().timestamp())}.jsonl"
+                # Archive old log for next batch (user should implement cleanup)
+                archive_path = os.path.join(log_dir, f"inft_{inft_id}_events_{int(datetime.now().timestamp())}.jsonl")
                 os.rename(log_path, archive_path)
                 
                 logger.info(f"Auto-uploaded event batch for iNFT {inft_id}: {storage_hash}")
+                logger.info(f"Archived log to: {archive_path} (cleanup not automatic)")
                 
                 return storage_hash
         
