@@ -413,6 +413,7 @@ export class ZeroGStorageClient {
         const { storageHash } = await this.uploadTo0gStorage(logPath);
 
         // Archive old log for next batch (user should implement cleanup)
+        // Uses milliseconds for archive filename (consistent with Python implementation)
         const archivePath = path.join(finalLogDir, `inft_${inftId}_events_${Date.now()}.jsonl`);
         await fs.rename(logPath, archivePath);
 

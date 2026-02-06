@@ -368,7 +368,7 @@ class ZeroGStorageClient:
             inft_id=inft_id,
             file_hash=storage_hash,
             checksum=checksum,
-            timestamp=int(datetime.now().timestamp()),  # Use seconds for consistency
+            timestamp=int(datetime.now().timestamp()),  # Unix timestamp in seconds (consistent with TypeScript)
             size_bytes=file_size,
             encryption_key_id="default" if encrypt else "none"
         )
@@ -497,7 +497,9 @@ class ZeroGStorageClient:
                 storage_hash, _ = await self.upload_to_0g_storage(log_path)
                 
                 # Archive old log for next batch (user should implement cleanup)
-                archive_path = os.path.join(log_dir, f"inft_{inft_id}_events_{int(datetime.now().timestamp())}.jsonl")
+                # Use milliseconds for archive filename to avoid collisions
+                timestamp_ms = int(datetime.now().timestamp() * 1000)
+                archive_path = os.path.join(log_dir, f"inft_{inft_id}_events_{timestamp_ms}.jsonl")
                 os.rename(log_path, archive_path)
                 
                 logger.info(f"Auto-uploaded event batch for iNFT {inft_id}: {storage_hash}")
