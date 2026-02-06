@@ -63,11 +63,13 @@ if [ -z "$PRIVATE_KEY" ]; then
     log_error "PRIVATE_KEY not set in .env"
     ((FAILED_CHECKS++))
 else
-    # Validate format (should be 66 chars: 0x + 64 hex characters)
-    if [[ $PRIVATE_KEY =~ ^0x[0-9a-fA-F]{64}$ ]]; then
-        log_success "PRIVATE_KEY is properly formatted"
+    # Validate format (should be 66 chars total: 0x prefix + 64 hex characters)
+    # The regex checks for 0x followed by exactly 64 hex chars
+    KEY_LENGTH=${#PRIVATE_KEY}
+    if [ "$KEY_LENGTH" -eq 66 ] && [[ $PRIVATE_KEY =~ ^0x[0-9a-fA-F]{64}$ ]]; then
+        log_success "PRIVATE_KEY is properly formatted (66 chars: 0x + 64 hex)"
     else
-        log_warning "PRIVATE_KEY format may be incorrect (expected: 0x followed by 64 hex chars = 66 total chars)"
+        log_warning "PRIVATE_KEY format may be incorrect (expected: 66 chars total = 0x + 64 hex characters, got: $KEY_LENGTH chars)"
     fi
 fi
 

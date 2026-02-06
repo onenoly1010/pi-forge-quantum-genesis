@@ -193,12 +193,24 @@ deploy_inft_forge() {
     fi
     
     log_info "Deploying via Forge to $RPC_URL..."
-    forge script script/Deploy.s.sol \
-        --rpc-url "$RPC_URL" \
-        --private-key "$PRIVATE_KEY" \
+    
+    # Build base command
+    FORGE_CMD="forge script script/Deploy.s.sol \
+        --rpc-url \"$RPC_URL\" \
+        --private-key \"$PRIVATE_KEY\" \
         --broadcast \
-        --verify \
-        --slow
+        --slow"
+    
+    # Add verification if API key is available
+    if [ -n "$ETHERSCAN_API_KEY" ] || [ -n "$PI_API_KEY" ]; then
+        log_info "Contract verification enabled"
+        FORGE_CMD="$FORGE_CMD --verify"
+    else
+        log_warning "No verification API key found, skipping contract verification"
+    fi
+    
+    # Execute deployment
+    eval $FORGE_CMD
     
     log_success "Forge deployment completed"
 }
