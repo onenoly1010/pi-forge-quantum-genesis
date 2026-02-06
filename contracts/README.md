@@ -2,6 +2,45 @@
 
 Production-ready Solidity smart contracts for the **OINIO** (Ontological Intelligence Network Incentive Organism) ecosystem on Pi Network.
 
+## 🚀 Quick Start - Deployment
+
+### Prerequisites Check
+Run the validation script to ensure your environment is ready:
+```bash
+./scripts/validate-setup.sh
+```
+
+### Quick Deploy Commands
+See [QUICK_REFERENCE.md](QUICK_REFERENCE.md) for one-page deployment guide.
+
+**Hardhat (iNFT Contracts):**
+```bash
+cd hardhat
+npm install
+npm run check:balance
+npm run deploy:0g:inft      # Deploy to 0G
+npm run deploy:pi:inft      # Deploy to Pi Mainnet
+```
+
+**Forge (All Contracts):**
+```bash
+forge script script/Deploy.s.sol --rpc-url $RPC_URL --broadcast --verify
+```
+
+**Soroban (Pi Network):**
+```bash
+cd oinio-memorial-bridge
+./build.sh && ./deploy.sh
+```
+
+### Comprehensive Guides
+- **[DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)** - Complete deployment documentation
+- **[SOROBAN_DEPLOYMENT.md](SOROBAN_DEPLOYMENT.md)** - Soroban-specific guide
+- **[QUICK_REFERENCE.md](QUICK_REFERENCE.md)** - One-page command reference
+- **[hardhat/README.md](hardhat/README.md)** - Hardhat deployment details
+
+---
+
 ## Overview
 
 The OINIO ecosystem consists of two main smart contracts:
