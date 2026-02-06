@@ -1,4 +1,21 @@
 name: Deploy to Vercel
+#
+# This workflow deploys the Pi Forge Quantum Genesis project to Vercel.
+#
+# Required Secrets:
+#   - VERCEL_TOKEN: Your Vercel authentication token (get from https://vercel.com/account/tokens)
+#   - VERCEL_ORG_ID: Your Vercel organization/team ID (found in .vercel/project.json after running 'vercel link')
+#   - VERCEL_PROJECT_ID: Your Vercel project ID (found in .vercel/project.json after running 'vercel link')
+#
+# The workflow automatically:
+#   - Tests the build on all PRs and pushes
+#   - Deploys preview environments for PRs
+#   - Deploys to production on main branch pushes
+#   - Monitors deployment health
+#
+# Note: VERCEL_TOKEN is set as an environment variable and used automatically by Vercel CLI.
+# Do not pass --token= flags explicitly.
+#
 
 on:
   push:
@@ -11,6 +28,7 @@ on:
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
 jobs:
   test:
@@ -64,19 +82,32 @@ jobs:
           node-version: '18'
           cache: 'npm'
 
+      - name: Check Vercel secrets
+        run: |
+          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
+            echo "⚠️  VERCEL_TOKEN secret is not configured"
+            echo "Please configure the following secrets in your repository settings:"
+            echo "  - VERCEL_TOKEN (required)"
+            echo "  - VERCEL_ORG_ID (required)"
+            echo "  - VERCEL_PROJECT_ID (required)"
+            echo ""
+            echo "See: https://vercel.com/docs/cli#authentication"
+            exit 1
+          fi
+
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
       - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=preview
 
       - name: Build Project Artifacts
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel build
 
       - name: Deploy Preview to Vercel
         id: deploy
         run: |
-          DEPLOYMENT_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt)
           echo "url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
           echo "Deployed to: $DEPLOYMENT_URL"
 
@@ -157,19 +188,32 @@ jobs:
           node-version: '18'
           cache: 'npm'
 
+      - name: Check Vercel secrets
+        run: |
+          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
+            echo "⚠️  VERCEL_TOKEN secret is not configured"
+            echo "Please configure the following secrets in your repository settings:"
+            echo "  - VERCEL_TOKEN (required)"
+            echo "  - VERCEL_ORG_ID (required)"
+            echo "  - VERCEL_PROJECT_ID (required)"
+            echo ""
+            echo "See: https://vercel.com/docs/cli#authentication"
+            exit 1
+          fi
+
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
       - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=production
 
       - name: Build Project Artifacts
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel build --prod
 
       - name: Deploy Production to Vercel
         id: deploy
         run: |
-          DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod)
           echo "url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
           echo "Deployed to production: $DEPLOYMENT_URL"
 
