@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300">
+    <!-- Generated from tx: 0x1234567890abcd... -->
+    <!-- Fractal type: recursive -->
+    <rect width="100%" height="100%" fill="#0a0a1a"/>
+    <g id="fractal">
+        <circle cx="150.00" cy="150.00" r="80.00" fill="none" stroke="hsl(204, 65%, 68%)" stroke-width="2.60" opacity="0.40"/>
+        <circle cx="105.91" cy="168.98" r="45.46" fill="none" stroke="hsl(204, 65%, 68%)" stroke-width="1.91" opacity="0.40"/>
+        <circle cx="131.02" cy="105.91" r="45.46" fill="none" stroke="hsl(93, 74%, 40%)" stroke-width="1.91" opacity="0.68"/>
+        <circle cx="194.09" cy="131.02" r="45.46" fill="none" stroke="hsl(190, 98%, 62%)" stroke-width="1.91" opacity="0.78"/>
+        <circle cx="168.98" cy="194.09" r="45.46" fill="none" stroke="hsl(235, 55%, 74%)" stroke-width="1.91" opacity="0.36"/>
+    </g>
+    <text x="150.0" y="290" text-anchor="middle" fill="#DDA0DD" font-size="10" opacity="0.7">TX: 0x1234567890...</text>
+</svg>
