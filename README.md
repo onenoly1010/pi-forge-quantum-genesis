@@ -31,6 +31,48 @@ This project is governed by the **[Canon of Autonomy](wiki/Canon-of-Autonomy.md)
 
 ---
 
+## 🏗️ Architecture & Repository Constellation
+
+The Quantum Pi Forge ecosystem consists of multiple specialized repositories working in harmony:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    Quantum Pi Forge Constellation                │
+└─────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────┐
+│  quantum-pi-forge-site   │  →  quantumpiforge.com
+│  (Public Frontend)       │      (Vercel - GitHub Pages)
+│  User-facing portal      │      Status: ✅ LIVE
+└────────────┬─────────────┘
+             │
+             │ API Calls
+             ↓
+┌──────────────────────────┐
+│ pi-forge-quantum-genesis │  →  Backend API Services
+│ (THIS REPOSITORY)        │      Railway: https://pi-forge-quantum-genesis.railway.app
+│ Backend API & Coord Hub  │      Render:  https://pi-forge-quantum-genesis-1.onrender.com
+└────────────┬─────────────┘      Status: ✅ LIVE
+             │
+             │ Resonance Calls
+             ↓
+┌──────────────────────────┐
+│ quantum-resonance-clean  │  →  Resonance Engine
+│ (Resonance Engine)       │      https://quantum-resonance-clean.vercel.app
+│ Harmonic Ledger Backend  │      Status: ✅ LIVE
+└──────────────────────────┘
+```
+
+### This Repository's Purpose
+
+**`pi-forge-quantum-genesis`** serves as:
+- ✅ **Backend API** — FastAPI services for Pi Network integration, payments, and quantum operations
+- ✅ **Coordination Hub** — Documentation, governance, and multi-repo coordination
+- ✅ **GitHub Agent Base** — Operational center for autonomous agents
+- ✅ **Canon Preservation** — Home of the Canon of Autonomy principles
+
+---
+
 ## 🚀 Deployment Options
 
 ### Vercel (Recommended for Frontend)
@@ -239,11 +281,41 @@ pytest tests/test_vercel_build.py -v
 
 ## 🌐 Live Deployments
 
-- **Production**: https://pi-forge-quantum-genesis.vercel.app
-- **Backend API**: https://quantumpiforge.com
-- **Documentation**: https://github.com/onenoly1010/pi-forge-quantum-genesis
+### Production Services
+
+**Public Frontend:**
+- **URL**: https://quantumpiforge.com
+- **Repository**: [quantum-pi-forge-site](https://github.com/onenoly1010/quantum-pi-forge-site)
+- **Status**: ✅ LIVE on Vercel/GitHub Pages
+
+**Backend API (This Repository):**
+- **Railway**: https://pi-forge-quantum-genesis.railway.app
+- **Render**: https://pi-forge-quantum-genesis-1.onrender.com
+- **Health Check**: `GET /health`
+- **Status**: ✅ LIVE
+
+**Resonance Engine:**
+- **URL**: https://quantum-resonance-clean.vercel.app
+- **Repository**: [quantum-resonance-clean](https://github.com/onenoly1010/quantum-resonance-clean)
+- **Status**: ✅ LIVE on Vercel
 
 **📊 Real-Time Status**: Check [CLEANUP_STATUS_DASHBOARD.md](./CLEANUP_STATUS_DASHBOARD.md) for live deployment health and monitoring data.
+
+### Quick Health Checks
+
+```bash
+# Backend API (Railway)
+curl https://pi-forge-quantum-genesis.railway.app/health
+
+# Backend API (Render)
+curl https://pi-forge-quantum-genesis-1.onrender.com/health
+
+# Resonance Engine
+curl https://quantum-resonance-clean.vercel.app/
+
+# Public Site
+curl -I https://quantumpiforge.com
+```
 
 ---
 

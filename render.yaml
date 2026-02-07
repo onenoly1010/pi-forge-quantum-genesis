@@ -5,9 +5,23 @@ services:
     dockerfilePath: ./Dockerfile
     plan: free
     region: oregon
+    # Health check configuration
+    healthCheckPath: /health
+    # Environment variables (configure in Render dashboard)
     envVars:
       - key: PORT
         value: 8080
       - key: NODE_ENV
         value: production
-    healthCheckPath: /health
+      # Required: Configure these in Render Dashboard
+      # - SUPABASE_URL
+      # - SUPABASE_KEY
+      # - SECRET_KEY
+      # - PI_NETWORK_MODE (mainnet or testnet)
+      # - PI_NETWORK_APP_ID
+      # - PI_NETWORK_API_KEY
+      # - PI_NETWORK_WEBHOOK_SECRET
+      # Optional:
+      # - SENTRY_DSN
+      # - OPENAI_API_KEY
+      # - ANTHROPIC_API_KEY
