@@ -36,12 +36,17 @@ This caused the Vercel CLI to receive an empty token parameter, leading to authe
    - `vercel build --prod` (line 211)
    - `vercel deploy --prebuilt --prod` (line 216)
 
-3. **Added validation steps** (lines 85-102, 191-202)
+3. **Added job-level environment variables** (lines 75-78, 185-188)
+   - Added explicit `env` blocks at job level for `deploy-preview` and `deploy-production`
+   - Ensures VERCEL_TOKEN, VERCEL_ORG_ID, and VERCEL_PROJECT_ID are properly inherited
+   - Fixes issue where workflow-level env vars weren't being passed to all steps
+
+4. **Added validation steps** (lines 89-100, 199-210)
    - Check if `VERCEL_TOKEN` secret is configured before attempting deployment
    - Provide clear error messages with setup instructions
    - Exit gracefully if secrets are missing
 
-4. **Added comprehensive documentation** (lines 1-16)
+5. **Added comprehensive documentation** (lines 1-18)
    - Document required secrets in workflow file header
    - Explain how to obtain these secrets
    - Note that `VERCEL_TOKEN` is used as environment variable
@@ -53,7 +58,9 @@ The Vercel CLI has built-in support for the following environment variables:
 - `VERCEL_ORG_ID` - Organization/team ID  
 - `VERCEL_PROJECT_ID` - Project ID
 
-When these are set as environment variables (in the `env:` section), the CLI automatically uses them for authentication. This is the recommended approach in Vercel's documentation and is more reliable than passing `--token=` flags.
+When these are set as environment variables (both at workflow level and job level), the CLI automatically uses them for authentication. Setting them at both levels ensures they are properly inherited by all steps in the jobs. This is the recommended approach in Vercel's documentation and is more reliable than passing `--token=` flags.
+
+**Important:** GitHub Actions doesn't always inherit workflow-level environment variables properly in all job contexts, especially when using `environment` settings. Setting them at the job level ensures they're always available.
 
 ## Required Secrets Configuration
 
