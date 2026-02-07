@@ -15,22 +15,22 @@ This document is the **single source of truth** for all active, production-ready
 
 ## 🟢 Active Production Services
 
-### 1. Public-Facing Site (GitHub Pages)
+### 1. Public-Facing Site (Vercel/GitHub Pages)
 **Repository**: `quantum-pi-forge-site`  
-**URL**: https://onenoly1010.github.io/quantum-pi-forge-site/  
+**URL**: https://quantumpiforge.com  
 **Purpose**: External communication, manifesto, public portal  
 **Status**: ✅ LIVE  
 **Health Check**: Visual inspection  
-**Deployment Method**: GitHub Pages (auto-deploy from main branch)
+**Deployment Method**: Vercel/GitHub Pages (auto-deploy from main branch)
 
 **Notes**:
 - Primary user-facing interface
-- Static site with GitHub Pages hosting
+- Static site hosted on Vercel or GitHub Pages
 - No backend dependencies
 
 ---
 
-### 2. Backend API (Railway)
+### 2. Backend API (Railway - Primary)
 **Repository**: `pi-forge-quantum-genesis`  
 **URL**: https://pi-forge-quantum-genesis.railway.app  
 **Purpose**: FastAPI Quantum Conduit backend services  
@@ -43,6 +43,8 @@ This document is the **single source of truth** for all active, production-ready
 - `/api/payments/*` — Pi Network payment processing
 - `/api/pi-webhooks/*` — Pi Network webhook receiver
 - `/api/pi-network/status` — Configuration status
+- `/api/fractal/generate` — Quantum fractal generation
+- `/sacred-trinity/*` — Sacred Trinity integration
 
 **Configuration**:
 - Dockerfile: `Dockerfile` (root directory)
@@ -60,9 +62,32 @@ PI_NETWORK_API_KEY
 PI_NETWORK_WEBHOOK_SECRET
 ```
 
+**Quick Health Check**:
+```bash
+curl https://pi-forge-quantum-genesis.railway.app/health
+```
+
 ---
 
-### 3. Resonance Engine (Vercel)
+### 3. Backend API (Render - Alternative)
+**Repository**: `pi-forge-quantum-genesis`  
+**URL**: https://pi-forge-quantum-genesis-1.onrender.com  
+**Purpose**: Alternative backend deployment for redundancy  
+**Status**: ✅ LIVE  
+**Health Check**: `GET /health`  
+**Deployment Method**: Render (Docker containerized)
+
+**Configuration**:
+Same as Railway deployment (see above).
+
+**Quick Health Check**:
+```bash
+curl https://pi-forge-quantum-genesis-1.onrender.com/health
+```
+
+---
+
+### 4. Resonance Engine (Vercel)
 **Repository**: `quantum-resonance-clean`  
 **URL**: https://quantum-resonance-clean.vercel.app  
 **Purpose**: Harmonic ledger backend  
@@ -74,6 +99,11 @@ PI_NETWORK_WEBHOOK_SECRET
 - Independent repository
 - Handles resonance ledger operations
 - Vercel auto-deploy from main branch
+
+**Quick Health Check**:
+```bash
+curl https://quantum-resonance-clean.vercel.app/
+```
 
 ---
 
@@ -211,14 +241,17 @@ SENTRY_DSN (Optional)
 
 **Health Checks**:
 ```bash
-# Backend API
+# Public Site
+curl -I https://quantumpiforge.com
+
+# Backend API (Railway)
 curl https://pi-forge-quantum-genesis.railway.app/health
+
+# Backend API (Render)
+curl https://pi-forge-quantum-genesis-1.onrender.com/health
 
 # Resonance Engine
 curl https://quantum-resonance-clean.vercel.app/
-
-# Public Site
-curl -I https://onenoly1010.github.io/quantum-pi-forge-site/
 ```
 
 ---
