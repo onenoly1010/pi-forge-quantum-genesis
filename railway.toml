@@ -3,12 +3,31 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
+# Start command for FastAPI backend
+# Note: $PORT is provided by Railway automatically
 startCommand = "python -m uvicorn main:app --host 0.0.0.0 --port $PORT"
+
+# Health check configuration
 healthcheckPath = "/health"
 healthcheckTimeout = 100
+
+# Restart policy
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
 
 # Explicitly tell Railway this is NOT a Node.js app
 [build.nixpacksConfig]
 ignoreNodeEngine = true
+
+# Required Environment Variables (configure in Railway dashboard):
+# - SUPABASE_URL: Your Supabase project URL
+# - SUPABASE_KEY: Your Supabase anon/public key
+# - SECRET_KEY: Application secret key for sessions
+# - PI_NETWORK_MODE: "mainnet" or "testnet"
+# - PI_NETWORK_APP_ID: Your Pi Network App ID
+# - PI_NETWORK_API_KEY: Your Pi Network API Key
+# - PI_NETWORK_WEBHOOK_SECRET: Your Pi Network Webhook Secret
+# Optional:
+# - SENTRY_DSN: Error tracking
+# - OPENAI_API_KEY: OpenAI integration
+# - ANTHROPIC_API_KEY: Anthropic integration

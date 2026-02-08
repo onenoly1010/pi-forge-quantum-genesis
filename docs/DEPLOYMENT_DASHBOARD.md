@@ -1,12 +1,46 @@
 # 🚀 Deployment Dashboard
 ## Your Complete Guide to Deploying Quantum Pi Forge
 
-**Last Updated**: 2025-12-21  
+**Last Updated**: 2026-02-07  
 **Maintained By**: GitHub Agent (Coordinator)  
 **Canon Alignment**: ✅ Verified  
 **Continuity**: Anyone can maintain/extend this dashboard
 
 This dashboard is the **canonical entry point** for all deployment tasks across the Quantum Pi Forge constellation. It consolidates deployment knowledge from all existing guides into a single, authoritative source of truth.
+
+---
+
+## 🌐 Current Production Deployments
+
+### Active Services
+
+| Service | URL | Status | Health Check |
+|---------|-----|--------|--------------|
+| **Public Frontend** | https://quantumpiforge.com | ✅ LIVE | `curl -I https://quantumpiforge.com` |
+| **Backend API (Railway)** | https://pi-forge-quantum-genesis.railway.app | ✅ LIVE | `curl https://pi-forge-quantum-genesis.railway.app/health` |
+| **Backend API (Render)** | https://pi-forge-quantum-genesis-1.onrender.com | ✅ LIVE | `curl https://pi-forge-quantum-genesis-1.onrender.com/health` |
+| **Resonance Engine** | https://quantum-resonance-clean.vercel.app | ✅ LIVE | `curl https://quantum-resonance-clean.vercel.app/` |
+
+### Quick Health Check
+
+Run all health checks at once:
+```bash
+# Public Frontend
+curl -I https://quantumpiforge.com
+
+# Backend API (Railway)
+curl https://pi-forge-quantum-genesis.railway.app/health
+
+# Backend API (Render) 
+curl https://pi-forge-quantum-genesis-1.onrender.com/health
+
+# Resonance Engine
+curl https://quantum-resonance-clean.vercel.app/
+```
+
+**Expected Response**: All endpoints should return 200 OK status.
+
+---
 
 > **📌 Note**: This document consolidates information from:
 > - `DEPLOYMENT.md` - Vercel/Railway basics

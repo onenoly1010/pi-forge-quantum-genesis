@@ -4,6 +4,33 @@
   "buildCommand": "npm run build",
   "cleanUrls": true,
   "trailingSlash": false,
+  "rewrites": [
+    {
+      "source": "/docs",
+      "destination": "/docs/index.html"
+    },
+    {
+      "source": "/wiki",
+      "destination": "/wiki/index.html"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/documentation",
+      "destination": "/docs",
+      "permanent": true
+    },
+    {
+      "source": "/deployment",
+      "destination": "/DEPLOYMENT.md",
+      "permanent": false
+    },
+    {
+      "source": "/api-docs",
+      "destination": "/docs/API.md",
+      "permanent": false
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
