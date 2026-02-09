@@ -141,6 +141,20 @@ This index provides quick navigation to all documentation resources in the `pi-f
 
 ---
 
+## 🧹 Repository Maintenance
+
+### Cleanup & Maintenance
+- **[Branch Cleanup Analysis](./BRANCH_CLEANUP_ANALYSIS.md)** — Complete branch inventory and cleanup analysis
+- **[Repository Cleanup Safeguards](./REPOSITORY_CLEANUP_SAFEGUARDS.md)** — Safe cleanup procedures and emergency recovery
+- **[Repository Maintenance Best Practices](./REPOSITORY_MAINTENANCE_BEST_PRACTICES.md)** — Long-term maintenance guidelines
+- **[Commit dd5aebbc Summary](./COMMIT_DD5AEBBC_SUMMARY.md)** — Major cleanup merge documentation
+
+### Workflow Management
+- **[Cleanup Status Dashboard](../CLEANUP_STATUS_DASHBOARD.md)** — Live cleanup status tracking
+- **[Deployment Health Dashboard](./DEPLOYMENT_DASHBOARD.md)** — Automated health monitoring
+
+---
+
 ## 📊 Status & Reports
 
 ### Current Status
@@ -233,7 +247,7 @@ This index is maintained by the GitHub Agent and the community.
 
 ---
 
-**Last Updated**: 2026-02-07  
+**Last Updated**: 2026-02-09  
 **Maintained By**: GitHub Agent & Community  
 **Canon Aligned**: ✅ Yes
 
