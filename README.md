@@ -255,6 +255,16 @@ The dashboard is maintained by the [`deployment-health-dashboard.yml`](.github/w
 
 **📋 For complete deployment information, see [DEPLOYMENT_CONSOLIDATION.md](./DEPLOYMENT_CONSOLIDATION.md)**
 
+**📖 Full Documentation Index**: [docs/index.md](./docs/index.md) — Complete navigation to all documentation resources
+
+### Recent Major Updates
+
+- **Feb 8, 2026**: [Comprehensive repository cleanup documentation](./docs/COMMIT_DD5AEBBC_SUMMARY.md) added (3,200+ lines)
+  - Branch cleanup analysis and safeguards
+  - Repository maintenance best practices
+  - Deployment configuration improvements
+  - Workflow fixes and dependency updates
+
 ### Vercel Configuration Note
 
 ---
