@@ -8,6 +8,8 @@ This playbook provides comprehensive operational procedures for Guardians overse
 **AI Assistant**: @app/copilot-swe-agent  
 **Guardian HQ**: [Issue #100](https://github.com/onenoly1010/pi-forge-quantum-genesis/issues/100)
 
+> **Note**: This playbook is part of the [Prelaunch Operational Team](./OPERATIONAL_TEAM.md) framework. For team structure, roles, and coordination procedures, refer to the operational team documentation.
+
 ---
 
 ## Table of Contents
@@ -144,7 +146,7 @@ When reviewing decisions, consider:
 curl http://localhost:8000/api/guardian/dashboard | jq .
 
 # Production
-curl https://[deployment-url]/api/guardian/dashboard | jq .
+curl https://pi-forge-quantum-genesis.railway.app/api/guardian/dashboard | jq .
 ```
 
 **Review**:
@@ -165,7 +167,7 @@ curl https://[deployment-url]/api/guardian/dashboard | jq .
 
 ```bash
 # Get decisions requiring approval
-curl https://[url]/api/autonomous/decision-history?requires_guardian=true&status=pending | jq .
+curl https://pi-forge-quantum-genesis.railway.app/api/autonomous/decision-history?requires_guardian=true&status=pending | jq .
 ```
 
 **For each pending decision**:
@@ -179,7 +181,7 @@ curl https://[url]/api/autonomous/decision-history?requires_guardian=true&status
 
 ```bash
 # Get last 12 hours of decisions
-curl https://[url]/api/autonomous/decision-history?limit=50&hours=12 | jq .
+curl https://pi-forge-quantum-genesis.railway.app/api/autonomous/decision-history?limit=50&hours=12 | jq .
 ```
 
 **Look for**:
@@ -217,7 +219,7 @@ curl https://[url]/api/autonomous/decision-history?limit=50&hours=12 | jq .
 #### 1. Final Dashboard Check
 
 ```bash
-curl https://[url]/api/guardian/dashboard | jq .
+curl https://pi-forge-quantum-genesis.railway.app/api/guardian/dashboard | jq .
 ```
 
 Ensure no pending critical items.
@@ -225,7 +227,7 @@ Ensure no pending critical items.
 #### 2. Review Day's Metrics
 
 ```bash
-curl https://[url]/api/autonomous/metrics | jq .
+curl https://pi-forge-quantum-genesis.railway.app/api/autonomous/metrics | jq .
 ```
 
 **Check**:
@@ -301,13 +303,13 @@ Update Guardian Log with:
 
 ```bash
 # 1. Trigger emergency stop
-curl -X POST https://[url]/api/guardian/emergency-stop \
+curl -X POST https://pi-forge-quantum-genesis.railway.app/api/guardian/emergency-stop \
   -H "Authorization: Bearer <guardian-token>" \
   -H "Content-Type: application/json" \
   -d '{"reason": "Critical incident: [description]", "guardian_id": "your-id"}'
 
 # 2. Check status
-curl https://[url]/api/guardian/status | jq .
+curl https://pi-forge-quantum-genesis.railway.app/api/guardian/status | jq .
 
 # 3. Notify team
 # Send message to team channel with:
@@ -320,8 +322,8 @@ curl https://[url]/api/guardian/status | jq .
 **STEP 2: Assessment (< 15 minutes)**
 
 1. **Identify root cause**
-   - Check logs: `curl https://[url]/api/logs/recent?limit=100`
-   - Review metrics: `curl https://[url]/api/autonomous/metrics`
+   - Check logs: `curl https://pi-forge-quantum-genesis.railway.app/api/logs/recent?limit=100`
+   - Review metrics: `curl https://pi-forge-quantum-genesis.railway.app/api/autonomous/metrics`
    - Check external dependencies (Supabase, Pi Network)
 
 2. **Determine impact**
@@ -341,7 +343,7 @@ curl https://[url]/api/guardian/status | jq .
 **Option A: Quick Fix**
 ```bash
 # Approve healing action
-curl -X POST https://[url]/api/guardian/approve-healing \
+curl -X POST https://pi-forge-quantum-genesis.railway.app/api/guardian/approve-healing \
   -H "Authorization: Bearer <guardian-token>" \
   -d '{"action": "restart_services", "approved": true}'
 ```
@@ -370,10 +372,10 @@ git revert <bad-commit-hash>
 
 ```bash
 # 1. Check health
-curl https://[url]/api/health | jq .
+curl https://pi-forge-quantum-genesis.railway.app/api/health | jq .
 
 # 2. Verify services
-curl https://[url]/api/guardian/dashboard | jq .
+curl https://pi-forge-quantum-genesis.railway.app/api/guardian/dashboard | jq .
 
 # 3. Test critical paths
 # - User login
@@ -388,7 +390,7 @@ curl https://[url]/api/guardian/dashboard | jq .
 
 ```bash
 # Re-enable autonomous operations
-curl -X POST https://[url]/api/guardian/resume \
+curl -X POST https://pi-forge-quantum-genesis.railway.app/api/guardian/resume \
   -H "Authorization: Bearer <guardian-token>" \
   -d '{"confirmed": true, "guardian_id": "your-id"}'
 ```
@@ -733,10 +735,10 @@ Use template: `.github/ISSUE_TEMPLATE/incident-report.md`
 
 ### Essential Tools
 
-1. **Guardian Dashboard**: `https://[url]/api/guardian/dashboard`
-2. **Decision History**: `https://[url]/api/autonomous/decision-history`
-3. **System Metrics**: `https://[url]/api/autonomous/metrics`
-4. **Health Endpoint**: `https://[url]/api/health`
+1. **Guardian Dashboard**: `https://pi-forge-quantum-genesis.railway.app/api/guardian/dashboard`
+2. **Decision History**: `https://pi-forge-quantum-genesis.railway.app/api/autonomous/decision-history`
+3. **System Metrics**: `https://pi-forge-quantum-genesis.railway.app/api/autonomous/metrics`
+4. **Health Endpoint**: `https://pi-forge-quantum-genesis.railway.app/api/health`
 
 ### Reference Documentation
 
@@ -756,22 +758,22 @@ Use template: `.github/ISSUE_TEMPLATE/incident-report.md`
 
 ```bash
 # Check dashboard
-curl https://[url]/api/guardian/dashboard | jq .
+curl https://pi-forge-quantum-genesis.railway.app/api/guardian/dashboard | jq .
 
 # Get pending decisions
-curl https://[url]/api/autonomous/decision-history?requires_guardian=true | jq .
+curl https://pi-forge-quantum-genesis.railway.app/api/autonomous/decision-history?requires_guardian=true | jq .
 
 # Approve decision
-curl -X POST https://[url]/api/guardian/approve/{decision_id} \
+curl -X POST https://pi-forge-quantum-genesis.railway.app/api/guardian/approve/{decision_id} \
   -H "Authorization: Bearer <token>" \
   -d '{"approved": true, "comments": "Approved"}'
 
 # Emergency stop
-curl -X POST https://[url]/api/guardian/emergency-stop \
+curl -X POST https://pi-forge-quantum-genesis.railway.app/api/guardian/emergency-stop \
   -H "Authorization: Bearer <token>"
 
 # Resume operations
-curl -X POST https://[url]/api/guardian/resume \
+curl -X POST https://pi-forge-quantum-genesis.railway.app/api/guardian/resume \
   -H "Authorization: Bearer <token>"
 
 # Emergency rollback

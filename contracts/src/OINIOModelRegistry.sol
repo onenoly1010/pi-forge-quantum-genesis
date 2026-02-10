@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
@@ -18,7 +19,7 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
  * - Only model owners can update their model metadata
  * - Searchable registry of all models by creator
  */
-contract OINIOModelRegistry is ERC721, ERC721URIStorage, Ownable, ReentrancyGuard {
+contract OINIOModelRegistry is ERC721, ERC721URIStorage, ERC721Burnable, Ownable, ReentrancyGuard {
     /// @dev Structure representing an AI model
     struct AIModel {
         uint256 modelId;
@@ -241,9 +242,35 @@ contract OINIOModelRegistry is ERC721, ERC721URIStorage, Ownable, ReentrancyGuar
     function supportsInterface(bytes4 interfaceId)
         public
         view
-        override(ERC721, ERC721URIStorage)
+        override(ERC721, ERC721URIStorage, ERC721Burnable)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
     }
-}
+    /**
+     * @dev Allow model owners to withdraw their staked tokens (emergency function)
+     * @param modelId ID of the model to withdraw stake from
+     */
+    function withdrawStake(uint256 modelId) external nonReentrant {
+        require(_ownerOf(modelId) == msg.sender, "Not the model owner");
+        require(_models[modelId].isActive, "Model is not active");
+        
+        uint256 stakeAmount = _models[modelId].stakeAmount;
+        require(stakeAmount > 0, "No stake to withdraw");
+        
+        // Mark stake as withdrawn
+        _models[modelId].stakeAmount = 0;
+        
+        // Transfer tokens back to owner
+        require(oinioToken.transfer(msg.sender, stakeAmount), "Stake withdrawal failed");
+        
+        emit ModelDeactivated(modelId);
+    }
+
+    /**
+     * @dev Emergency function for contract owner to recover stuck tokens
+     * @param amount Amount of tokens to recover
+     */
+    function emergencyWithdraw(uint256 amount) external onlyOwner {
+        require(oinioToken.transfer(owner(), amount), "Emergency withdrawal failed");
+    }}

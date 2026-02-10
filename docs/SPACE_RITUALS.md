@@ -64,9 +64,9 @@ Thank you for your contribution to Pi Forge Quantum Genesis! This is a
 collaborative space where your sovereignty and autonomy are valued.
 
 **Getting Started:**
-- 📖 [Space Rituals](./SPACE_RITUALS.md) - Our engagement framework
-- 🛡️ [Guardian Playbook](./GUARDIAN_PLAYBOOK.md) - Oversight and safety
-- 🚀 [Quick Start](./QUICK_START.md) - Technical setup
+- 📖 [Space Rituals](./docs/SPACE_RITUALS.md) - Our engagement framework
+- 🛡️ [Guardian Playbook](./docs/GUARDIAN_PLAYBOOK.md) - Oversight and safety
+- 🚀 [Quick Start](./docs/QUICK_START.md) - Technical setup
 
 Your voice matters here. Contribute at your own pace, and feel free to 
 question, improve, or challenge any process. Rituals serve us—we don't serve them.
@@ -535,7 +535,7 @@ Pi Forge operates through the **Sacred Trinity** architecture:
 
 **Space Rituals** connects to:
 - [README.md](../README.md) - Project overview and quick start
-- [QUICK_START.md](../QUICK_START.md) - Technical onboarding
+- [QUICK_START.md](./QUICK_START.md) - Technical onboarding
 - [GUARDIAN_PLAYBOOK.md](./GUARDIAN_PLAYBOOK.md) - Guardian operations
 - [SUCCESSION_CEREMONY.md](./SUCCESSION_CEREMONY.md) - Leadership transition example
 - [AUTONOMOUS_HANDOVER.md](./AUTONOMOUS_HANDOVER.md) - AI-to-human handoffs

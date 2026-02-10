@@ -26,6 +26,8 @@ jobs:
   gate1-classification:
     name: "Gate 1: PR Classification"
     runs-on: ubuntu-latest
+    # Skip if check_suite event without associated PRs (e.g., on main branch after merge)
+    if: github.event_name != 'check_suite' || (github.event.check_suite.pull_requests && github.event.check_suite.pull_requests.length > 0)
     outputs:
       is_canon_pr: ${{ steps.classify.outputs.is_canon_pr }}
       artifact_type: ${{ steps.classify.outputs.artifact_type }}
@@ -41,9 +43,19 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const pr_number = context.payload.pull_request?.number || context.payload.inputs?.pr_number;
+            let pr_number = context.payload.pull_request?.number || context.payload.inputs?.pr_number;
+            
+            // For check_suite events, get PR from the check_suite payload
+            if (!pr_number && context.payload.check_suite) {
+              const prs = context.payload.check_suite.pull_requests || [];
+              if (prs.length > 0) {
+                pr_number = prs[0].number;
+                core.info(`Found PR #${pr_number} from check_suite event`);
+              }
+            }
+            
             if (!pr_number) {
-              core.setFailed('Could not determine PR number');
+              core.setFailed(`Could not determine PR number from event payload. Event: ${context.eventName}, Payload keys: ${Object.keys(context.payload).join(', ')}`);
               return;
             }
             
@@ -142,7 +154,23 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const pr_number = context.payload.pull_request?.number || context.payload.inputs?.pr_number;
+            let pr_number = context.payload.pull_request?.number || context.payload.inputs?.pr_number;
+            
+            // For check_suite events, get PR from the check_suite payload
+            if (!pr_number && context.payload.check_suite) {
+              const prs = context.payload.check_suite.pull_requests || [];
+              if (prs.length > 0) {
+                pr_number = prs[0].number;
+              }
+            }
+            
+            // Get PR to obtain head SHA
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr_number
+            });
+            
             const timeout = 300; // 5 minutes
             const interval = 10; // Check every 10 seconds
             const maxAttempts = timeout / interval;
@@ -151,7 +179,7 @@ jobs:
               const { data: checks } = await github.rest.checks.listForRef({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                ref: context.payload.pull_request.head.sha,
+                ref: pr.head.sha,
                 check_name: 'ClosureSentinel'
               });
               
@@ -203,7 +231,16 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const pr_number = context.payload.pull_request?.number || context.payload.inputs?.pr_number;
+            let pr_number = context.payload.pull_request?.number || context.payload.inputs?.pr_number;
+            
+            // For check_suite events, get PR from the check_suite payload
+            if (!pr_number && context.payload.check_suite) {
+              const prs = context.payload.check_suite.pull_requests || [];
+              if (prs.length > 0) {
+                pr_number = prs[0].number;
+              }
+            }
+            
             const requiredApprovals = parseInt('${{ steps.rules.outputs.required_approvals }}');
             
             const { data: reviews } = await github.rest.pulls.listReviews({
@@ -241,7 +278,16 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const pr_number = context.payload.pull_request?.number || context.payload.inputs?.pr_number;
+            let pr_number = context.payload.pull_request?.number || context.payload.inputs?.pr_number;
+            
+            // For check_suite events, get PR from the check_suite payload
+            if (!pr_number && context.payload.check_suite) {
+              const prs = context.payload.check_suite.pull_requests || [];
+              if (prs.length > 0) {
+                pr_number = prs[0].number;
+              }
+            }
+            
             const required = '${{ steps.rules.outputs.required_approvals }}';
             
             await github.rest.issues.createComment({
@@ -316,7 +362,16 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const pr_number = context.payload.pull_request?.number || context.payload.inputs?.pr_number;
+            let pr_number = context.payload.pull_request?.number || context.payload.inputs?.pr_number;
+            
+            // For check_suite events, get PR from the check_suite payload
+            if (!pr_number && context.payload.check_suite) {
+              const prs = context.payload.check_suite.pull_requests || [];
+              if (prs.length > 0) {
+                pr_number = prs[0].number;
+              }
+            }
+            
             const artifactType = '${{ needs.gate1-classification.outputs.artifact_type }}';
             
             const auditEntry = {
@@ -354,7 +409,15 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const pr_number = context.payload.pull_request?.number || context.payload.inputs?.pr_number;
+            let pr_number = context.payload.pull_request?.number || context.payload.inputs?.pr_number;
+            
+            // For check_suite events, get PR from the check_suite payload
+            if (!pr_number && context.payload.check_suite) {
+              const prs = context.payload.check_suite.pull_requests || [];
+              if (prs.length > 0) {
+                pr_number = prs[0].number;
+              }
+            }
             
             const { data: pr } = await github.rest.pulls.get({
               owner: context.repo.owner,
@@ -375,7 +438,22 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const pr_number = context.payload.pull_request?.number || context.payload.inputs?.pr_number;
+            let pr_number = context.payload.pull_request?.number || context.payload.inputs?.pr_number;
+            
+            // For check_suite events, get PR from the check_suite payload
+            if (!pr_number && context.payload.check_suite) {
+              const prs = context.payload.check_suite.pull_requests || [];
+              if (prs.length > 0) {
+                pr_number = prs[0].number;
+              }
+            }
+            
+            // Get PR details for merge
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr_number
+            });
             
             try {
               const { data: result } = await github.rest.pulls.merge({
@@ -383,7 +461,7 @@ jobs:
                 repo: context.repo.repo,
                 pull_number: pr_number,
                 merge_method: 'squash',
-                commit_title: `Canon: ${context.payload.pull_request.title} (#${pr_number})`,
+                commit_title: `Canon: ${pr.title} (#${pr_number})`,
                 commit_message: 'Auto-merged by Canon Auto-Merge Gates'
               });
               
@@ -402,7 +480,7 @@ jobs:
                 await github.rest.git.deleteRef({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  ref: `heads/${context.payload.pull_request.head.ref}`
+                  ref: `heads/${pr.head.ref}`
                 });
                 core.info('🗑️ Source branch deleted');
               } catch (error) {
@@ -420,7 +498,15 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const pr_number = context.payload.pull_request?.number || context.payload.inputs?.pr_number;
+            let pr_number = context.payload.pull_request?.number || context.payload.inputs?.pr_number;
+            
+            // For check_suite events, get PR from the check_suite payload
+            if (!pr_number && context.payload.check_suite) {
+              const prs = context.payload.check_suite.pull_requests || [];
+              if (prs.length > 0) {
+                pr_number = prs[0].number;
+              }
+            }
             
             await github.rest.issues.createComment({
               owner: context.repo.owner,
@@ -444,7 +530,15 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const pr_number = context.payload.pull_request?.number || context.payload.inputs?.pr_number;
+            let pr_number = context.payload.pull_request?.number || context.payload.inputs?.pr_number;
+            
+            // For check_suite events, get PR from the check_suite payload
+            if (!pr_number && context.payload.check_suite) {
+              const prs = context.payload.check_suite.pull_requests || [];
+              if (prs.length > 0) {
+                pr_number = prs[0].number;
+              }
+            }
             
             await github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
@@ -474,7 +568,15 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const pr_number = context.payload.pull_request?.number || context.payload.inputs?.pr_number;
+            let pr_number = context.payload.pull_request?.number || context.payload.inputs?.pr_number;
+            
+            // For check_suite events, get PR from the check_suite payload
+            if (!pr_number && context.payload.check_suite) {
+              const prs = context.payload.check_suite.pull_requests || [];
+              if (prs.length > 0) {
+                pr_number = prs[0].number;
+              }
+            }
             
             const gateResults = {
               'Gate 2: ClosureSentinel': '${{ needs.gate2-sentinel.result }}',

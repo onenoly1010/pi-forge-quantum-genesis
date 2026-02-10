@@ -12,8 +12,10 @@ Pi Forge Quantum Genesis provides multiple API layers for different purposes. Th
 
 The FastAPI application provides auto-generated interactive API documentation:
 
-- **Swagger UI**: `http://localhost:8000/docs` (local) or `https://[deployment-url]/docs` (production)
-- **ReDoc**: `http://localhost:8000/redoc` (local) or `https://[deployment-url]/redoc` (production)
+- **Swagger UI**: `http://localhost:8000/docs` (local) or `https://pi-forge-quantum-genesis.railway.app/docs` (production)
+- **ReDoc**: `http://localhost:8000/redoc` (local) or `https://pi-forge-quantum-genesis.railway.app/redoc` (production)
+
+> **Note:** For the most current deployment status, see [DEPLOYMENT_STATUS.md](./DEPLOYMENT_STATUS.md)
 
 ### Core Endpoints
 
@@ -254,7 +256,7 @@ Content-Type: application/json
 
 ```javascript
 // Connect to WebSocket
-const ws = new WebSocket('wss://[url]/ws/collective-insight?token=<jwt-token>');
+const ws = new WebSocket('wss://pi-forge-quantum-genesis.railway.app/ws/collective-insight?token=<jwt-token>');
 
 ws.onmessage = (event) => {
   const data = JSON.parse(event.data);
@@ -307,7 +309,7 @@ GET /dashboard
 
 ### Ethical AI Audit Interface
 
-Access via web browser: `http://localhost:7860` (local) or `https://[gradio-url]` (production)
+Access via web browser: `http://localhost:7860` (local) or `https://quantum-resonance-clean.vercel.app` (production)
 
 **Features**:
 - AI model evaluation

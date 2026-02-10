@@ -1,23 +1,19 @@
 {
   "version": 2,
-  "outputDirectory": "public",
   "cleanUrls": true,
   "trailingSlash": false,
   "buildCommand": "npm run build",
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "https://pi-forge-quantum-genesis-production-4fc8.up.railway.app/api/$1" },
-    { "source": "/health",      "destination": "https://pi-forge-quantum-genesis-production-4fc8.up.railway.app/health" },
-    { "source": "/ws",          "destination": "wss://pi-forge-quantum-genesis-production-4fc8.up.railway.app/ws" },
-    { "source": "/socket.io/(.*)", "destination": "wss://pi-forge-quantum-genesis-production-4fc8.up.railway.app/socket.io/$1" },
-    { "source": "/(.*)",        "destination": "/index.html" }
-  ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
         { "key": "X-Frame-Options", "value": "DENY" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" }
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Repository-Type", "value": "coordination-hub" }
       ]
     }
-  ]
+  ],
+  "github": {
+    "silent": true
+  }
 }
