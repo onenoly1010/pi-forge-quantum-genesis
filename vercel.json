@@ -1,8 +1,23 @@
 {
   "version": 2,
+  "outputDirectory": "public",
   "cleanUrls": true,
   "trailingSlash": false,
   "buildCommand": "npm run build",
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://pi-forge-quantum-genesis-1.onrender.com/api/$1"
+    },
+    {
+      "source": "/health",
+      "destination": "https://pi-forge-quantum-genesis-1.onrender.com/health"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",

@@ -2,16 +2,29 @@
 
 /**
  * Build script for Vercel deployment
- * Uses Vercel Build Output API v3 format (.vercel/output/static)
- * This bypasses .gitignore issues with the public/ directory
+ * Creates the public directory and copies static assets
  */
 
 const fs = require('fs');
 const path = require('path');
 
-const rootDir = path.join(__dirname, '..');
-const vercelOutputDir = path.join(rootDir, '.vercel', 'output');
-const publicDir = path.join(vercelOutputDir, 'static');
+// Resolve project root from the current working directory for build environment alignment
+const rootDir = process.cwd();
+const publicDir = path.join(rootDir, 'public');
+
+// Debug logging for path resolution (gated behind DEBUG env flag)
+// Normalize env vars: only "1", "true", or "yes" (case-insensitive) enable debug mode
+const isDebugEnabled = () => {
+  const debug = process.env.DEBUG || process.env.VERCEL_DEBUG || '';
+  return ['1', 'true', 'yes'].includes(debug.toLowerCase());
+};
+
+if (isDebugEnabled()) {
+  console.log('Build script path resolution:');
+  console.log(`  Script directory: ${__dirname}`);
+  console.log(`  Working directory (rootDir): ${rootDir}`);
+  console.log(`  Public directory: ${publicDir}\n`);
+}
 
 // Files to copy from root to public directory
 const staticFiles = [
@@ -70,26 +83,12 @@ function copyFile(src, dest) {
 function build() {
   console.log('Building static assets for Vercel deployment...\n');
 
-  // Clean and create output directory structure
-  if (fs.existsSync(vercelOutputDir)) {
-    fs.rmSync(vercelOutputDir, { recursive: true });
+  // Clean and create public directory
+  if (fs.existsSync(publicDir)) {
+    fs.rmSync(publicDir, { recursive: true });
   }
   fs.mkdirSync(publicDir, { recursive: true });
-  console.log('✓ Created .vercel/output/static directory\n');
-
-  // Create Vercel Build Output API config
-  const configPath = path.join(vercelOutputDir, 'config.json');
-  const config = {
-    version: 3,
-    routes: [
-      { handle: "filesystem" },
-      { src: "/api/(.*)", dest: "https://pi-forge-quantum-genesis-1.onrender.com/api/$1" },
-      { src: "/health", dest: "https://pi-forge-quantum-genesis-1.onrender.com/health" },
-      { src: "/(.*)", dest: "/index.html" }
-    ]
-  };
-  fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
-  console.log('✓ Created config.json\n');
+  console.log('✓ Created public directory\n');
 
   // Copy static files
   console.log('Copying static files:');
@@ -113,7 +112,31 @@ function build() {
   }
 
   console.log('\n✅ Build completed successfully!');
-  console.log(`📁 Output directory: ${publicDir}\n`);
+  console.log(`📁 Output directory: ${publicDir}`);
+  
+  // Verification step: Confirm public directory exists and list contents (gated behind DEBUG env flag)
+  if (isDebugEnabled()) {
+    console.log('\nVerification:');
+    if (fs.existsSync(publicDir)) {
+      console.log('✓ Public directory exists');
+      const files = fs.readdirSync(publicDir);
+      console.log(`✓ Contains ${files.length} items:`);
+      files.forEach(file => {
+        const filePath = path.join(publicDir, file);
+        const stats = fs.statSync(filePath);
+        const type = stats.isDirectory() ? 'dir' : 'file';
+        console.log(`  - ${file} (${type})`);
+      });
+    } else {
+      throw new Error('Public directory was not created!');
+    }
+    console.log('');
+  } else {
+    // Quick verification without detailed listing
+    if (!fs.existsSync(publicDir)) {
+      throw new Error('Public directory was not created!');
+    }
+  }
 }
 
 // Run the build
@@ -122,5 +145,7 @@ try {
   process.exit(0);
 } catch (error) {
   console.error('\n❌ Build failed:', error.message);
+  console.error('\nStack trace:');
+  console.error(error.stack);
   process.exit(1);
 }
