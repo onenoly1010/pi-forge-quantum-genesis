@@ -4,6 +4,20 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "buildCommand": "npm run build",
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://render-backend.example.com/api/$1"
+    },
+    {
+      "source": "/health",
+      "destination": "https://render-backend.example.com/health"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
