@@ -7,11 +7,11 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://render-backend.example.com/api/$1"
+      "destination": "https://pi-forge-quantum-genesis-1.onrender.com/api/$1"
     },
     {
       "source": "/health",
-      "destination": "https://render-backend.example.com/health"
+      "destination": "https://pi-forge-quantum-genesis-1.onrender.com/health"
     },
     {
       "source": "/(.*)",

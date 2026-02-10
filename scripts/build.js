@@ -13,7 +13,13 @@ const rootDir = process.cwd();
 const publicDir = path.join(rootDir, 'public');
 
 // Debug logging for path resolution (gated behind DEBUG env flag)
-if (process.env.DEBUG || process.env.VERCEL_DEBUG) {
+// Normalize env vars: only "1", "true", or "yes" (case-insensitive) enable debug mode
+const isDebugEnabled = () => {
+  const debug = process.env.DEBUG || process.env.VERCEL_DEBUG || '';
+  return ['1', 'true', 'yes'].includes(debug.toLowerCase());
+};
+
+if (isDebugEnabled()) {
   console.log('Build script path resolution:');
   console.log(`  Script directory: ${__dirname}`);
   console.log(`  Working directory (rootDir): ${rootDir}`);
@@ -109,7 +115,7 @@ function build() {
   console.log(`📁 Output directory: ${publicDir}`);
   
   // Verification step: Confirm public directory exists and list contents (gated behind DEBUG env flag)
-  if (process.env.DEBUG || process.env.VERCEL_DEBUG) {
+  if (isDebugEnabled()) {
     console.log('\nVerification:');
     if (fs.existsSync(publicDir)) {
       console.log('✓ Public directory exists');
