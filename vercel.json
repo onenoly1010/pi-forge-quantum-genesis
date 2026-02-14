@@ -1,75 +1,16 @@
 {
   "version": 2,
-  "framework": null,
-  "buildCommand": "npm run build",
+  "public": true,
   "cleanUrls": true,
   "trailingSlash": false,
+  "builds": [
+    { "src": "api/**/*.ts", "use": "@vercel/node" },
+    { "src": "index.html", "use": "@vercel/static" },
+    { "src": "assets/**", "use": "@vercel/static" },
+    { "src": "*.html", "use": "@vercel/static" }
+  ],
   "rewrites": [
-    {
-      "source": "/docs",
-      "destination": "/docs/index.html"
-    },
-    {
-      "source": "/wiki",
-      "destination": "/wiki/index.html"
-    }
-  ],
-  "redirects": [
-    {
-      "source": "/documentation",
-      "destination": "/docs",
-      "permanent": true
-    },
-    {
-      "source": "/deployment",
-      "destination": "/DEPLOYMENT.md",
-      "permanent": false
-    },
-    {
-      "source": "/api-docs",
-      "destination": "/docs/API.md",
-      "permanent": false
-    }
-  ],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "X-Frame-Options", "value": "DENY" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-XSS-Protection", "value": "1; mode=block" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" }
-      ]
-    },
-    {
-      "source": "/(.*)\\.(js|css|svg|png|jpg|jpeg|gif|webp|woff|woff2|ttf|eot)",
-      "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
-      ]
-    },
-    {
-      "source": "/(.*)\\.(html|json)",
-      "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
-      ]
-    },
-    {
-      "source": "/manifest.json",
-      "headers": [
-        { "key": "Content-Type", "value": "application/manifest+json" },
-        { "key": "Cache-Control", "value": "public, max-age=3600" }
-      ]
-    },
-    {
-      "source": "/service-worker.js",
-      "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" },
-        { "key": "Service-Worker-Allowed", "value": "/" }
-      ]
-    }
-  ],
-  "github": {
-    "silent": true
-  }
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
