@@ -11,10 +11,10 @@ Provides distributed tracing across:
 - Azure AI SDK calls
 """
 
-import os
 import logging
-from typing import Dict, Any
+import os
 from functools import wraps
+from typing import Any, Dict
 
 # Initialize logger first to avoid reference errors
 logging.basicConfig(level=logging.INFO)
@@ -41,14 +41,41 @@ except ImportError:
 
 # Enable comprehensive content recording for Azure AI SDKs
 os.environ["AZURE_TRACING_GEN_AI_CONTENT_RECORDING_ENABLED"] = "true"
-os.environ["AZURE_SDK_TRACING_IMPLEMENTATION"] = "opentelemetry" 
+os.environ["AZURE_SDK_TRACING_IMPLEMENTATION"] = "opentelemetry"
 os.environ["AZURE_TRACING_GEN_AI_INCLUDE_BINARY_DATA"] = "true"
 
-from opentelemetry import trace
-from opentelemetry.sdk.resources import Resource
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+# OpenTelemetry imports (optional)
+try:
+    from opentelemetry import trace
+    from opentelemetry.exporter.otlp.proto.http.trace_exporter import \
+        OTLPSpanExporter
+    from opentelemetry.sdk.resources import Resource
+    from opentelemetry.sdk.trace import TracerProvider
+    from opentelemetry.sdk.trace.export import BatchSpanProcessor
+    opentelemetry_available = True
+except ImportError as e:
+    logger.warning(f"⚠️ OpenTelemetry not available: {e}")
+    opentelemetry_available = False
+    # Create dummy classes/functions for graceful fallback
+    class DummyTracerProvider:
+        def __init__(self, *args, **kwargs): pass
+
+    class DummySpanProcessor:
+        def __init__(self, *args, **kwargs): pass
+
+    class DummySpan:
+        def __enter__(self): return self
+        def __exit__(self, *args): pass
+        def set_attribute(self, *args): pass
+        def set_status(self, *args): pass
+
+    class DummyTracer:
+        def start_as_current_span(self, name, **kwargs):
+            return DummySpan()
+
+    trace = type('DummyTrace', (), {'get_tracer': lambda self, name: DummyTracer()})()
+    TracerProvider = DummyTracerProvider
+    BatchSpanProcessor = DummySpanProcessor
 
 # Azure AI Projects and Inference SDK instrumentation
 try:
@@ -101,7 +128,8 @@ class QuantumTracingSystem:
             
             # Configure OTLP exporter for AI Toolkit (prefer gRPC for Agent Framework)
             try:
-                from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter as GRPCExporter
+                from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import \
+                    OTLPSpanExporter as GRPCExporter
                 otlp_exporter = GRPCExporter(
                     endpoint="http://localhost:4317",  # AI Toolkit gRPC endpoint for Agent Framework
                 )
@@ -496,6 +524,7 @@ def trace_ai_model_interaction(model_name: str, operation_type: str = "inference
 
 # Context manager helpers for Sacred Trinity flows
 from contextlib import contextmanager
+
 
 @contextmanager
 def trace_sacred_trinity_flow(flow_name: str, metadata: Dict[str, Any] = None):

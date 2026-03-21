@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Production Dashboard - Quantum Pi Forge</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'IBM Plex Mono', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #0a0a0a 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        .dashboard { max-width: 1200px; margin: 0 auto; }
+        h1 {
+            color: #00d4ff;
+            margin-bottom: 2rem;
+            text-align: center;
+            font-size: 1.8rem;
+        }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+        .card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(0,212,255,0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+        .card h2 { color: #00d4ff; font-size: 1rem; margin-bottom: 1rem; }
+        .metric { font-size: 2rem; font-weight: 600; color: #4ade80; }
+        .label { font-size: 0.75rem; color: #888; margin-top: 0.5rem; }
+        .status-dot {
+            display: inline-block;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-healthy { background: #4ade80; }
+        .status-warning { background: #fbbf24; }
+        .status-error { background: #ef4444; }
+        #services-list { list-style: none; }
+        #services-list li { padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <h1>⚛️ Quantum Pi Forge — Production Dashboard</h1>
+        <div class="grid">
+            <div class="card">
+                <h2>🌐 Backend Health</h2>
+                <div id="backend-status" class="metric">Loading...</div>
+                <div class="label">FastAPI Quantum Conduit</div>
+            </div>
+            <div class="card">
+                <h2>⏱️ Response Latency</h2>
+                <div id="latency" class="metric">--ms</div>
+                <div class="label">Average API response time</div>
+            </div>
+            <div class="card">
+                <h2>🔮 Services Status</h2>
+                <ul id="services-list">
+                    <li><span class="status-dot status-healthy"></span>Vercel Frontend</li>
+                    <li><span class="status-dot" id="render-status"></span>Render Backend</li>
+                    <li><span class="status-dot" id="supabase-status"></span>Supabase Auth</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h2>📊 System Info</h2>
+                <div id="system-info">
+                    <p>Version: 3.3.0</p>
+                    <p>Network: <span id="network-mode">--</span></p>
+                    <p>Timestamp: <span id="timestamp">--</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const API_BASE = 'https://pi-forge-quantum-genesis-1.onrender.com';
+        
+        async function checkHealth() {
+            const start = performance.now();
+            try {
+                const res = await fetch(`${API_BASE}/health`, { timeout: 10000 });
+                const latency = Math.round(performance.now() - start);
+                const data = await res.json();
+                
+                document.getElementById('backend-status').textContent = data.status === 'healthy' ? '✅ Healthy' : '⚠️ Degraded';
+                document.getElementById('backend-status').style.color = data.status === 'healthy' ? '#4ade80' : '#fbbf24';
+                document.getElementById('latency').textContent = `${latency}ms`;
+                document.getElementById('network-mode').textContent = data.network || 'unknown';
+                document.getElementById('timestamp').textContent = new Date().toLocaleString();
+                document.getElementById('render-status').className = 'status-dot status-healthy';
+                document.getElementById('supabase-status').className = data.supabase_connected ? 'status-dot status-healthy' : 'status-dot status-warning';
+            } catch (err) {
+                document.getElementById('backend-status').textContent = '❌ Offline';
+                document.getElementById('backend-status').style.color = '#ef4444';
+                document.getElementById('render-status').className = 'status-dot status-error';
+            }
+        }
+        
+        checkHealth();
+        setInterval(checkHealth, 30000);
+    </script>
+</body>
+</html>

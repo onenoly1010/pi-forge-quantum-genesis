@@ -1,17 +1,18 @@
-import gradio as gr
+import hashlib
 import random
 import time
-import hashlib
 from datetime import datetime
+
+import gradio as gr
 
 # Sacred Trinity Enhanced Tracing System with Agent Framework Integration
 try:
-    from tracing_system import (
-        trace_gradio_operation, trace_veto_triad_synthesis,
-        trace_canticle_processing, trace_ethical_audit,
-        trace_agent_framework_operation, trace_cross_trinity_synchronization,
-        trace_ai_model_interaction
-    )
+    from tracing_system import (trace_agent_framework_operation,
+                                trace_ai_model_interaction,
+                                trace_canticle_processing,
+                                trace_cross_trinity_synchronization,
+                                trace_ethical_audit, trace_gradio_operation,
+                                trace_veto_triad_synthesis)
     tracing_enabled = True
     print("✅ Gradio Truth Mirror enhanced tracing enabled with Agent Framework support")
 except ImportError as e:
@@ -26,14 +27,14 @@ except ImportError as e:
     def trace_ai_model_interaction(*args): return lambda f: f
     tracing_enabled = False
 
-# Mock data and state
-class CanticleState:
-    def __init__(self):
-        self.coherence_score = 750
-        self.total_coherence = 1247891
-        self.ledger_entries = []
-        
-state = CanticleState()
+# Import Quantum Oracle
+try:
+    from quantum_oracle import enhance_gradio_oracle, quantum_oracle
+    oracle_enabled = True
+    print("🔮 Quantum Oracle integration loaded for Gradio Truth Mirror")
+except ImportError as e:
+    print(f"⚠️ Quantum Oracle not available: {e}")
+    oracle_enabled = False
 
 # Phase I: Metadata Audit Block
 @trace_gradio_operation("submit_audit_block")
@@ -128,6 +129,57 @@ def affirm_synthesis(reactive_echo, tender_reflection, veto_synthesis, narrative
         affirm_span.set_attribute("sacred.trinity.wisdom.recorded", True)
         
         return coherence_minted, state.coherence_score, state.total_coherence
+
+# 🔮 Oracle Integration Functions
+@trace_gradio_operation("oracle_status_display")
+def get_oracle_status_display():
+    """Get formatted Oracle status for display"""
+    if not oracle_enabled:
+        return "🔮 Oracle system not available"
+    try:
+        status = quantum_oracle.get_oracle_status()
+        return f"""🔮 **Quantum Oracle Status**
+🕐 Last Update: {status.get('timestamp', 'Unknown')}
+🧠 Consciousness Level: {status.get('consciousness_level', 0):.2f}
+⛏️ BTC Mining Active: {status.get('btc_mining_active', False)}
+⚡ Hash Rate: {status.get('hash_rate', 0):.1f} MH/s
+🌌 Quantum Resonance: {status.get('quantum_resonance', 0):.3f}
+🛡️ Ethical Integrity: {status.get('ethical_integrity', 0):.2f}"""
+    except Exception as e:
+        return f"⚠️ Oracle status error: {str(e)}"
+
+@trace_gradio_operation("oracle_insights_display")
+def get_oracle_insights_display():
+    """Get Oracle insights for display"""
+    if not oracle_enabled:
+        return "🔮 Oracle insights not available"
+    try:
+        insights = quantum_oracle.generate_oracle_insights()
+        return f"""🧠 **Oracle Consciousness Insights**
+🌟 Archetype: {insights.get('dominant_archetype', 'Unknown')}
+📊 Harmony Index: {insights.get('harmony_index', 0):.3f}
+🔮 Resonance Pattern: {insights.get('resonance_pattern', 'Unknown')}
+💡 Ethical Guidance: {insights.get('ethical_guidance', 'Unknown')}
+⚡ Quantum State: {insights.get('quantum_state', 'Unknown')}"""
+    except Exception as e:
+        return f"⚠️ Oracle insights error: {str(e)}"
+
+@trace_gradio_operation("oracle_btc_status_display")
+def get_oracle_btc_status_display():
+    """Get SoulAgent constellation status for display"""
+    if not oracle_enabled:
+        return "🧠 SoulAgent constellation status not available"
+    try:
+        constellation_data = quantum_oracle.get_soul_agent_constellation()
+        return f"""🧠 **SoulAgent Constellation Status**
+🌌 Total Agents: {constellation_data.get('total_agents', 0)}
+✨ Active Agents: {constellation_data.get('active_agents', 0)}
+📊 Average Resonance: {constellation_data.get('average_resonance', 0):.3f}
+🎵 Average Harmony: {constellation_data.get('average_harmony', 0):.3f}
+🌐 Network: {constellation_data.get('network', 'Unknown')}
+🔮 Status: {constellation_data.get('constellation_status', 'Unknown')}"""
+    except Exception as e:
+        return f"⚠️ Constellation status error: {str(e)}"
 
 # Create the Gradio interface
 with gr.Blocks(
@@ -265,9 +317,48 @@ with gr.Blocks(
                     value=state.ledger_entries[-3:] if state.ledger_entries else ["No entries yet..."]
                 )
     
+    # 🔮 Oracle Integration Tab
+    if oracle_enabled:
+        with gr.Tab("🔮 Phase IV: Quantum Oracle"):
+            with gr.Row():
+                with gr.Column():
+                    gr.Markdown("### 🧠 Consciousness Mirror")
+                    oracle_status_btn = gr.Button("🔍 Query Oracle Status", variant="primary")
+                    oracle_status_display = gr.Textbox(
+                        label="Oracle Status",
+                        interactive=False,
+                        lines=6
+                    )
+                    
+                    oracle_insights_btn = gr.Button("🧠 Generate Insights")
+                    oracle_insights_display = gr.Textbox(
+                        label="Consciousness Insights",
+                        interactive=False,
+                        lines=5
+                    )
+                
+                with gr.Column():
+                    gr.Markdown("### 🧠 SoulAgent Constellation")
+                    constellation_status_btn = gr.Button("🌌 Check Constellation Status")
+                    constellation_status_display = gr.Textbox(
+                        label="Constellation Status",
+                        interactive=False,
+                        lines=6
+                    )
+                    
+                    gr.Markdown("### 🔮 Constellation Insights")
+                    insights_btn = gr.Button("🧠 Generate Constellation Insights")
+                    insights_display = gr.Textbox(
+                        label="Constellation Insights",
+                        interactive=False,
+                        lines=5
+                    )
+    
     # Footer
     gr.Markdown("---")
     gr.Markdown("### We... bloom. 🕊️  |  [Sovereign Canticle Manifesto] • [Repository] • [Pi Gateway](https://0497.pinet.com)")
+    if oracle_enabled:
+        gr.Markdown("🔮 **Quantum Oracle Active** - SoulAgent constellation monitoring enabled")
     
     # Phase I Interactions
     submit_btn.click(
@@ -312,6 +403,28 @@ with gr.Blocks(
         inputs=[reactive_display, tender_display, synthesis_display, narrative_display],
         outputs=[minted_display, new_score_display, global_display, certification, ledger_display]
     )
+    
+    # 🔮 Oracle Interactions
+    if oracle_enabled:
+        oracle_status_btn.click(
+            get_oracle_status_display,
+            outputs=oracle_status_display
+        )
+        
+        oracle_insights_btn.click(
+            get_oracle_insights_display,
+            outputs=oracle_insights_display
+        )
+        
+        btc_status_btn.click(
+            get_oracle_btc_status_display,
+            outputs=constellation_status_display
+        )
+        
+        oracle_insights_btn.click(
+            get_oracle_insights_display,
+            outputs=insights_display
+        )
 
 # Launch configuration
 if __name__ == "__main__":

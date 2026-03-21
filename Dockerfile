@@ -43,6 +43,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code to /app root (not /app/server)
 COPY server/ ./
 
+# Copy frontend directory for static file serving
+COPY frontend/ ./frontend/
+
 # Create non-root user
 RUN useradd --create-home --shell /bin/bash app \
     && chown -R app:app /app

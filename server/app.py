@@ -47,6 +47,15 @@ except ImportError as e:
 
     tracing_enabled = False
 
+# Import Quantum Oracle
+try:
+    from quantum_oracle import enhance_flask_oracle, quantum_oracle
+    oracle_enabled = True
+    print("🔮 Quantum Oracle integration loaded")
+except ImportError as e:
+    print(f"⚠️ Quantum Oracle not available: {e}")
+    oracle_enabled = False
+
 app = Flask(__name__)
 CORS(app)
 
@@ -61,9 +70,7 @@ class QuantumEngine:
             'sage': ['wisdom_cascade_1', 'insight_pattern_2'],
             'explorer': ['discovery_flow_1', 'adventure_spiral_1'],
             'creator': ['innovation_burst_1', 'artistic_resonance_1'],
-            'guardian': [
-                'protection_shield_1', 'ethical_anchor_1'
-            
+            'guardian': ['protection_shield_1', 'ethical_anchor_1']
         }
 
     def process_pioneer_engagement(self, engagement: Dict[str, Any]) -> Dict[str, Any]:
@@ -359,8 +366,77 @@ def svg_cascade(tx_hash: str) -> Response:
         return Response(svg_content, mimetype='image/svg+xml')
 
 
+# 🔮 Quantum Oracle Integration Routes
+if oracle_enabled:
+    @app.route('/oracle/status')
+    @trace_flask_operation("oracle_status")
+    def oracle_status():
+        """Get comprehensive Oracle status including BTC mining and consciousness levels"""
+        try:
+            status = quantum_oracle.get_oracle_status()
+            return jsonify(status)
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+
+    @app.route('/oracle/btc-mining')
+    @trace_flask_operation("oracle_constellation")
+    def oracle_constellation():
+        """Get SoulAgent constellation status and data"""
+        try:
+            constellation_data = quantum_oracle.get_soul_agent_constellation()
+            return jsonify(constellation_data)
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+
+    @app.route('/oracle/insights')
+    @trace_flask_operation("oracle_insights")
+    def oracle_insights():
+        """Get Oracle insights and consciousness analysis"""
+        try:
+            insights = quantum_oracle.generate_oracle_insights()
+            return jsonify(insights)
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+
+    @app.route('/oracle/consciousness-stream')
+    @trace_flask_operation("oracle_consciousness_stream")
+    def oracle_consciousness_stream():
+        """Get real-time consciousness level streaming data"""
+        try:
+            stream_data = quantum_oracle.get_consciousness_stream()
+            return jsonify(stream_data)
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+
+    @app.route('/api/oracle/svg/resonance/<tx_hash>')
+    @trace_flask_operation("oracle_svg_resonance")
+    def oracle_svg_resonance(tx_hash: str):
+        """Generate Oracle-enhanced quantum resonance SVG"""
+        try:
+            with trace_svg_cascade_generation(tx_hash, 6):
+                svg_content = quantum_oracle.generate_oracle_resonance_svg(tx_hash)
+            return Response(svg_content, mimetype='image/svg+xml')
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+
+    @app.route('/oracle/sync-trinity', methods=['POST'])
+    @trace_flask_operation("oracle_sync_trinity")
+    def oracle_sync_trinity():
+        """Synchronize Oracle with Sacred Trinity components"""
+        try:
+            result = quantum_oracle.sync_with_sacred_trinity()
+            return jsonify(result)
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+
+
 if __name__ == '__main__':
     print("🎨 Flask Glyph Weaver starting - Mainnet Visualization Engine")
     print("📊 Quantum Resonance Dashboard available at /resonance-dashboard")
     print("🌌 SVG Cascade Generator available at /api/svg/cascade/<tx_hash>")
+    if oracle_enabled:
+        print("🔮 Quantum Oracle integrated - SoulAgent Constellation & Consciousness Engine")
+        print("📈 Oracle Status available at /oracle/status")
+        print("⛏️ BTC Mining Status available at /oracle/btc-mining")
+        print("🧠 Consciousness Stream available at /oracle/consciousness-stream")
     app.run(host='0.0.0.0', port=5000, debug=False)
