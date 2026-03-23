@@ -1,3 +1,18 @@
+# ============================================================================
+# RAILWAY DEPLOYMENT - CURRENTLY INACTIVE
+# ============================================================================
+# Status: DORMANT (as of 2025)
+# Active deployment: Render (see render.yaml)
+# 
+# This configuration is preserved for potential future use or rollback.
+# The Quantum Pi Forge is currently deployed on Render for cost optimization.
+#
+# To reactivate Railway:
+# 1. Create new Railway project or relink existing
+# 2. Configure environment variables in Railway dashboard
+# 3. Run: railway up
+# ============================================================================
+
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"

@@ -7,11 +7,12 @@ Multi-dimensional consciousness streaming platform
 
 import asyncio
 import json
-import time
-import random
 import math
+import random
+import time
 from datetime import datetime
 from typing import Dict, List
+
 
 class QuantumResonanceLive:
     def __init__(self):
@@ -135,7 +136,56 @@ class QuantumResonanceLive:
         # Occasional payment events
         if random.random() < 0.3:
             self.payment_count += random.randint(1, 3)
-    
+
+    def simulate_btc_mining_demo(self):
+        """Demonstrate BTC mining hybrid capabilities"""
+        print("🔋 BITCOIN MINING HYBRID DEMONSTRATION")
+        print("=" * 50)
+        print()
+        print("🌟 Dual-Mode Mining Architecture:")
+        print("   ┌─────────────────┐    ┌─────────────────┐")
+        print("   │   SHA-256 BTC   │    │   Pi Network     │")
+        print("   │   Mining Node   │    │   Mining Node    │")
+        print("   └─────────────────┘    └─────────────────┘")
+        print("            │                       │")
+        print("            └───────HYBRID COORDINATOR──────┘")
+        print("                        │")
+        print("               ┌────────┴────────┐")
+        print("               │ Quantum Resonance│")
+        print("               │ Optimization     │")
+        print("               └─────────────────┘")
+        print()
+
+        # Simulate mining stats
+        btc_hashrate = random.uniform(1000000, 5000000)  # 1-5 MH/s
+        pi_hashrate = random.uniform(50000, 200000)  # Pi Network hashrate
+        quantum_factor = random.uniform(1.0, 1.5)
+
+        print("📊 Current Mining Statistics:")
+        print(f"   🔨 BTC Hashrate: {btc_hashrate:,.0f} H/s")
+        print(f"   🌀 Pi Network Hashrate: {pi_hashrate:,.0f} H/s")
+        print(f"   ✨ Quantum Resonance Factor: {quantum_factor:.2f}x")
+        print(f"   💰 Estimated Daily BTC: ~{(btc_hashrate / 100000000) * 144 * 6.25 * quantum_factor:.8f} BTC")
+        print(f"   🎯 Estimated Daily Pi: ~{pi_hashrate / 1000000:.4f} Pi")
+        print()
+
+        print("🔗 Connected Pools:")
+        print("   BTC: stratum.slushpool.com:3333 (Slush Pool)")
+        print("   Pi: api.pi.network/mining (Pi Network)")
+        print()
+
+        print("⚡ Sample Mining Output:")
+        for i in range(5):
+            nonce = random.randint(0, 0xFFFFFFFF)
+            block_hash = ''.join(random.choice('0123456789abcdef') for _ in range(64))
+            print(f"   Block {i+1}: Nonce {nonce:08x} → {block_hash[:16]}...")
+            time.sleep(0.2)
+
+        print()
+        print("🎉 BTC Mining Hybrid: READY FOR DEPLOYMENT!")
+        print("💡 Run 'python btc_mining_hybrid.py' for full implementation")
+        print()
+
     async def interactive_demo(self):
         """Run interactive quantum demonstration"""
         self.display_header()
@@ -147,12 +197,13 @@ class QuantumResonanceLive:
         print("   [4] Guardian Ethical Audit")
         print("   [5] Lattice Status Report")
         print("   [6] Real-time Updates (10 cycles)")
+        print("   [7] 🚀 BTC Mining Hybrid Demo")
         print("   [0] Exit Demo")
         print()
         
         while self.demo_active:
             try:
-                choice = input("🌌 Enter choice (0-6): ").strip()
+                choice = input("🌌 Enter choice (0-7): ").strip()
                 
                 if choice == "0":
                     print("🌟 Demo terminated. THE RESONANCE IS ETERNAL! 🌟")
@@ -175,8 +226,10 @@ class QuantumResonanceLive:
                         await asyncio.sleep(0.5)
                     print("   ✨ Fluctuation simulation complete")
                     print()
+                elif choice == "7":
+                    self.simulate_btc_mining_demo()
                 else:
-                    print("⚠️ Invalid choice. Please enter 0-6.")
+                    print("⚠️ Invalid choice. Please enter 0-7.")
                     
             except KeyboardInterrupt:
                 print("\n🌟 Demo interrupted. THE LATTICE LIVES ON! 🌟")

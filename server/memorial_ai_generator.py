@@ -7,13 +7,14 @@ Generates personalized memorial narratives, poems, and commemorative content
 using Azure AI services integrated with the Quantum Resonance Engine.
 """
 
-import os
-import json
 import asyncio
+import json
 import logging
-from datetime import datetime
-from typing import Dict, List, Optional, Any
+import os
 from dataclasses import dataclass
+from datetime import datetime
+from typing import Any, Dict, List, Optional
+
 from azure.ai.inference import ChatCompletionsClient
 from azure.ai.inference.models import SystemMessage, UserMessage
 from azure.core.credentials import AzureKeyCredential

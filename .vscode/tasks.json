@@ -172,6 +172,23 @@
                 "reveal": "always",
                 "panel": "shared"
             }
+        },
+        {
+            "label": "🧪 Run Tests (CMD)",
+            "type": "process",
+            "command": "${workspaceFolder}/.venv/Scripts/pytest.exe",
+            "args": ["tests/test_genesis_references.py", "tests/test_canon_of_closure.py", "-v", "--tb=short"],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "panel": "dedicated",
+                "focus": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": []
         }
     ]
 }

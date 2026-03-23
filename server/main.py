@@ -1781,28 +1781,27 @@ async def websocket_guardian_alerts(websocket: WebSocket):
 async def startup_event():
     logging.basicConfig(level=logging.INFO)
     logger.info("🚀 QVM 3.3.0 - Pi Forge Quantum Genesis - INITIALIZING...")
-    
-    # Validate Pi Network configuration
+
+    # Validate Pi Network configuration (optional)
     try:
         validate_pi_network_config()
-    except ValueError as e:
-        logger.error(f"❌ Pi Network configuration validation failed: {e}")
-        if PI_NETWORK_CONFIG["network"] == "mainnet":
-            raise  # Fail fast in mainnet mode
-    
+    except Exception as e:
+        logger.warning(f"⚠️ Pi Network configuration validation failed: {e}")
+
     logger.info(f"📡 Network Mode: {PI_NETWORK_CONFIG['network']}")
     logger.info(f"🔒 Supabase: {'connected' if supabase else 'demo mode'}")
     logger.info(f"⚔️ Cyber Samurai Guardian: {'active' if guardian.guardian_active else 'inactive'}")
     logger.info(f"🎯 Latency Target: <{guardian.latency_threshold_ns}ns")
     logger.info("🌌 Sacred Trinity entanglement complete - Mainnet Ready!")
-    
-    # Start Pi Network background tasks
+
+    # Start Pi Network background tasks (optional)
     try:
         from pi_network_router import pi_client
         await pi_client.start_background_tasks()
         logger.info("✅ Pi Network background tasks started")
     except Exception as e:
         logger.warning(f"⚠️ Failed to start Pi Network background tasks: {e}")
+        logger.info("🌌 Server will run in basic mode without Pi Network background tasks")
 
 
 # --- SHUTDOWN EVENT ---

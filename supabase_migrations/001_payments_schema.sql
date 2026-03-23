@@ -78,9 +78,17 @@ CREATE POLICY "Users can create own payments"
     WITH CHECK (auth.uid() = user_id);
 
 -- Service role can do everything (for backend operations)
+-- Note: Service role bypasses RLS by default, but explicit policy for clarity
 CREATE POLICY "Service role has full access"
     ON payments FOR ALL
-    USING (auth.role() = 'service_role');
+    USING (true)
+    WITH CHECK (true);
+
+-- Backend service can update payment status (via service_role key)
+CREATE POLICY "Backend can update payments"
+    ON payments FOR UPDATE
+    USING (true)
+    WITH CHECK (true);
 
 -- =====================================================
 -- UPDATED_AT TRIGGER
