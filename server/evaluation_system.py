@@ -252,15 +252,6 @@ class QuantumLatticeEvaluator:
         # Cross-Component Integration Evaluator
         evaluators["cross_component_integration"] = CrossComponentIntegrationEvaluator()
         
-        # Authentication Flow Evaluator
-        evaluators["authentication_flow"] = AuthenticationFlowEvaluator()
-        
-        # Payment Processing Evaluator
-        evaluators["payment_processing"] = PaymentProcessingEvaluator()
-        
-        # SVG Visualization Evaluator
-        evaluators["svg_visualization"] = SVGVisualizationEvaluator()
-        
         # Ethical Audit Evaluator
         evaluators["ethical_audit"] = EthicalAuditEvaluator()
         
@@ -274,9 +265,6 @@ class QuantumLatticeEvaluator:
             "sacred_trinity_quality": SacredTrinityQualityEvaluator(),
             "quantum_coherence": QuantumCoherenceEvaluator(), 
             "cross_component_integration": CrossComponentIntegrationEvaluator(),
-            "authentication_flow": AuthenticationFlowEvaluator(),
-            "payment_processing": PaymentProcessingEvaluator(),
-            "svg_visualization": SVGVisualizationEvaluator(),
             "ethical_audit": EthicalAuditEvaluator(),
             "resonance_visualization": ResonanceVisualizationEvaluator()
         }

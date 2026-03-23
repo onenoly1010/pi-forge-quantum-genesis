@@ -1,4 +1,4 @@
-﻿import hashlib
+import hashlib
 import random
 import time
 from contextlib import contextmanager
@@ -70,7 +70,9 @@ class QuantumEngine:
             'sage': ['wisdom_cascade_1', 'insight_pattern_2'],
             'explorer': ['discovery_flow_1', 'adventure_spiral_1'],
             'creator': ['innovation_burst_1', 'artistic_resonance_1'],
-            'guardian': ['protection_shield_1', 'ethical_anchor_1']
+            'guardian': [
+                'protection_shield_1', 'ethical_anchor_1'
+            ]
         }
 
     def process_pioneer_engagement(self, engagement: Dict[str, Any]) -> Dict[str, Any]:
@@ -316,51 +318,44 @@ def collective_wisdom() -> Response:
 @app.route('/api/svg/cascade/<tx_hash>')
 @trace_flask_operation("svg_cascade")
 def svg_cascade(tx_hash: str) -> Response:
-    """Generate SVG cascade visualization"""
+    """Generate SVG cascade visualization from transaction hash"""
     with trace_svg_cascade_generation(tx_hash, 4) as svg_span:
-        # Generate SVG content
-        svg_content = (
-            '<?xml version="1.0" encoding="UTF-8"?>\n'
-            '<svg xmlns="http://www.w3.org/2000/svg" ' \
-            'width="300" height="300" viewBox="0 0 300 300">\n'
-            '    <style>\n'
-            '        @keyframes resonate-0 { \n'
-            '            0% { transform: scale(1) rotate(0deg); opacity: 1; }\n'
-            '            50% { transform: scale(1.5) rotate(180deg); opacity: 0.5; }\n'
-            '            100% { transform: scale(1) rotate(360deg); opacity: 1; }\n'
-            '        }\n'
-            '        @keyframes resonate-1 { \n'
-            '            0% { transform: scale(0.8) rotate(0deg); opacity: 0.8; }\n'
-            '            50% { transform: scale(1.8) rotate(270deg); opacity: 0.3; }\n'
-            '            100% { transform: scale(0.8) rotate(360deg); opacity: 0.8; }\n'
-            '        }\n'
-            '        @keyframes resonate-2 { \n'
-            '            0% { transform: scale(1.2) rotate(180deg); opacity: 0.6; }\n'
-            '            50% { transform: scale(2.0) rotate(90deg); opacity: 0.2; }\n'
-            '            100% { transform: scale(1.2) rotate(540deg); opacity: 0.6; }\n'
-            '        }\n'
-            '        @keyframes resonate-3 { \n'
-            '            0% { transform: scale(0.9) rotate(270deg); opacity: 0.4; }\n'
-            '            50% { transform: scale(2.2) rotate(0deg); opacity: 0.1; }\n'
-            '            100% { transform: scale(0.9) rotate(630deg); opacity: 0.4; }\n'
-            '        }\n'
-            '    </style>\n'
-            '    <g transform="translate(150,150)">\n'
-            '        <circle r="50" fill="none" stroke="hsl(0, 100%, 50%)" ' \
-            'stroke-width="2" style="animation: resonate-0 2s linear infinite"/>\n'
-            '        <circle r="80" fill="none" stroke="hsl(90, 100%, 50%)" ' \
-            'stroke-width="2" style="animation: resonate-1 3s linear infinite"/>\n'
-            '        <circle r="110" fill="none" stroke="hsl(180, 100%, 50%)" ' \
-            'stroke-width="2" style="animation: resonate-2 4s linear infinite"/>\n'
-            '        <circle r="140" fill="none" stroke="hsl(270, 100%, 50%)" ' \
-            'stroke-width="2" style="animation: resonate-3 5s linear infinite"/>\n'
-            '    </g>\n'
-            f'    <text x="150" y="290" text-anchor="middle" ' \
-            f'fill="#DDA0DD" font-size="10">TX: {tx_hash[:12]}...</text>\n'
-            '</svg>'
-        )
-
-        svg_span.set_attribute("quantum.svg.generated", True)
+        try:
+            # Import the quantum fractal generator
+            from quantum_fractal_generator import generate_resonance_fractal
+            
+            # Determine fractal type from query param or auto-select
+            from flask import request
+            fractal_type = request.args.get('type', 'auto')
+            
+            # Generate real fractal from transaction hash
+            svg_content = generate_resonance_fractal(tx_hash, fractal_type)
+            
+            svg_span.set_attribute("quantum.svg.generated", True)
+            svg_span.set_attribute("quantum.svg.type", fractal_type)
+            svg_span.set_attribute("quantum.svg.tx_hash", tx_hash)
+            
+        except ImportError as e:
+            # Fallback to simple visualization if generator not available
+            print(f"⚠️ Fractal generator not available: {e}")
+            svg_content = (
+                '<?xml version="1.0" encoding="UTF-8"?>\n'
+                '<svg xmlns="http://www.w3.org/2000/svg" ' \
+                'width="300" height="300" viewBox="0 0 300 300">\n'
+                '    <rect width="100%" height="100%" fill="#0a0a1a"/>\n'
+                '    <g transform="translate(150,150)">\n'
+                '        <circle r="50" fill="none" stroke="hsl(0, 100%, 50%)" ' \
+                'stroke-width="2"/>\n'
+                '        <circle r="80" fill="none" stroke="hsl(120, 100%, 50%)" ' \
+                'stroke-width="2"/>\n'
+                '        <circle r="110" fill="none" stroke="hsl(240, 100%, 50%)" ' \
+                'stroke-width="2"/>\n'
+                '    </g>\n'
+                f'    <text x="150" y="290" text-anchor="middle" ' \
+                f'fill="#DDA0DD" font-size="10">TX: {tx_hash[:12]}...</text>\n'
+                '</svg>'
+            )
+            svg_span.set_attribute("quantum.svg.fallback", True)
 
         from flask import Response
         return Response(svg_content, mimetype='image/svg+xml')
@@ -433,10 +428,6 @@ if oracle_enabled:
 if __name__ == '__main__':
     print("🎨 Flask Glyph Weaver starting - Mainnet Visualization Engine")
     print("📊 Quantum Resonance Dashboard available at /resonance-dashboard")
-    print("🌌 SVG Cascade Generator available at /api/svg/cascade/<tx_hash>")
-    if oracle_enabled:
-        print("🔮 Quantum Oracle integrated - SoulAgent Constellation & Consciousness Engine")
-        print("📈 Oracle Status available at /oracle/status")
-        print("⛏️ BTC Mining Status available at /oracle/btc-mining")
-        print("🧠 Consciousness Stream available at /oracle/consciousness-stream")
+    print("🌌 SVG Fractal Generator available at /api/svg/cascade/<tx_hash>")
+    print("   Fractal types: ?type=recursive, ?type=mandala, ?type=sierpinski, ?type=auto")
     app.run(host='0.0.0.0', port=5000, debug=False)

@@ -2,9 +2,6 @@
 Tests for transaction API endpoints.
 """
 
-import pytest
-from decimal import Decimal
-
 
 def test_health_endpoint(client):
     """Test health check endpoint."""

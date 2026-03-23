@@ -1,111 +1,36 @@
-# Render Deployment Setup Guide
+# Render setup instructions
 
-## Overview
+This document shows steps to deploy `pi-forge-backend` on Render and verifies required environment variables.
 
-This guide provides step-by-step instructions for deploying the Pi Forge Quantum Genesis backend to Render.
+### Quick steps (UI)
+1. Sign in to https://dashboard.render.com
+2. New → Web Service → Connect GitHub → select `onenoly1010/pi-forge-quantum-genesis`
+3. Configure:
+   - **Name:** `pi-forge-backend`
+   - **Environment:** Docker
+   - **Dockerfile Path:** `Dockerfile`
+   - **Branch:** `main`
+4. Under **Environment** add the following variables (use secrets for sensitive values):
+   - PORT = `8000`
+   - PI_API_KEY = (set from your Pi Developer Portal)
+   - PI_APP_ID = `Quantum Pi Forge`
+   - PI_APP_SECRET = (set in Render secrets — **not** present in repo `.env`)
+   - SAFE_MULTISIG_ADDRESS = (your created Safe address)
+   - AI_SIGNER_PRIVATE_KEY = (secret; repo uses `AI_PRIVATE_KEY` — keep alias in mind)
+   - AI_WALLET_ADDRESS = `0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67`
+   - OINIO_CONTRACT_ADDRESS = `0x07f43E5B1A8a0928B364E40d5885f81A543B05C7`
+   - POLYGON_RPC_URL = `https://polygon-rpc.com`
 
-## Prerequisites
+### Verification checklist
+- [ ] Confirm `PI_API_KEY` exists in your Pi Developer Console
+- [ ] Add `PI_APP_SECRET` to Render; it's missing in repo `.env`
+- [ ] Add `AI_SIGNER_PRIVATE_KEY` as a secret in Render (do not commit private keys)
+- [ ] If your code expects `SERVER_PORT`, ensure `PORT` is mapped or update app to read `PORT` first
 
-- Render account ([https://render.com](https://render.com))
-- GitHub repository with your code
-- Environment variables configured
+### Notes & Recommendations
+- The repo `.env` uses `SERVER_PORT` and `AI_PRIVATE_KEY`. For Render use `PORT` and `AI_SIGNER_PRIVATE_KEY` as environment-variable names; the code currently reads `AI_PRIVATE_KEY` and `SERVER_PORT`, so we set both envs in the manifest to ensure compatibility.
+- To avoid leaking secrets, do NOT commit real private keys. Use the Render Dashboard secret store.
+- If you want IaC for Render, `infra/render.yaml` is included at the repo root — use it for automation or import into Render.
 
-## Step-by-Step Deployment
-
-### 1. Connect Your Repository
-
-1. Log in to your Render dashboard
-2. Click "New" → "Web Service"
-3. Connect your GitHub repository (pi-forge-quantum-genesis)
-4. Select the main branch
-
-### 2. Configure Build Settings
-
-- **Name**: pi-forge-backend (or your preferred name)
-- **Environment**: Docker
-- **Region**: Choose the closest region to your users
-- **Branch**: main (or your deployment branch)
-- **Root Directory**: Leave empty (deploys from root)
-- **Dockerfile Path**: Dockerfile (should auto-detect)
-
-### 3. Environment Variables
-
-Add the following environment variables in Render:
-
-#### Required Variables
-
-```bash
-PORT=8000
-PYTHON_VERSION=3.11
-```
-
-#### Application Variables
-
-```bash
-# Database
-DATABASE_URL=postgresql://...
-
-# Pi Network
-PI_API_KEY=your_pi_api_key
-PI_APP_ID=your_pi_app_id
-
-# Other secrets as needed
-```
-
-### 4. Deploy
-
-1. Click "Create Web Service"
-2. Render will build and deploy automatically
-3. Monitor the build logs for any issues
-
-### 5. Health Check
-
-Once deployed, verify the service is running:
-
-- Visit `https://your-service-name.onrender.com/health`
-- Should return a 200 status with health information
-
-### 6. Update Frontend
-
-After deployment, update your Vercel frontend:
-
-1. Go to Vercel dashboard
-2. Update `NEXT_PUBLIC_BACKEND_URL` to `https://your-service-name.onrender.com`
-
-## Troubleshooting
-
-### Build Failures
-
-- Check Dockerfile syntax
-- Ensure all dependencies are in requirements.txt
-- Verify Python version compatibility
-
-### Runtime Issues
-
-- Check environment variables are set correctly
-- Review application logs in Render dashboard
-- Ensure database connectivity
-
-### Port Issues
-
-- Render assigns dynamic ports, but our Dockerfile uses PORT env var
-- Make sure the service binds to 0.0.0.0:$PORT
-
-## Cost Optimization
-
-- Free tier: 750 hours/month
-- Paid plans start at $7/month for 1000 hours
-- Consider scaling based on usage
-
-## Security Notes
-
-- Never commit secrets to code
-- Use Render's environment variable system
-- Enable HTTPS (Render provides automatically)
-- Consider adding rate limiting for production
-
-## Next Steps
-
-- Set up monitoring and alerts
-- Configure custom domain if needed
-- Set up staging environment for testing
+### Troubleshooting
+- If your service fails to start, check `PORT` mapping and logs in Render Dashboard. Ensure the Dockerfile exposes/binds to the provided `PORT`.

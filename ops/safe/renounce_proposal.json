@@ -1,0 +1,7 @@
+{
+  "to": "0xbEbC1A40...5F37",
+  "value": "0",
+  "data": "0x715018a6",
+  "operation": 0,
+  "description": "Propose renounceOwnership() on OINIO (unsigned). Replace `to` with full contract address before proposing."
+}

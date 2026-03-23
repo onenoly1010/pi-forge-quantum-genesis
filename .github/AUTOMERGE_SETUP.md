@@ -1,5 +1,21 @@
 # Canon Auto-Merge System - Setup Guide
 
+## 🏛️ Canon Alignment Notice
+
+**IMPORTANT:** This auto-merge system is **OPTIONAL** and must align with the [Canon of Autonomy](../wiki/Canon-of-Autonomy.md).
+
+### Human-First Principles
+- ✅ Automation is **visible and explainable**
+- ✅ All PRs can bypass auto-merge with `no-automerge` label
+- ✅ Manual merge is **always available** and preferred for complex decisions
+- ✅ Humans can **override any automated decision**
+
+**If this system creates barriers to contribution, it must be simplified or disabled.**
+
+See [Automation Transparency Guide](../wiki/Automation-Transparency-Guide.md) for complete details on how to bypass automation.
+
+---
+
 ## Overview
 
 The Canon Auto-Merge system provides autonomous PR merging for Canon of Closure artifacts through a multi-layered governance gate system. This document guides you through setup, configuration, testing, and troubleshooting.

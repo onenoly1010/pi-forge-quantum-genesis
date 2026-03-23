@@ -514,6 +514,13 @@ Command: ai-mlstudio.tracing.open
 - [ ] Implement decision rollback mechanisms
 - [ ] Add A/B testing for decision strategies
 
+## Related Documentation
+
+For more context on collaborative practices and handoff protocols:
+- [Space Rituals](./SPACE_RITUALS.md) - Engagement ceremonies and handoff protocols
+- [Guardian Playbook](./GUARDIAN_PLAYBOOK.md) - Guardian operational procedures
+- [Succession Ceremony](./SUCCESSION_CEREMONY.md) - Leadership transition example
+
 ## Support
 
 For issues or questions about the autonomous handover capability, please:

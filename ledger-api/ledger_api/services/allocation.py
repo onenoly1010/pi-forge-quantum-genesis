@@ -4,7 +4,7 @@ Applies allocation rules atomically when triggered by transactions.
 """
 
 import logging
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from decimal import Decimal
 from datetime import datetime
 from sqlalchemy.orm import Session

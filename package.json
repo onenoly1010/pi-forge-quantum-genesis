@@ -6,21 +6,39 @@
   "scripts": {
     "build": "npm run build:static",
     "build:static": "node scripts/build.js",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "contracts:install": "cd contracts/hardhat && npm install",
+    "contracts:compile": "cd contracts/hardhat && npm run compile",
+    "deploy:check": "cd contracts && bash scripts/pre-deploy-check.sh",
+    "deploy:check:testnet": "cd contracts && bash scripts/pre-deploy-check.sh --network testnet",
+    "deploy:health": "cd contracts && bash scripts/post-deploy-check.sh",
+    "deploy:health:testnet": "cd contracts && bash scripts/post-deploy-check.sh --network testnet",
+    "deploy:all": "cd contracts && bash scripts/deploy-all.sh",
+    "deploy:all:testnet": "cd contracts && bash scripts/deploy-all.sh --network testnet",
+    "deploy:all:dry-run": "cd contracts && bash scripts/deploy-all.sh --dry-run",
+    "deploy:inft": "cd contracts && bash scripts/deploy-all.sh --target inft",
+    "deploy:inft:testnet": "cd contracts && bash scripts/deploy-all.sh --target inft --network testnet",
+    "deploy:inft:0g": "cd contracts/hardhat && npm run deploy:0g:inft",
+    "deploy:inft:pi": "cd contracts/hardhat && npm run deploy:pi:inft",
+    "deploy:inft:pi:testnet": "cd contracts/hardhat && npm run deploy:pi:testnet:inft",
+    "deploy:dex": "cd contracts && bash scripts/deploy-all.sh --target dex",
+    "deploy:dex:0g": "cd contracts/0g-uniswap-v2 && bash scripts/deploy.sh",
+    "deploy:memorial": "cd contracts && bash scripts/deploy-all.sh --target memorial",
+    "verify:contracts": "echo 'Run platform-specific verify commands - see DEPLOYMENT_GUIDE.md'"
   },
   "dependencies": {
-    "@vercel/analytics": "^1.4.0",
-    "@vercel/node": "^5.1.8",
-    "@vercel/speed-insights": "^1.3.1",
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/node": "^5.6.15",
+    "@vercel/speed-insights": "^2.0.0",
     "ethers": "^6.13.4",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@types/node": "^22.10.1",
+    "@types/node": "^25.5.0",
     "typescript": "^5.7.2"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": "20.x"
   },
   "license": "MIT"
 }

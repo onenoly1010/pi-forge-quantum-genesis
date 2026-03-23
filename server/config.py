@@ -62,6 +62,12 @@ ZERO_G_CONFIG: Dict[str, Any] = {
     "min_liquidity": 0.001,  # Minimum liquidity in 0G
     "max_slippage": 0.05,    # 5% maximum slippage
     "deadline_minutes": 20,   # Transaction deadline
+    
+    # 0G Storage Configuration (for iNFT Memory Layer)
+    "storage_endpoint": os.getenv("ZERO_G_STORAGE_ENDPOINT", "https://storage.0g.ai"),
+    "storage_api_key": os.getenv("ZERO_G_STORAGE_API_KEY", ""),
+    "sync_interval_blocks": int(os.getenv("ZERO_G_SYNC_INTERVAL", "100")),  # Sync every N blocks
+    "sync_interval_minutes": int(os.getenv("ZERO_G_SYNC_MINUTES", "60")),  # Or every N minutes
 }
 
 # =============================================================================

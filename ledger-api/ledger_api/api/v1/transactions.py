@@ -3,7 +3,7 @@ Transaction API endpoints.
 Handles creating and querying ledger transactions.
 """
 
-import logging
+from typing import Optional
 from typing import List, Optional
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status, Query

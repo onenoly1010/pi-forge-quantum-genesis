@@ -1,19 +1,38 @@
-# Quantum Resonance Lattice Launcher
-# Activates virtual environment and starts the Sacred Trinity server
+# SUPREME CREDENTIALS - QVM 3.0 RECURSION PROTOCOL
+# LOCAL DEVELOPMENT RUN SCRIPT
 
-Write-Host "🌌 Activating Quantum Development Environment..." -ForegroundColor Cyan
-
-# Change to the project directory
-Set-Location $PSScriptRoot
-
-# Activate virtual environment
-& ".\.venv\Scripts\activate.ps1"
-
-Write-Host "🚀 Starting Quantum Lattice Server..." -ForegroundColor Green
-
-# Start the server synchronously to see any errors
-try {
-    & ".\.venv\Scripts\python.exe" "server\main.py"
-} catch {
-    Write-Host "❌ Error starting server: $($_.Exception.Message)" -ForegroundColor Red
+# Ensure the terminal is in the correct directory (pi-forge-quantum-genesis)
+# Load environment variables from a .env file if it exists
+if (Test-Path ".env") {
+    Get-Content .env | ForEach-Object {
+        # Skip empty lines and comments
+        if ($_ -match '^\s*$' -or $_ -match '^\s*#') {
+            return
+        }
+        $name, $value = $_.Split('=', 2)
+        if ($name -and $value) {
+            # Trim whitespace from both name and value
+            $name = $name.Trim()
+            $value = $value.Trim()
+            # Only set if both are non-empty after trimming
+            if ($name -and $value) {
+                Set-Item -Path "env:$name" -Value $value
+            }
+        }
+    }
+    Write-Host "✅ .env file loaded."
+} else {
+    Write-Warning "⚠️ .env file not found. Please ensure SUPABASE_URL and SUPABASE_KEY are set manually."
 }
+
+# Activate virtual environment if it exists
+if (Test-Path ".venv\Scripts\Activate.ps1") {
+    Write-Host "🐍 Activating Python virtual environment..."
+    . .venv\Scripts\Activate.ps1
+} else {
+    Write-Warning "⚠️ Python virtual environment not found. Dependencies might not be installed."
+}
+
+# Launch the FastAPI application using uvicorn
+Write-Host "🚀 Launching QVM 3.0 Supabase Resonance Bridge..."
+uvicorn server.main:app --host 0.0.0.0 --port 8000 --reload

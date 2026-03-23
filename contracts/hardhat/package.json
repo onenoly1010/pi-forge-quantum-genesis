@@ -1,0 +1,29 @@
+{
+  "name": "pi-forge-hardhat-deployment",
+  "version": "1.0.0",
+  "description": "Hardhat deployment scripts for OINIO contracts on 0G and Pi Network",
+  "scripts": {
+    "compile": "hardhat compile",
+    "deploy:0g:inft": "hardhat run scripts/deploy-inft.ts --network zeroG",
+    "deploy:0g:dex": "hardhat run scripts/deploy-dex.ts --network zeroG",
+    "deploy:pi:inft": "hardhat run scripts/deploy-inft.ts --network piMainnet",
+    "deploy:pi:testnet:inft": "hardhat run scripts/deploy-inft.ts --network piTestnet",
+    "verify:0g": "hardhat verify --network zeroG",
+    "verify:pi": "hardhat verify --network piMainnet",
+    "check:balance": "hardhat run scripts/check-balance.ts",
+    "test": "hardhat test"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@nomicfoundation/hardhat-verify": "^2.0.3",
+    "@types/node": "^20.10.0",
+    "hardhat": "^2.19.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.0",
+    "dotenv": "^16.3.1",
+    "ethers": "^6.9.0"
+  }
+}

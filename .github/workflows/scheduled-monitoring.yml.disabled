@@ -215,7 +215,7 @@ jobs:
             - \`SLACK_WEBHOOK_URL\`: Slack incoming webhook URL
             - \`DISCORD_WEBHOOK_URL\`: Discord webhook URL
             
-            See [docs/automation.md](./docs/automation.md) for setup instructions.
+            See [docs/automation.md](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/docs/automation.md) for setup instructions.
             `;
             
             const issueNumber = '${{ steps.find-issue.outputs.issue_number }}';

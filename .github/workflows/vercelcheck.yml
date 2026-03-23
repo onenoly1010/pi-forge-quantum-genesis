@@ -8,7 +8,9 @@ name: Vercel Deployment Status Check
   workflow_dispatch:
 
 permissions:
+ 
   contents: read
+  statuses: write
 
 jobs:
   vercel-check:

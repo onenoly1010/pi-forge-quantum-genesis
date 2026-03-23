@@ -1,60 +1,27 @@
-# Render Blueprint - Pi Forge Quantum Genesis
-# https://render.com/docs/blueprint-spec
-
 services:
-  # FastAPI Backend (Quantum Conduit)
   - type: web
-    name: pi-forge-quantum-genesis
+    name: pi-forge-quantum-genesis-open
     runtime: docker
     dockerfilePath: ./Dockerfile
-    dockerContext: .
     plan: free
     region: oregon
-    branch: main
+    # Health check configuration
     healthCheckPath: /health
+    # Environment variables (configure in Render dashboard)
     envVars:
       - key: PORT
-        value: 8000
-      - key: PYTHON_VERSION
-        value: "3.11"
-      - key: PI_NETWORK_MODE
-        fromGroup: pi-network-secrets
-      - key: PI_NETWORK_API_KEY
-        fromGroup: pi-network-secrets
-      - key: PI_NETWORK_APP_ID
-        fromGroup: pi-network-secrets
-      - key: PI_NETWORK_WEBHOOK_SECRET
-        fromGroup: pi-network-secrets
-      - key: SUPABASE_URL
-        fromGroup: supabase-secrets
-      - key: SUPABASE_KEY
-        fromGroup: supabase-secrets
-      - key: JWT_SECRET
-        fromGroup: auth-secrets
-      - key: CORS_ORIGINS
-        value: "https://quantum-pi-forge.vercel.app,https://pi-forge-quantum-genesis.vercel.app,http://localhost:3000"
-
-# Environment Variable Groups (configure in Render dashboard)
-envVarGroups:
-  - name: pi-network-secrets
-    envVars:
-      - key: PI_NETWORK_MODE
-        value: mainnet
-      - key: PI_NETWORK_API_KEY
-        sync: false
-      - key: PI_NETWORK_APP_ID
-        sync: false
-      - key: PI_NETWORK_WEBHOOK_SECRET
-        sync: false
-  
-  - name: supabase-secrets
-    envVars:
-      - key: SUPABASE_URL
-        sync: false
-      - key: SUPABASE_KEY
-        sync: false
-  
-  - name: auth-secrets
-    envVars:
-      - key: JWT_SECRET
-        generateValue: true
+        value: 8080
+      - key: NODE_ENV
+        value: production
+      # Required: Configure these in Render Dashboard
+      # - SUPABASE_URL
+      # - SUPABASE_KEY
+      # - SECRET_KEY
+      # - PI_NETWORK_MODE (mainnet or testnet)
+      # - PI_NETWORK_APP_ID
+      # - PI_NETWORK_API_KEY
+      # - PI_NETWORK_WEBHOOK_SECRET
+      # Optional:
+      # - SENTRY_DSN
+      # - OPENAI_API_KEY
+      # - ANTHROPIC_API_KEY
