@@ -57,7 +57,7 @@
 ### Health Check URLs
 - Public Site: https://onenoly1010.github.io/quantum-pi-forge-site/
 - Backend API: https://pi-forge-quantum-genesis.railway.app/health
-- Resonance Engine: https://quantum-resonance-clean.vercel.app/
+- Resonance Engine: https://your-project.workers.dev/
 
 ---
 

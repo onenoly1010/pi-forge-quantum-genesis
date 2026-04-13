@@ -189,7 +189,7 @@ Every action in this ecosystem aligns with the **[Canon of Autonomy](wiki/Canon-
   - User-facing portal with manifesto and ecosystem information
 - **Backend API**: https://pi-forge-quantum-genesis.railway.app
   - FastAPI service handling payments, webhooks, and core business logic
-- **Resonance Engine**: https://quantum-resonance-clean.vercel.app
+- **Resonance Engine**: https://your-project.workers.dev
   - Harmonic ledger backend for resonance-based operations
 
 ### Health Monitoring

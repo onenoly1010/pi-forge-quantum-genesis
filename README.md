@@ -58,7 +58,7 @@ The Quantum Pi Forge ecosystem consists of multiple specialized repositories wor
              ↓
 ┌──────────────────────────┐
 │ quantum-resonance-clean  │  →  Resonance Engine
-│ (Resonance Engine)       │      https://quantum-resonance-clean.vercel.app
+│ (Resonance Engine)       │      https://your-project.workers.dev
 │ Harmonic Ledger Backend  │      Status: ✅ LIVE
 └──────────────────────────┘
 ```
@@ -305,7 +305,7 @@ pytest tests/test_vercel_build.py -v
 - **Status**: ✅ LIVE
 
 **Resonance Engine:**
-- **URL**: https://quantum-resonance-clean.vercel.app
+- **URL**: https://your-project.workers.dev
 - **Repository**: [quantum-resonance-clean](https://github.com/onenoly1010/quantum-resonance-clean)
 - **Status**: ✅ LIVE on Vercel
 
@@ -321,7 +321,7 @@ curl https://pi-forge-quantum-genesis.railway.app/health
 curl https://pi-forge-quantum-genesis-1.onrender.com/health
 
 # Resonance Engine
-curl https://quantum-resonance-clean.vercel.app/
+curl https://your-project.workers.dev/
 
 # Public Site
 curl -I https://quantumpiforge.com

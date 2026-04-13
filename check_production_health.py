@@ -14,7 +14,7 @@ def check_production_health():
 
     endpoints = [
         ("Railway API", "https://pi-forge-quantum-genesis.railway.app/health"),
-        ("Vercel Frontend", "https://quantum-resonance-clean.vercel.app"),
+        ("Vercel Frontend", "https://your-project.workers.dev"),
     ]
 
     results = []

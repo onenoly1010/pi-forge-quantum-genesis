@@ -19,7 +19,7 @@ This dashboard is the **canonical entry point** for all deployment tasks across 
 | **Public Frontend** | https://quantumpiforge.com | ✅ LIVE | `curl -I https://quantumpiforge.com` |
 | **Backend API (Railway)** | https://pi-forge-quantum-genesis.railway.app | ✅ LIVE | `curl https://pi-forge-quantum-genesis.railway.app/health` |
 | **Backend API (Render)** | https://pi-forge-quantum-genesis-1.onrender.com | ✅ LIVE | `curl https://pi-forge-quantum-genesis-1.onrender.com/health` |
-| **Resonance Engine** | https://quantum-resonance-clean.vercel.app | ✅ LIVE | `curl https://quantum-resonance-clean.vercel.app/` |
+| **Resonance Engine** | https://your-project.workers.dev | ✅ LIVE | `curl https://your-project.workers.dev/` |
 
 ### Quick Health Check
 
@@ -35,7 +35,7 @@ curl https://pi-forge-quantum-genesis.railway.app/health
 curl https://pi-forge-quantum-genesis-1.onrender.com/health
 
 # Resonance Engine
-curl https://quantum-resonance-clean.vercel.app/
+curl https://your-project.workers.dev/
 ```
 
 **Expected Response**: All endpoints should return 200 OK status.

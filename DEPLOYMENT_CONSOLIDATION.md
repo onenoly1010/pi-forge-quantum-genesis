@@ -89,7 +89,7 @@ curl https://pi-forge-quantum-genesis-1.onrender.com/health
 
 ### 4. Resonance Engine (Vercel)
 **Repository**: `quantum-resonance-clean`  
-**URL**: https://quantum-resonance-clean.vercel.app  
+**URL**: https://your-project.workers.dev  
 **Purpose**: Harmonic ledger backend  
 **Status**: ✅ LIVE  
 **Health Check**: Root endpoint  
@@ -102,7 +102,7 @@ curl https://pi-forge-quantum-genesis-1.onrender.com/health
 
 **Quick Health Check**:
 ```bash
-curl https://quantum-resonance-clean.vercel.app/
+curl https://your-project.workers.dev/
 ```
 
 ---
@@ -251,7 +251,7 @@ curl https://pi-forge-quantum-genesis.railway.app/health
 curl https://pi-forge-quantum-genesis-1.onrender.com/health
 
 # Resonance Engine
-curl https://quantum-resonance-clean.vercel.app/
+curl https://your-project.workers.dev/
 ```
 
 ---

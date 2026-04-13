@@ -71,7 +71,7 @@ DEBUG=false
 LOG_LEVEL=INFO
 
 # CORS (if needed)
-CORS_ORIGINS=https://quantum-resonance-clean.vercel.app,https://pi-forge-quantum-genesis.vercel.app
+CORS_ORIGINS=https://your-project.workers.dev,https://pi-forge-quantum-genesis.vercel.app
 ```
 
 ### 2.3 Where to Find Values
@@ -172,7 +172,7 @@ Invoke-WebRequest -Uri "https://pi-forge-quantum-genesis.railway.app/health" -Me
 
 ```powershell
 # Open in browser
-start "https://quantum-resonance-clean.vercel.app"
+start "https://your-project.workers.dev"
 
 # Check browser console for errors (F12)
 ```

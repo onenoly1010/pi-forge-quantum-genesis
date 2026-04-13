@@ -251,7 +251,7 @@ curl http://localhost:8000/health
 - **Railway Backend**: https://pi-forge-quantum-genesis.railway.app
 - **Render Backend**: https://pi-forge-quantum-genesis-1.onrender.com
 - **Public Frontend**: https://quantumpiforge.com
-- **Resonance Engine**: https://quantum-resonance-clean.vercel.app
+- **Resonance Engine**: https://your-project.workers.dev
 
 ### Configuration Files
 - `railway.toml` — Railway deployment configuration

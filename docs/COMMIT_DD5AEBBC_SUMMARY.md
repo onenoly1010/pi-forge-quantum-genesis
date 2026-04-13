@@ -202,7 +202,7 @@ The merge clarified canonical deployment URLs:
 
 - **Public Site (GitHub Pages)**: https://onenoly1010.github.io/quantum-pi-forge-site/
 - **Backend API (Railway)**: https://pi-forge-quantum-genesis.railway.app/health
-- **Resonance Engine (Vercel)**: https://quantum-resonance-clean.vercel.app/
+- **Resonance Engine (Vercel)**: https://your-project.workers.dev/
 
 ### Health Metrics
 - Public Site: 🟢 99.9% uptime, <100ms response
