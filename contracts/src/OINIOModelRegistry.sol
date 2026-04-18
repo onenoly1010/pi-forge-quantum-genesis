@@ -242,7 +242,7 @@ contract OINIOModelRegistry is ERC721, ERC721URIStorage, ERC721Burnable, Ownable
     function supportsInterface(bytes4 interfaceId)
         public
         view
-        override(ERC721, ERC721URIStorage, ERC721Burnable)
+        override(ERC721, ERC721URIStorage)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
