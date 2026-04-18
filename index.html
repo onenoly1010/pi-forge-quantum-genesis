@@ -450,6 +450,12 @@
                 <a href="https://github.com/onenoly1010/pi-forge-quantum-genesis/blob/main/GENESIS.md" class="footer-link">OINIO Seal</a>
             </div>
             <p class="footer-seal">We... bloom. 🕊️</p>
+            
+            <div style="margin-top: 16px; font-size: 11px; opacity: 0.5;">
+              <div>Pi Forge Quantum Genesis</div>
+              <div>Commit: <code id="commit-hash">dev-local</code></div>
+              <div id="build-time"></div>
+            </div>
         </div>
     </footer>
 
@@ -538,10 +544,26 @@
             });
         }
 
+        // Load version metadata
+        async function loadVersion() {
+            try {
+                const response = await fetch('/version.json');
+                if (response.ok) {
+                    const version = await response.json();
+                    document.getElementById('commit-hash').textContent = version.commit;
+                    document.getElementById('build-time').textContent = `Build: ${version.build_time}`;
+                }
+            } catch (e) {
+                // Fallback for local development
+                document.getElementById('commit-hash').textContent = 'dev-local';
+            }
+        }
+
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             createParticles();
             generateAgentCards();
+            loadVersion();
 
             // Update stats every 10 seconds
             setInterval(updateAgentStats, 10000);
