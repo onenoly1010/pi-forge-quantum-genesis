@@ -79,55 +79,6 @@ contract W0G is ZeroGRouterWrapper, ZeroGV3RouterWrapper {
     }
 
     /**
-     * @notice Mint concentrated liquidity position on Uniswap V3
-     * @dev Exposed from ZeroGV3RouterWrapper with full security hardening
-     */
-    function mintPosition(
-        address token0,
-        address token1,
-        uint24 fee,
-        int24 tickLower,
-        int24 tickUpper,
-        uint256 amount0Desired,
-        uint256 amount1Desired,
-        uint256 amount0Min,
-        uint256 amount1Min,
-        address recipient,
-        uint256 deadline
-    ) external returns (
-        uint256 tokenId,
-        uint128 liquidity,
-        uint256 amount0,
-        uint256 amount1
-    ) {
-        return super.mintPosition(
-            token0,
-            token1,
-            fee,
-            tickLower,
-            tickUpper,
-            amount0Desired,
-            amount1Desired,
-            amount0Min,
-            amount1Min,
-            recipient,
-            deadline
-        );
-    }
-
-    /**
-     * @notice Collect accumulated fees from V3 position
-     */
-    function collectFees(
-        uint256 tokenId,
-        address recipient,
-        uint128 amount0Max,
-        uint128 amount1Max
-    ) external returns (uint256 amount0, uint256 amount1) {
-        return super.collectFees(tokenId, recipient, amount0Max, amount1Max);
-    }
-
-    /**
      * @notice Deposit native 0G and receive W0G tokens
      */
     function deposit() public payable {

@@ -12,7 +12,7 @@ via_ir = false
 remappings = [
     "@uniswap/v2-core/=lib/v2-core/",
     "@uniswap/v2-periphery/=lib/v2-periphery/",
-    "@openzeppelin/=lib/openzeppelin-contracts/",
+    "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
     "forge-std/=lib/forge-std/src/"
 ]
 
@@ -23,10 +23,10 @@ zero_g = "https://evmrpc.0g.ai"
 zero_g = { key = "${ETHERSCAN_API_KEY}", url = "https://chainscan.0g.ai/api" }
 
 # Build settings
-[build]
+[profile.build]
 cache = true
 force = false
 
 # Test settings
-[test]
+[profile.test]
 verbosity = 3

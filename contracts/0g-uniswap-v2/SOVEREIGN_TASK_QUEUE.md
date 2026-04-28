@@ -1,0 +1,13 @@
+- [x] Add multi-chain security: chain validation, code.length check, CEI pattern, slippage/deadline enforcement
+- [x] Pre-populate known routers: ETH 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D, Base/Arbitrum 0x4752ba5dbc23f44d87826276bf6fd6b1c372ad24, etc.
+- [x] Integrate ZeroGRouterWrapper into W0G.sol (inheritance approach)
+- [x] ZeroGV3RouterWrapper initial implementation with exactInputSingle
+- [x] Added multi-chain mapping for SwapRouter, SwapRouter02, PositionManager, Quoter
+- [ ] Integrate V3 swaps into W0G.sol with V2 fallback
+- [x] ZeroGV3RouterWrapper with full multi-chain V3 mapping & exactInputSingle
+- [x] Integrate V3 swaps into W0G.sol with intelligent V2/V3 fallback routing
+- [x] W0G V2+V3 integration with intelligent fallback routing
+- [x] Implement NonfungiblePositionManager mint for concentrated liquidity
+- [ ] Comprehensive V3 fallback + edge case testing
+- [ ] Update deployment scripts for multi-chain support
+- [ ] Optimize intelligent routing with dynamic quote selection

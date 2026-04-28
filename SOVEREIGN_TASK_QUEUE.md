@@ -1,0 +1,5 @@
+- [x] ERC-7857 Agentic ID with 0G Compute/Storage hooks
+- [x] Connect ForgeAgent to W0G for autonomous liquidity actions
+- [x] Implement full volatility-based rebalancePosition()
+- [x] Complete requestSealedInference() and completeInference() with proof verification
+- [x] Add agent decision skills using sealed inference

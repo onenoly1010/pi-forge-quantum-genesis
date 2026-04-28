@@ -1,0 +1,160 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+
+/// @title ZeroGV3RouterWrapper - Sovereign Uniswap V3 Integration for W0G
+/// @notice Hardened multi-chain V3 router wrapper with full security parity
+/// @dev Maintains backwards compatibility with V2 architecture patterns
+contract ZeroGV3RouterWrapper is ReentrancyGuard {
+    using SafeERC20 for IERC20;
+
+    /// @dev Uniswap V3 SwapRouter Interface (minimal)
+    interface ISwapRouter {
+        struct ExactInputSingleParams {
+            address tokenIn;
+            address tokenOut;
+            uint24 fee;
+            address recipient;
+            uint256 deadline;
+            uint256 amountIn;
+            uint256 amountOutMinimum;
+            uint160 sqrtPriceLimitX96;
+        }
+
+        function exactInputSingle(ExactInputSingleParams calldata params) external payable returns (uint256 amountOut);
+    }
+
+    /// @dev Uniswap V3 Router Address Mapping
+    mapping(uint256 => address) public swapRouterByChain;
+    mapping(uint256 => address) public swapRouter02ByChain;
+    mapping(uint256 => address) public positionManagerByChain;
+    mapping(uint256 => address) public quoterByChain;
+
+    /// @dev Default Fallback Addresses (verified multi-chain deployments)
+    address public constant DEFAULT_SWAP_ROUTER = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
+    address public constant DEFAULT_SWAP_ROUTER_02 = 0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45;
+    address public constant DEFAULT_POSITION_MANAGER = 0xC36442b4a4522E871399CD717aBDD847Ab11FE88;
+    address public constant DEFAULT_QUOTER = 0xb27308f9F90D607463bb33eA1BeBb41C27CE5AB6;
+    address public constant UNIVERSAL_ROUTER = 0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD;
+
+    /// @dev Fee Tier Constants
+    uint24 public constant FEE_LOWEST = 500;   // 0.05%
+    uint24 public constant FEE_STANDARD = 3000; // 0.3%
+    uint24 public constant FEE_HIGH = 10000;   // 1%
+
+    error ZeroAmount();
+    error InsufficientOutput();
+    error DeadlineExpired();
+    error InvalidSlippage();
+
+    event V3SwapExecuted(
+        address indexed tokenIn,
+        address indexed tokenOut,
+        uint256 amountIn,
+        uint256 amountOut,
+        uint24 fee,
+        uint256 chainId
+    );
+
+    constructor() {
+        // Initialize common chain mappings
+        // Ethereum Mainnet
+        swapRouterByChain[1] = DEFAULT_SWAP_ROUTER;
+        swapRouter02ByChain[1] = DEFAULT_SWAP_ROUTER_02;
+        positionManagerByChain[1] = DEFAULT_POSITION_MANAGER;
+        quoterByChain[1] = DEFAULT_QUOTER;
+
+        // Arbitrum
+        swapRouterByChain[42161] = DEFAULT_SWAP_ROUTER;
+        swapRouter02ByChain[42161] = DEFAULT_SWAP_ROUTER_02;
+        positionManagerByChain[42161] = DEFAULT_POSITION_MANAGER;
+        quoterByChain[42161] = DEFAULT_QUOTER;
+
+        // Optimism
+        swapRouterByChain[10] = DEFAULT_SWAP_ROUTER;
+        swapRouter02ByChain[10] = DEFAULT_SWAP_ROUTER_02;
+        positionManagerByChain[10] = DEFAULT_POSITION_MANAGER;
+        quoterByChain[10] = DEFAULT_QUOTER;
+
+        // Base
+        swapRouterByChain[8453] = DEFAULT_SWAP_ROUTER;
+        swapRouter02ByChain[8453] = DEFAULT_SWAP_ROUTER_02;
+        positionManagerByChain[8453] = DEFAULT_POSITION_MANAGER;
+        quoterByChain[8453] = DEFAULT_QUOTER;
+
+        // Polygon
+        swapRouterByChain[137] = DEFAULT_SWAP_ROUTER;
+        swapRouter02ByChain[137] = DEFAULT_SWAP_ROUTER_02;
+        positionManagerByChain[137] = DEFAULT_POSITION_MANAGER;
+        quoterByChain[137] = DEFAULT_QUOTER;
+    }
+
+    /// @notice Execute exact input single hop swap on Uniswap V3
+    /// @dev Fully hardened with CEI, reentrancy protection, zero checks
+    function exactInputSingle(
+        address tokenIn,
+        address tokenOut,
+        uint24 fee,
+        uint256 amountIn,
+        uint256 amountOutMinimum,
+        uint256 deadline,
+        uint160 sqrtPriceLimitX96
+    ) external nonReentrant returns (uint256 amountOut) {
+        if (amountIn == 0) revert ZeroAmount();
+        if (amountOutMinimum == 0) revert InvalidSlippage();
+        if (block.timestamp > deadline) revert DeadlineExpired();
+
+        uint256 chainId = block.chainid;
+        address router = getSwapRouter(chainId);
+
+        // Transfer tokens from caller (CEI pattern - pull first)
+        IERC20(tokenIn).safeTransferFrom(msg.sender, address(this), amountIn);
+
+        // Approve router
+        IERC20(tokenIn).forceApprove(router, amountIn);
+
+        // Execute swap
+        amountOut = ISwapRouter(router).exactInputSingle(
+            ISwapRouter.ExactInputSingleParams({
+                tokenIn: tokenIn,
+                tokenOut: tokenOut,
+                fee: fee,
+                recipient: msg.sender,
+                deadline: deadline,
+                amountIn: amountIn,
+                amountOutMinimum: amountOutMinimum,
+                sqrtPriceLimitX96: sqrtPriceLimitX96
+            })
+        );
+
+        if (amountOut < amountOutMinimum) revert InsufficientOutput();
+
+        emit V3SwapExecuted(tokenIn, tokenOut, amountIn, amountOut, fee, chainId);
+    }
+
+    /// @dev Get appropriate SwapRouter for current chain with fallback
+    function getSwapRouter(uint256 chainId) public view returns (address) {
+        address router = swapRouter02ByChain[chainId];
+        if (router != address(0)) return router;
+        
+        router = swapRouterByChain[chainId];
+        if (router != address(0)) return router;
+        
+        return DEFAULT_SWAP_ROUTER_02;
+    }
+
+    /// @dev Get NonfungiblePositionManager address
+    function getPositionManager(uint256 chainId) public view returns (address) {
+        address manager = positionManagerByChain[chainId];
+        return manager != address(0) ? manager : DEFAULT_POSITION_MANAGER;
+    }
+
+    /// @dev Get Quoter address
+    function getQuoter(uint256 chainId) public view returns (address) {
+        address quoter = quoterByChain[chainId];
+        return quoter != address(0) ? quoter : DEFAULT_QUOTER;
+    }
+}
