@@ -1,0 +1,15 @@
+{
+  "version": "1.0.0",
+  "canonicalization": "RFC8785",
+  "reducers": [
+    "genesis_reducer_v1"
+  ],
+  "schemas": [
+    "GENESIS_SUBSTRATE_INIT"
+  ],
+  "rules": {
+    "deterministic_execution": true,
+    "reject_nan": true,
+    "utf8_only": true
+  }
+}
