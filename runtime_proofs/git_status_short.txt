@@ -1,0 +1,71 @@
+ M .gitignore
+ D .vscode/extensions.json
+ D .vscode/launch.json
+ M .vscode/settings.json
+ D .vscode/tasks.json
+A  bootstrap_quantum_replay_verifier.sh
+ D cache/solidity-files-cache.json
+ M contracts/foundry.toml
+ M foundry.lock
+ M lib/forge-std
+ M lib/openzeppelin-contracts
+ D out/Bytes.sol/Bytes.json
+ D out/Context.sol/Context.json
+ D out/ERC165.sol/ERC165.json
+ D out/ERC721.sol/ERC721.json
+ D out/ERC721Utils.sol/ERC721Utils.json
+ D out/ForgeAgentERC7857.sol/ForgeAgentERC7857.json
+ D out/ForgeAgentERC7857.sol/I0GCompute.json
+ D out/ForgeAgentERC7857.sol/IERC7857.json
+ D out/ForgeAgentERC7857.sol/IW0GRouter.json
+ D out/Hashes.sol/Hashes.json
+ D out/IERC165.sol/IERC165.json
+ D out/IERC721.sol/IERC721.json
+ D out/IERC721Metadata.sol/IERC721Metadata.json
+ D out/IERC721Receiver.sol/IERC721Receiver.json
+ D out/Math.sol/Math.json
+ D out/MerkleProof.sol/MerkleProof.json
+ D out/Ownable.sol/Ownable.json
+ D out/Panic.sol/Panic.json
+ D out/SafeCast.sol/SafeCast.json
+ D out/SignedMath.sol/SignedMath.json
+ D out/Strings.sol/Strings.json
+ D out/build-info/89d4391b9c4b3d29.json
+ D out/build-info/b21dbac37d78369f.json
+ D out/build-info/ed3615da3305d865.json
+ D out/build-info/f4659463abaece9b.json
+ D out/draft-IERC6093.sol/IERC1155Errors.json
+ D out/draft-IERC6093.sol/IERC20Errors.json
+ D out/draft-IERC6093.sol/IERC721Errors.json
+ M press-agent/package-lock.json
+ M press-agent/package.json
+ M requirements.txt
+?? .clineignore
+?? ARCHITECTURE.md
+?? Modelfile
+?? ROADMAP.md
+?? SKILL.md
+?? SYSTEM_MAP.md
+?? archive/
+?? docs/network/
+?? logs/
+?? operations/
+?? quantum-replay-verifier/
+?? requirements.lock.txt
+?? runtime_proofs/
+?? scripts/verification/integrity_report.py
+?? server/integrations/zero_g_memory_os.py
+?? server/integrations/zero_g_sdk_wrapper.py
+?? src/ledger/
+?? src/security/
+?? src/snapshots/
+?? tests/__init__.py
+?? tests/test_executor.py
+?? tests/test_hashing.py
+?? tests/test_receipts.py
+?? tests/test_reducer.py
+?? tests/test_replay.py
+?? tests/test_state_root.py
+?? tests/test_transactions.py
+?? tests/test_validator.py
+?? tests/test_wallet.py

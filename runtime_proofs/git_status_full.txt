@@ -1,0 +1,83 @@
+On branch master
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+	new file:   bootstrap_quantum_replay_verifier.sh
+
+Changes not staged for commit:
+  (use "git add/rm <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+  (commit or discard the untracked or modified content in submodules)
+	modified:   .gitignore
+	deleted:    .vscode/extensions.json
+	deleted:    .vscode/launch.json
+	modified:   .vscode/settings.json
+	deleted:    .vscode/tasks.json
+	deleted:    cache/solidity-files-cache.json
+	modified:   contracts/foundry.toml
+	modified:   foundry.lock
+	modified:   lib/forge-std (new commits)
+	modified:   lib/openzeppelin-contracts (new commits, modified content)
+	deleted:    out/Bytes.sol/Bytes.json
+	deleted:    out/Context.sol/Context.json
+	deleted:    out/ERC165.sol/ERC165.json
+	deleted:    out/ERC721.sol/ERC721.json
+	deleted:    out/ERC721Utils.sol/ERC721Utils.json
+	deleted:    out/ForgeAgentERC7857.sol/ForgeAgentERC7857.json
+	deleted:    out/ForgeAgentERC7857.sol/I0GCompute.json
+	deleted:    out/ForgeAgentERC7857.sol/IERC7857.json
+	deleted:    out/ForgeAgentERC7857.sol/IW0GRouter.json
+	deleted:    out/Hashes.sol/Hashes.json
+	deleted:    out/IERC165.sol/IERC165.json
+	deleted:    out/IERC721.sol/IERC721.json
+	deleted:    out/IERC721Metadata.sol/IERC721Metadata.json
+	deleted:    out/IERC721Receiver.sol/IERC721Receiver.json
+	deleted:    out/Math.sol/Math.json
+	deleted:    out/MerkleProof.sol/MerkleProof.json
+	deleted:    out/Ownable.sol/Ownable.json
+	deleted:    out/Panic.sol/Panic.json
+	deleted:    out/SafeCast.sol/SafeCast.json
+	deleted:    out/SignedMath.sol/SignedMath.json
+	deleted:    out/Strings.sol/Strings.json
+	deleted:    out/build-info/89d4391b9c4b3d29.json
+	deleted:    out/build-info/b21dbac37d78369f.json
+	deleted:    out/build-info/ed3615da3305d865.json
+	deleted:    out/build-info/f4659463abaece9b.json
+	deleted:    out/draft-IERC6093.sol/IERC1155Errors.json
+	deleted:    out/draft-IERC6093.sol/IERC20Errors.json
+	deleted:    out/draft-IERC6093.sol/IERC721Errors.json
+	modified:   press-agent/package-lock.json
+	modified:   press-agent/package.json
+	modified:   requirements.txt
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	.clineignore
+	ARCHITECTURE.md
+	Modelfile
+	ROADMAP.md
+	SKILL.md
+	SYSTEM_MAP.md
+	archive/
+	docs/network/
+	logs/
+	operations/
+	quantum-replay-verifier/
+	requirements.lock.txt
+	runtime_proofs/
+	scripts/verification/integrity_report.py
+	server/integrations/zero_g_memory_os.py
+	server/integrations/zero_g_sdk_wrapper.py
+	src/ledger/
+	src/security/
+	src/snapshots/
+	tests/__init__.py
+	tests/test_executor.py
+	tests/test_hashing.py
+	tests/test_receipts.py
+	tests/test_reducer.py
+	tests/test_replay.py
+	tests/test_state_root.py
+	tests/test_transactions.py
+	tests/test_validator.py
+	tests/test_wallet.py
+
