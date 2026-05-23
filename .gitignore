@@ -175,3 +175,9 @@ reports/*.html
 
 # Vercel build output
 .vercel/
+.aider*
+venv/
+node_modules/
+.venv/
+venv/
+node_modules/
