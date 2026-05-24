@@ -73,7 +73,19 @@ except ImportError as e:
         def start_as_current_span(self, name, **kwargs):
             return DummySpan()
 
-    trace = type('DummyTrace', (), {'get_tracer': lambda self, name: DummyTracer()})()
+    class DummyTrace:
+        Tracer = DummyTracer
+        Span = DummySpan
+
+        @staticmethod
+        def get_tracer(name=None):
+            return DummyTracer()
+
+        @staticmethod
+        def set_tracer_provider(provider):
+            pass
+
+    trace = DummyTrace()
     TracerProvider = DummyTracerProvider
     BatchSpanProcessor = DummySpanProcessor
 
