@@ -1369,9 +1369,27 @@ async def get_decision_metrics():
 @app.get("/api/health/diagnostics")
 async def run_system_diagnostics():
     """Run automated system diagnostics and return health status"""
+
+    # Graceful offline fallback
+    if get_healing_system is None:
+        return {
+            "status": "degraded",
+            "mode": "offline",
+            "healing_system": "unavailable",
+            "diagnostics": []
+        }
+
     healing_system = get_healing_system()
-    health_status = healing_system.get_system_health()
-    return health_status
+
+    if healing_system is None:
+        return {
+            "status": "degraded",
+            "mode": "inactive",
+            "healing_system": "inactive",
+            "diagnostics": []
+        }
+
+    return healing_system.get_system_health()
 
 @app.get("/api/health/incidents")
 async def get_incident_reports(
@@ -1380,13 +1398,33 @@ async def get_incident_reports(
     limit: int = 100
 ):
     """Get incident reports with optional filtering"""
+
+    # Graceful offline fallback
+    if get_healing_system is None:
+        return {
+            "incidents": [],
+            "count": 0,
+            "mode": "offline"
+        }
+
     healing_system = get_healing_system()
-    
+
+    if healing_system is None:
+        return {
+            "incidents": [],
+            "count": 0,
+            "mode": "inactive"
+        }
+
     # Convert string to enum if provided
     severity_filter = validate_enum(severity, IncidentSeverity, "severity")
-    
-    incidents = healing_system.get_incident_report(severity_filter, component, limit)
-    
+
+    incidents = healing_system.get_incident_report(
+        severity_filter,
+        component,
+        limit
+    )
+
     return {
         "incidents": [
             {
