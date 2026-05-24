@@ -1,0 +1,26 @@
+./src/components/SovereigntySections.tsx:19:      fetch('/api/pulse').then(res => res.json()).then(setSoulState).catch(() => {});
+./press-agent/OPERATIONS_GUIDE.md:176:    "Improved WebSocket streaming",
+./press-agent/README.md:106:    "technicalDetails": "Enhanced WebSocket streaming..."
+./press-agent/PRESS_AGENT_REPORT.md:429:- [ ] Implement analytics tracking
+./press-agent/COMMUNICATION_PLAN.md:131:- 📈 Metrics and analytics
+./press-agent/COMMUNICATION_PLAN.md:240:- Implement advanced analytics
+./press-agent/src/bots/discord.js:227:     * a more robust HTTP client like axios or node-fetch for:
+./press-agent/src/bots/telegram.js:171:     * a more robust HTTP client like axios or node-fetch for:
+./press-agent/src/tests/server.test.js:18:    const response = await fetch(url, {
+./press-agent/src/templates.js:25:    <li><strong>Sacred Trinity Architecture:</strong> Built on our proven FastAPI, Flask, and Gradio trinity, ensuring real-time WebSocket streaming, blockchain payment integration, and ethical audit workflows.</li>
+./press-agent/src/templates.js:82:    <li>WebSocket consciousness streaming performance</li>
+./press-agent/src/templates.js:106:    <li><strong>FastAPI (Port 8000):</strong> The Quantum Conduit handling async operations, authentication, and WebSocket streaming</li>
+./press-agent/src/publishers/wordpress.js:64:            const response = await fetch(`${this.apiBase}/posts`, {
+./press-agent/src/publishers/wordpress.js:111:            const response = await fetch(`${this.apiBase}/posts/${postId}`, {
+./press-agent/src/publishers/wordpress.js:150:            const response = await fetch(`${this.apiBase}/posts/${postId}?force=true`, {
+./press-agent/src/publishers/wordpress.js:186:            const response = await fetch(`${this.apiBase}/posts`, {
+./press-agent/src/publishers/wordpress.js:226:            const response = await fetch(`${this.apiBase}/users/me`, {
+./.github/scripts/dependabot_auto_merge.py:45:) -> requests.Response:
+./.github/scripts/dependabot_auto_merge.py:53:    response = requests.request(
+./.github/agents/ONBOARDING.md:79:│  • WebSocket              • SVG Rendering                │
+./.github/agents/ONBOARDING.md:146:**Purpose:** Main REST API & WebSocket server
+./.github/agents/ONBOARDING.md:151:- Real-time updates via WebSocket
+./.github/workflows/branch-cleanup.yml:124:          inactive for 90+ days and have no open pull requests.
+./.github/workflows/release-on-merge.yml:162:          - ✅ **Real-time WebSocket Communication**: Live telemetry and consciousness streaming
+./.github/workflows/ci-healthcheck.yml:29:            pip install fastapi[all] pytest httpx
+./.github/workflows/canon-auto-merge.yml:30:    if: github.event_name != 'check_suite' || (github.event.check_suite.pull_requests && github.event.check_suite.pull_requests.length > 0)

@@ -1,46 +1,12 @@
 # 🚀 Deployment Dashboard
 ## Your Complete Guide to Deploying Quantum Pi Forge
 
-**Last Updated**: 2026-02-07  
+**Last Updated**: 2025-12-21  
 **Maintained By**: GitHub Agent (Coordinator)  
 **Canon Alignment**: ✅ Verified  
 **Continuity**: Anyone can maintain/extend this dashboard
 
 This dashboard is the **canonical entry point** for all deployment tasks across the Quantum Pi Forge constellation. It consolidates deployment knowledge from all existing guides into a single, authoritative source of truth.
-
----
-
-## 🌐 Current Production Deployments
-
-### Active Services
-
-| Service | URL | Status | Health Check |
-|---------|-----|--------|--------------|
-| **Public Frontend** | https://quantumpiforge.com | ✅ LIVE | `curl -I https://quantumpiforge.com` |
-| **Backend API (Railway)** | https://pi-forge-quantum-genesis.railway.app | ✅ LIVE | `curl https://pi-forge-quantum-genesis.railway.app/health` |
-| **Backend API (Render)** | https://pi-forge-quantum-genesis-1.onrender.com | ✅ LIVE | `curl https://pi-forge-quantum-genesis-1.onrender.com/health` |
-| **Resonance Engine** | https://your-project.workers.dev | ✅ LIVE | `curl https://your-project.workers.dev/` |
-
-### Quick Health Check
-
-Run all health checks at once:
-```bash
-# Public Frontend
-curl -I https://quantumpiforge.com
-
-# Backend API (Railway)
-curl https://pi-forge-quantum-genesis.railway.app/health
-
-# Backend API (Render) 
-curl https://pi-forge-quantum-genesis-1.onrender.com/health
-
-# Resonance Engine
-curl https://your-project.workers.dev/
-```
-
-**Expected Response**: All endpoints should return 200 OK status.
-
----
 
 > **📌 Note**: This document consolidates information from:
 > - `DEPLOYMENT.md` - Vercel/Railway basics
@@ -1120,9 +1086,6 @@ This section covers the most common deployment issues and their solutions.
    ```bash
    # Test webhook endpoint is accessible
    curl -X POST https://your-app.railway.app/api/pi-webhooks/payment      -H "Content-Type: application/json"      -d '{"test": true}'
-   curl -X POST https://your-app.railway.app/api/pi-webhooks/payment \
-     -H "Content-Type: application/json" \
-     -d '{"test": true}'
    
    # Expected: Response (even if verification fails, endpoint should respond)
    ```
@@ -1551,7 +1514,6 @@ If you're still stuck:
   ```bash
   # Test payment approval
   curl -X POST https://your-app.railway.app/api/payments/approve     -H "Content-Type: application/json"     -H "Authorization: Bearer YOUR_JWT"     -d '{"payment_id": "test_123", "amount": 0.15}'
-  curl -X POST https://your-app.railway.app/api/payments/approve      -H "Content-Type: application/json"      -H "Authorization: Bearer YOUR_JWT"      -d '{"payment_id": "test_123", "amount": 0.15}'
   ```
 - [ ] Review deployment logs
   - Railway: Check for warnings
