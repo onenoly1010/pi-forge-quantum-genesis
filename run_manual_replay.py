@@ -3,26 +3,7 @@ from __future__ import annotations
 from src.ledger.replay import replay_batch
 from src.security.wallet import derive_address, generate_keypair
 from tests.test_replay import _make_signed_tx
-The verification reconstructs the unsigned canonical bytes from the
-signed transaction (excluding signature) and checks the detached
-signature against the provided *public_key*.
 
-Args:
-    transaction: The signed transaction to verify.
-    public_key: 32-byte Ed25519 public key.
-
-Returns:
-    ``True`` if the signature is valid, ``False`` otherwise.
-"""
-unsigned = UnsignedTransaction(
-    sender=transaction.sender,
-    nonce=transaction.nonce,
-    epoch=transaction.epoch,
-    action=transaction.action,
-    payload=dict(transaction.payload),
-)
-signable = transaction_to_signable_bytes(unsigned)
-return verify_signature(public_key, signable, transaction.signature)(.venv) kris@quantum-pi-forge:~/forge/Quantum-pi-forge$ python - <<'PY'
 
 def build_manual_replay_example(
     action: str = "state.set",
@@ -32,7 +13,7 @@ def build_manual_replay_example(
     reducer_version: int = 1,
     policy_hash: str = "genesis_hash_001",
 ) -> tuple[dict, list, dict, dict, int, str]:
-    """Build a reusable example payload for `replay_batch`."""
+    """Build a reusable example payload for replay_batch."""
     kp = generate_keypair()
     sender = derive_address(kp.public_key)
     tx = _make_signed_tx(
