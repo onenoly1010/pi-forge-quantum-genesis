@@ -1,0 +1,23 @@
+{
+  "batch_id": "batch-000049",
+  "policy_hash": "0x8c617053a697944fe5c13447d0037b1587157e6ef06a8fdc9a68d8722a18b25b",
+  "chain_context": {
+    "network": "quantum-pi-forge-local",
+    "epoch": "000001",
+    "block_height": "00000049"
+  },
+  "transactions": [
+    {
+      "tx_id": "tx-000001",
+      "actor": "did:oinio:kris",
+      "action": "WRITE_MEMORY_COMMIT",
+      "nonce": "00000001",
+      "payload": {
+        "memory_key": "forge.genesis.intent",
+        "value_hash": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "visibility": "private"
+      },
+      "signature": "0xa29a3e08b9e6eeab1428d2bbe36d846981810b08257626c14dbd75ac0365940b649413ee31cdf3b062a97ebe03bdfb96ceb0303d98937a250ed39bd573d8ab0e"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "policy_hash": "0x8c617053a697944fe5c13447d0037b1587157e6ef06a8fdc9a68d8722a18b25b",
+  "chain_context": {
+    "network": "quantum-pi-forge-local",
+    "epoch": "000001",
+    "block_height": "00000048"
+  },
+  "identities": {
+    "did:oinio:kris": {
+      "public_key_pem": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEA0CqISVEACoqJtI0rdLj2d8aGjis/Q3+7Lc7ryPuNWDc=\n-----END PUBLIC KEY-----\n",
+      "nonce": "00000000"
+    }
+  },
+  "memory": {},
+  "permissions": {},
+  "receipts": []
+}
