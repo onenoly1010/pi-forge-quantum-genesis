@@ -11,15 +11,13 @@ from src.ledger.replay import (
     ReplayResult,
     replay_batch,
 )
-from nacl.signing import SigningKey
-
 from src.ledger.transaction import (
     SignedTransaction,
     create_unsigned_transaction,
     sign_transaction,
 )
 from src.snapshots.state_root import derive_state_root
-from src.security.wallet import KeyPair, derive_address, generate_keypair
+from src.security.wallet import derive_address, generate_keypair
 
 
 def _make_signed_tx(
@@ -33,12 +31,6 @@ def _make_signed_tx(
     """Helper: create and sign a transaction."""
     if kp is None:
         kp = generate_keypair()
-    elif isinstance(kp, (bytes, bytearray)):
-        signing_key = SigningKey(bytes(kp))
-        kp = KeyPair(private_key=bytes(kp), public_key=bytes(signing_key.verify_key))
-    elif not hasattr(kp, "private_key") or not hasattr(kp, "public_key"):
-        raise TypeError("kp must be a KeyPair or a 32-byte private key seed")
-
     sender_addr = sender if sender else derive_address(kp.public_key)
     utx = create_unsigned_transaction(
         sender=sender_addr,
