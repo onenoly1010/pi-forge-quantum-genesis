@@ -133,7 +133,18 @@ source venv/bin/activate  # On Windows: .venv\Scripts\Activate.ps1
 pip install -r server/requirements.txt
 ```
 
-### 2️⃣ Environment Variables
+### 2️⃣ Manual Replay Helper
+
+Use the local replay helper to exercise the ledger replay layer with a signed transaction.
+
+```bash
+source .venv/bin/activate
+python run_manual_replay.py
+```
+
+For more details, see [docs/MANUAL_REPLAY.md](./docs/MANUAL_REPLAY.md).
+
+### 3️⃣ Environment Variables
 
 Create a `.env` file (see `.env.example`):
 
