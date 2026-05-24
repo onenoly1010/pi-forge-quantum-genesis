@@ -175,3 +175,5 @@ reports/*.html
 
 # Vercel build output
 .vercel/
+.vercel
+.env*
