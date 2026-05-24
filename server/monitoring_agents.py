@@ -370,3 +370,22 @@ def get_monitoring_system() -> MonitoringAgentSystem:
     if _monitoring_system is None:
         _monitoring_system = MonitoringAgentSystem()
     return _monitoring_system
+
+def main() -> None:
+    """CLI status entrypoint for monitoring agent visibility.
+
+    This intentionally does not start long-running background tasks.
+    Use API/runtime orchestration to start agents.
+    """
+    import json
+
+    system = get_monitoring_system()
+    status = system.get_system_status()
+
+    print("Monitoring agents module: OK")
+    print(json.dumps(status, indent=2, default=str))
+
+
+if __name__ == "__main__":
+    main()
+
