@@ -16,6 +16,8 @@ import asyncio
 import aiohttp
 import logging
 import websockets
+
+from server.security.capabilities import require_network_capability
 from datetime import datetime
 from typing import Dict, List, Any, Optional
 from pathlib import Path
@@ -38,6 +40,8 @@ class SacredTrinityAgentRunner:
         
     async def __aenter__(self):
         """Async context manager entry"""
+        require_network_capability("quantum_agent_runner.aiohttp.ClientSession")
+        require_network_capability("quantum_agent_runner.aiohttp.ClientSession")
         self.session = aiohttp.ClientSession()
         return self
     
@@ -228,6 +232,8 @@ class SacredTrinityAgentRunner:
         try:
             ws_url = "ws://localhost:8000/ws/collective-insight"
             
+            require_network_capability("quantum_agent_runner.websockets.connect")
+            require_network_capability("quantum_agent_runner.websockets.connect")
             async with websockets.connect(ws_url, timeout=10) as websocket:
                 # Send test message
                 test_message = {"type": "test", "message": "Sacred Trinity evaluation test"}
