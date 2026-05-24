@@ -16,6 +16,8 @@ from typing import Any, Dict, List, Optional, Union
 
 # Core imports
 import aiohttp
+
+from server.security.capabilities import require_network_capability
 import pandas as pd
 
 # Azure AI SDK imports (with fallback handling)
@@ -233,6 +235,7 @@ class QuantumLatticeEvaluator:
         """Check health status of all Sacred Trinity services"""
         health_status = {}
         
+        require_network_capability("evaluation_system_clean.aiohttp.ClientSession")
         async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=5)) as session:
             for service, url in self.trinity_services.items():
                 try:
