@@ -89,5 +89,4 @@ async def test_memorial_generation():
     return test_results
 
 if __name__ == "__main__":
-    asyncio.run(test_memorial_generation())</content>
-<parameter name="filePath">c:\Users\Colle\projects\pi-forge-quantum-genesis\test_memorial_ai.py
+    asyncio.run(test_memorial_generation())
