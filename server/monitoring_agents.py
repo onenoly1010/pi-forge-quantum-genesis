@@ -340,6 +340,8 @@ class MonitoringAgentSystem:
     
     async def report_to_vercel(self, metrics: Dict[str, Any]):
         """Report metrics to Vercel serverless function"""
+        require_network_capability("monitoring_agents.report_to_vercel")
+
         if not self.vercel_endpoint:
             logger.warning("⚠️ Vercel endpoint not configured, skipping report")
             return
