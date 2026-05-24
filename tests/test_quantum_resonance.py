@@ -1,3 +1,4 @@
+import os
 #!/usr/bin/env python3
 """
 🧪 QUANTUM RESONANCE LATTICE - TEST SUITE
@@ -9,6 +10,12 @@ import json
 import requests
 import websocket
 import pytest
+
+pytestmark = pytest.mark.skipif(
+    os.environ.get("RUN_QUANTUM_RESONANCE") != "1",
+    reason="Quantum resonance live-service tests require FastAPI/Flask/Gradio/WebSocket services running",
+)
+
 import time
 from datetime import datetime
 from typing import Dict, List

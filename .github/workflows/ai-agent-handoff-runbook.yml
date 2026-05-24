@@ -1,0 +1,22 @@
+name: AI Agent Handoff Runbook
+
+on:
+  workflow_dispatch:
+    inputs:
+      rollback_version:
+        description: "Version tag to rollback to"
+        required: true
+        default: "v1.0.0"
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Rollback Placeholder
+        run: |
+          echo "Rollback workflow operational"
+          echo "Target version: ${{ github.event.inputs.rollback_version }}"

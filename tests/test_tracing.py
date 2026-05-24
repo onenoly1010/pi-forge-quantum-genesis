@@ -1,3 +1,4 @@
+import pytest
 #!/usr/bin/env python3
 """
 🌌 Sacred Trinity Tracing Test
@@ -18,6 +19,7 @@ from pathlib import Path
 # Add server directory to path
 sys.path.append(str(Path(__file__).parent / "server"))
 
+@pytest.mark.asyncio
 async def test_sacred_trinity_tracing():
     """Test Sacred Trinity tracing system"""
     print("🌌 Sacred Trinity Tracing Test")
