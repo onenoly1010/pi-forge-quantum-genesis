@@ -12,6 +12,8 @@ from enum import Enum
 from pydantic import BaseModel, Field
 import aiohttp
 
+from server.security.capabilities import require_network_capability
+
 logger = logging.getLogger(__name__)
 
 
@@ -343,6 +345,7 @@ class MonitoringAgentSystem:
             return
         
         try:
+            require_network_capability("monitoring_agents.aiohttp.ClientSession")
             async with aiohttp.ClientSession() as session:
                 async with session.post(
                     self.vercel_endpoint,
