@@ -28,9 +28,9 @@
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",
-    "@vercel/node": "^5.7.16",
+    "@vercel/node": "^5.8.4",
     "@vercel/speed-insights": "^2.0.0",
-    "ethers": "^6.13.4",
+    "ethers": "^6.16.0",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
