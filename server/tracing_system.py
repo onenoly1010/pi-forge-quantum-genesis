@@ -589,3 +589,12 @@ if agent_framework_available:
     logger.info("🤖 Agent Framework observability active with prompt/completion capture")
 else:
     logger.info("💡 Install agent-framework package for enhanced AI agent observability")
+# ---------------------------------------------------------------------------
+# Compatibility export for verify_production.py
+# ---------------------------------------------------------------------------
+class _TracingSystemProxy:
+    def __getattr__(self, name):
+        system, _, _, _ = get_tracing_system()
+        return getattr(system, name)
+
+tracing_system = _TracingSystemProxy()

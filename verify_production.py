@@ -48,7 +48,19 @@ def check_dependencies():
     failed_imports = []
     for dep in dependencies:
         try:
-            __import__(dep.replace('.', '-').replace('_', '-'))
+            __import__({
+                "fastapi": "fastapi",
+                "uvicorn": "uvicorn",
+                "supabase": "supabase",
+                "websockets": "websockets",
+                "pydantic": "pydantic",
+                "flask": "flask",
+                "flask_cors": "flask_cors",
+                "gradio": "gradio",
+                "opentelemetry.sdk": "opentelemetry.sdk",
+                "azure.ai.evaluation": "azure.ai.evaluation",
+                "azure.identity": "azure.identity",
+            }.get(dep, dep))
             print(f"✅ {dep}")
         except ImportError:
             failed_imports.append(dep)
@@ -124,24 +136,26 @@ def check_tracing_system():
     print("\n🔍 Testing Tracing System...")
 
     try:
-        # Add server to path
         sys.path.insert(0, str(Path(__file__).parent / "server"))
 
-        # Test tracing system import
         from tracing_system import tracing_system, fastapi_tracer, flask_tracer, gradio_tracer
         print("✅ Tracing system imported successfully")
 
-        # Test tracer creation
-        if fastapi_tracer and flask_tracer and gradio_tracer:
+        ft = fastapi_tracer()
+        flt = flask_tracer()
+        gt = gradio_tracer()
+
+        if ft and flt and gt:
             print("✅ Component tracers initialized")
         else:
             print("❌ Component tracers not initialized")
             return False
 
-        # Test span creation
         with tracing_system.create_quantum_span(
-            fastapi_tracer, "test_operation", "fastapi",
-            quantum_phase="foundation"
+            ft,
+            "test_operation",
+            "fastapi",
+            quantum_phase="foundation",
         ) as span:
             span.set_attribute("test.success", True)
             print("✅ Quantum span creation working")
@@ -152,7 +166,6 @@ def check_tracing_system():
     except Exception as e:
         print(f"❌ Tracing system test failed: {e}")
         return False
-
 def check_health_endpoints():
     """Test health endpoints if services are running"""
     print("\n🏥 Testing Health Endpoints...")
