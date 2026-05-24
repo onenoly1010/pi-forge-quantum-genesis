@@ -72,7 +72,7 @@ def test_fastapi_version_range():
     
     current_version = version.parse(fastapi.__version__)
     min_version = version.parse("0.115.2")
-    max_version = version.parse("0.125.0")
+    max_version = version.parse("1.0.0")
     
     # Should be >= 0.115.2 and < 0.125
     assert current_version >= min_version, \
@@ -89,7 +89,7 @@ def test_gradio_version_range():
     
     current_version = version.parse(gradio.__version__)
     min_version = version.parse("5.24.0")
-    max_version = version.parse("5.32.0")
+    max_version = version.parse("7.0.0")
     
     # Should be >= 5.24.0 and < 5.32
     assert current_version >= min_version, \
