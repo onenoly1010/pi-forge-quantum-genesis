@@ -16,6 +16,8 @@ from typing import Any, Dict, List, Optional, Type, cast
 
 import aiohttp
 
+from server.security.capabilities import require_network_capability
+
 # Import tracing system
 try:
     from tracing_system import (get_tracing_system, trace_fastapi_operation,
@@ -42,6 +44,7 @@ class QuantumAgentRunner:
         self.session: Optional[aiohttp.ClientSession] = None
 
     async def __aenter__(self):
+        require_network_capability("agent_runner.aiohttp.ClientSession")
         self.session = aiohttp.ClientSession()
         return self
 
