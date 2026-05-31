@@ -1,3 +1,8 @@
+<!-- REPO_STATUS_BANNER_START -->
+> **Repository Status:** ARCHIVED — HISTORICAL GENESIS COMPENDIUM  
+> **Public Review Note:** This repository is explicitly classified to prevent ambiguity between production canon, support infrastructure, historical archives, and demos.
+<!-- REPO_STATUS_BANNER_END -->
+
 # 🌌 Pi Forge Quantum Genesis — Relaunch v2.0
 
 **Collaborative, Artistic, Autonomous Blockchain Ecosystem Guided by the [Canon of Autonomy](wiki/Canon-of-Autonomy.md)**
