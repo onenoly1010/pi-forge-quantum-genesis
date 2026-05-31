@@ -8,8 +8,8 @@ pydantic[email]
 python-multipart>=0.0.18
 flask>=3.0.0
 flask-cors>=4.0.0
-gradio>=5.24.0,<5.32
-python-dotenv>=1.0.0
+gradio>=5.49.1,<6.0
+python-dotenv>=1.2.1,<2.0
 azure-ai-evaluation>=1.0.1
 azure-identity>=1.19.0
 aiohttp>=3.9.0
