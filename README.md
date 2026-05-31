@@ -1,3 +1,11 @@
+# Archive Notice
+
+This repository is an archived genesis compendium. Safe dependency remediations have been applied where possible. One remaining moderate Dependabot advisory is documented in `SECURITY_STATUS.md`; forced breaking remediation is intentionally rejected.
+
+For current development, use the active production repository.
+
+---
+
 <!-- REPO_STATUS_BANNER_START -->
 > **Repository Status:** ARCHIVED — HISTORICAL GENESIS COMPENDIUM  
 > **Public Review Note:** This repository is explicitly classified to prevent ambiguity between production canon, support infrastructure, historical archives, and demos.
