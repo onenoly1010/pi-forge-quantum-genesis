@@ -27,7 +27,7 @@
     "verify:contracts": "echo 'Run platform-specific verify commands - see DEPLOYMENT_GUIDE.md'"
   },
   "dependencies": {
-    "ethers": "^6.13.4",
+    "ethers": "^6.17.0",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
